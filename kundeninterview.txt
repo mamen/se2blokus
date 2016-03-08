@@ -1,0 +1,26 @@
+Die wichtigsten Fragen bezüglich dem Kundeninterview:
+
+System:
+Welche Android Versionen sollen unterstützt sein (von/bis)?
+Welche Devices? (Tablet, Handy etc.)
+Bestimmte Daten die gespeichert werden sollen?
+Minimum response time? (Also wie schnell soll die App sein)
+Welche Sprachen sollen unterstützt werden? (Deutsch, Englisch, andere)
+
+
+Marketing:
+Zielgruppe für die Applikation?
+
+
+Management:
+Was bedeutet "Erfolg" für das Projekt?
+
+
+Testing:
+Wieviel muss der User in die Tests miteinbezogen werden? (GUI Tests durch User oä)
+Wie genau muss getestet werden?
+Wie viel Zeit soll in Testen investiert werden?
+
+Design:
+Gibt es Designvorschriften (evtl. Blöcke in gewissen Farben oder ähnliches)?
+
