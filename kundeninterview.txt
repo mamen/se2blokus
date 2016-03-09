@@ -6,7 +6,10 @@ Welche Devices? (Tablet, Handy etc.)
 Bestimmte Daten die gespeichert werden sollen?
 Minimum response time? (Also wie schnell soll die App sein)
 Welche Sprachen sollen unterstützt werden? (Deutsch, Englisch, andere)
-
+Soll es ein Benutzerverwaltungssystem geben? (Gibt es verschiedene Benutzer, Login etc.)
+  -Wenn ja: Welche Daten sollen vom User gespeichert werden? (Email, voller Name, DOB...)
+Sollte es sowas wie ein Scoreboard geben?
+  -Wenn ja: Welches? Lokal auf dem Device? Benutzerbezogen?
 
 Marketing:
 Zielgruppe für die Applikation?
@@ -23,4 +26,5 @@ Wie viel Zeit soll in Testen investiert werden?
 
 Design:
 Gibt es Designvorschriften (evtl. Blöcke in gewissen Farben oder ähnliches)?
+
 
