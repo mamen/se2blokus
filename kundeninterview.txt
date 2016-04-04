@@ -17,6 +17,7 @@ Zielgruppe für die Applikation?
 
 Management:
 Was bedeutet "Erfolg" für das Projekt?
+Wie viele Arbeitsstunden sollen in das Projekt investiert werden ?
 
 
 Testing:
