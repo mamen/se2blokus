@@ -15,8 +15,7 @@
         android:textColor="#33b5e5"
         android:textStyle="bold"
         android:textSize="50sp"
-        android:gravity="center"
-        android:text="@string/dummy_content" />
+        android:gravity="center" />
 
     <!-- This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows. -->
@@ -38,8 +37,14 @@
             android:layout_height="wrap_content"
             android:text="Join Game"
             android:id="@+id/joinGame"
-            android:layout_gravity="center"
-            android:onClick="btn_joinGame()" />
+            android:layout_gravity="center" />
+
+        <Button
+            android:layout_width="381dp"
+            android:layout_height="wrap_content"
+            android:text="Host Game"
+            android:id="@+id/hostGame"
+            android:layout_gravity="center" />
 
     </LinearLayout>
 
