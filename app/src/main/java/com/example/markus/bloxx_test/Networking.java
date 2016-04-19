@@ -6,6 +6,7 @@ package com.example.markus.bloxx_test;
 public class Networking {
 
     public int host(){
+        //test
         return 0;
     }
 
