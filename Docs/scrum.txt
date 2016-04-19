@@ -1,0 +1,21 @@
+SCRUM  -  ÜBERSICHT
+
+PRODUCT BACKLOG - Ist eine Liste an Anforderungen für das Gesamte Projekt. Dies wird am Anfang des Projektes festgelegt und im laufe der Zeit kontinuierlich erweitert. Die Anforderungen werden nach Notwendigkeit, wirtschaftlichem Nutzen und Risiko priorisiert. Anforderungen im Product Backlog sollen nicht technisch sondern Anwenderorietiert sein.
+
+
+SPRINT BACKLOG - Ähnlich wie der Product Backlog ist der Sprint Backlog ein aktueller Plan des nächsten Sprints. Während eines Sprintes werden die Anforderungen nach Erledigung laufend aktualisiert. Häufig wird der Sprint Backlog als "Taskboard" benutzt.
+
+SPRINT -  Ist ein Arbeitsabschnitt, in welchem ein bestimmter neuer Teil eines Projektes implementiert werden soll. Sprints sollten zwischen 2 und 4 Wochen angesetzt sein und es sind keine Änderungen an einem laufendem Sprint vorzunehmen, die das Sprintziel beeinflussen. Generell sollte das Ergebnis des Sprintes ein laufendes Programmstück sein, sollte dieses Ziel aus den verschiedensten Gründen nicht erreicht werden können, so wird der Sprint abgebrochen und ein neuer mit angepassten Umfang erstellt.
+
+DAILY SCRUM MEETING -  Wie der Name schon sagt, ein tägliches Meeting des Entwicklerteams, dass dazu dient jeden auf den neuesten Stand zu bringen und zu synchronisieren. Das daily meeting sollte nicht länger als 15 Minuten dauern.
+ 
+SPRINT REVIEW MEETING - Das Endmeeting eines Sprints indem das Progammstück welches im Sprint erstellt wurde präsentiert, demonstriert und vom Product Owner abgenommen wird.
+
+Scrum arbeitet im wesentlichen mit 6 Prinzipien:
+
+Transparenz
+Beobachten und Anpassen
+Time-Boxing
+Dinge werden abgeschlossen
+Maximierung vom Geschäftswert
+Teams scheitern nicht

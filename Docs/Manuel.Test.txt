@@ -1,0 +1,6 @@
+Da mir nicht wirklich weitere Fragen einfallen, würde ich noch meinen Senf/Wissensstand zu den Vorhandenen abgeben, 
+um das Kundengespräch in eine Richtung zu lenken :)
+- Android Versionen sollten wir denk ich für 4.x programmieren, die sollten dann auf allen Versionen 4+ funktionieren, 
+alles unter 4 ist normal uninteressant ;)
+- Tablets und Handys dürften reichen, wenn Handys überhaupt sinnvoll sind für unser Brettspiel, müss ma noch untereinander ausmachen :)
+Viel mehr weiß ich dann eh nicht^^
