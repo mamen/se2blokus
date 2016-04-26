@@ -72,13 +72,11 @@ public class Startscreen extends AppCompatActivity implements View.OnClickListen
                 text = "hostGame";
                 toast = Toast.makeText(context, text, duration);
                 toast.show();
-
-                fm = getFragmentManager();
+                setContentView(R.layout.fragment_serverlist);
+               /* fm = getFragmentManager();
                 ft = fm.beginTransaction();
-
-                fm.beginTransaction();
-                // it's wrong , you just hide the fragment that not added to  FragmentTransactio
                 ft.hide(fragOne);
+                ft.show(ServerlistFragment.newInstance("param1","param2"));*/
 
                 break;
         }

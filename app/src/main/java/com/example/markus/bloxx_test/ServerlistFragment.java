@@ -7,6 +7,7 @@ import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 
 
@@ -52,7 +53,7 @@ public class ServerlistFragment extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
-
+    Button btn_back;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
