@@ -1,24 +1,19 @@
 package at.aau.se2.test;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Point;
-import android.app.Activity;
-import android.media.Image;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +43,27 @@ public class FullscreenActivity extends Activity {
 
         gl = GameLogic.getInstance();
 
-        playerID = (byte)(1+Math.random()*3);
+//        playerID = (byte)(1+Math.random()*3);
+
+        String color = "";
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            color = extras.getString("chosen_color");
+        }
+        switch (color) {
+            case "green":
+                playerID = 1;
+                break;
+            case "red":
+                playerID = 2;
+                break;
+            case "blue":
+                playerID = 3;
+                break;
+            case "yellow":
+                playerID = 4;
+                break;
+        }
 
         blocks = new Blocks(playerID);
         //1. Statusbar verstecken
@@ -89,6 +104,8 @@ public class FullscreenActivity extends Activity {
 
         blockDrawer_children = new ArrayList<ImageView>();
         removed_blockDrawer_children = new ArrayList<ImageView>();
+
+
 
         //Alle Spielsteine hinzufügen
         for(int i = 1; i < 22; i++){
@@ -157,6 +174,7 @@ public class FullscreenActivity extends Activity {
     private void updateGameBoard(){
         byte[][] board = gl.getGameBoard();
 
+        gameBoardLayout = null;
         gameBoardLayout = (GridLayout)findViewById(R.id.gameBoard);
 
         //Sicherheitshalber alle vorherigen Elemente auf dem gameBoard löschen
