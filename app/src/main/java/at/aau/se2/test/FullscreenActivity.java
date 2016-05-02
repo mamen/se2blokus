@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,22 +50,21 @@ public class FullscreenActivity extends Activity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             color = extras.getString("chosen_color");
+            switch (color) {
+                case "green":
+                    playerID = 1;
+                    break;
+                case "red":
+                    playerID = 2;
+                    break;
+                case "blue":
+                    playerID = 3;
+                    break;
+                case "yellow":
+                    playerID = 4;
+                    break;
+            }
         }
-        switch (color) {
-            case "green":
-                playerID = 1;
-                break;
-            case "red":
-                playerID = 2;
-                break;
-            case "blue":
-                playerID = 3;
-                break;
-            case "yellow":
-                playerID = 4;
-                break;
-        }
-
         blocks = new Blocks(playerID);
         //1. Statusbar verstecken
         hideStatusBar();
@@ -75,13 +75,13 @@ public class FullscreenActivity extends Activity {
     }
 
     @Override
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
         hideStatusBar();
     }
 
     @Override
-    public void onWindowFocusChanged (boolean hasFocus){
+    public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         hideStatusBar();
     }
@@ -106,13 +106,12 @@ public class FullscreenActivity extends Activity {
         removed_blockDrawer_children = new ArrayList<ImageView>();
 
 
-
         //Alle Spielsteine hinzufügen
-        for(int i = 1; i < 22; i++){
+        for (int i = 1; i < 22; i++) {
             final ImageView oImageView = new ImageView(this);
 
             String color = "";
-            switch(playerID){
+            switch (playerID) {
                 case 1:
                     color = "green";
                     break;
@@ -127,7 +126,7 @@ public class FullscreenActivity extends Activity {
                     break;
             }
 
-            oImageView.setImageResource(getResources().getIdentifier(color+"_"+i, "drawable", getPackageName()));
+            oImageView.setImageResource(getResources().getIdentifier(color + "_" + i, "drawable", getPackageName()));
             oImageView.setTag(i);
             GridLayout.LayoutParams param = new GridLayout.LayoutParams();
             param.setGravity(Gravity.CENTER);
@@ -139,12 +138,12 @@ public class FullscreenActivity extends Activity {
             oImageView.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    for(ImageView bdc : blockDrawer_children){
-                        if(bdc.equals(v)){
-                            selectedBlockID = (int)bdc.getTag()-1; //Gewählter Spielstein
+                    for (ImageView bdc : blockDrawer_children) {
+                        if (bdc.equals(v)) {
+                            selectedBlockID = (int) bdc.getTag() - 1; //Gewählter Spielstein
                             //Toast.makeText(getApplicationContext(), "ID: " + selectedBlockID, Toast.LENGTH_SHORT).show();
                             bdc.setBackgroundColor(Color.LTGRAY);
-                        }else{
+                        } else {
                             bdc.setBackgroundColor(Color.TRANSPARENT); //Highlight löschen
                         }
                     }
@@ -156,7 +155,7 @@ public class FullscreenActivity extends Activity {
     }
 
     //Bilschirmbreite
-    private int getScreenWidth(){
+    private int getScreenWidth() {
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
@@ -164,18 +163,18 @@ public class FullscreenActivity extends Activity {
     }
 
     //Bilschirmhöhe
-    private int getScreenHeight(){
+    private int getScreenHeight() {
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
         return size.y;
     }
 
-    private void updateGameBoard(){
+    private void updateGameBoard() {
         byte[][] board = gl.getGameBoard();
 
         gameBoardLayout = null;
-        gameBoardLayout = (GridLayout)findViewById(R.id.gameBoard);
+        gameBoardLayout = (GridLayout) findViewById(R.id.gameBoard);
 
         //Sicherheitshalber alle vorherigen Elemente auf dem gameBoard löschen
         gameBoardLayout.removeAllViews();
@@ -183,90 +182,36 @@ public class FullscreenActivity extends Activity {
         gameBoardLayout.setColumnCount(SIZE);
         gameBoardLayout.setRowCount(SIZE);
 
-        for(int i = 0; i < SIZE; i++){
-            for(int j = 0; j < SIZE; j++){
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
                 ImageView oImageView = new ImageView(this);
                 GridLayout.LayoutParams param = new GridLayout.LayoutParams();
                 int size = getScreenWidth() / SIZE;
-                switch(board[i][j]){
+                //param.stuff extracted because duplicate code
+                param.height = size;
+                param.width = size;
+                param.setGravity(Gravity.CENTER);
+                param.columnSpec = GridLayout.spec(i);
+                param.rowSpec = GridLayout.spec(j);
+                switch (board[i][j]) {
                     case 0:
-                        param.height = size;
-                        param.width = size;
-                        param.setGravity(Gravity.CENTER);
-                        param.columnSpec = GridLayout.spec(i);
-                        param.rowSpec = GridLayout.spec(j);
                         oImageView.setImageResource(R.drawable.gameboard_empty);
                         oImageView.setOnClickListener(new View.OnClickListener() {
                             public void onClick(View v) {
-                                if (selectedBlockID >= 0) {
-                                    for (int i = 0; i < gameBoardLayout.getColumnCount(); i++) {
-                                        for (int j = 0; j < gameBoardLayout.getRowCount(); j++) {
-                                            if (gameBoardLayout.getChildAt((i * 20) + j).equals(v)) {
-                                                byte[][] b = blocks.getStone(selectedBlockID);
-                                                for (int x = 0; x < b.length; x++) {
-                                                    for (int y = 0; y < b.length; y++) {
-                                                        //TODO:
-                                                        //Array-out-of-bounds-exception
-                                                        //Steine nicht außerhalb des Spielfeldes setzen
-                                                        if (b[x][y] != 0) {
-                                                            gl.setSingleStone(b[x][y], i + y, j + x);
-                                                        }
-                                                    }
-                                                }
-                                                int count = 0;
-                                                if(!removed_blockDrawer_children.isEmpty()) {
-                                                    for (ImageView t : removed_blockDrawer_children) {
-                                                        if ((int) t.getTag() < selectedBlockID) {
-                                                            count++;
-                                                        }
-                                                    }
-                                                }
-
-                                                int rm_index = Math.max(0,(selectedBlockID)-count);
-                                                ImageView rm = (ImageView) blockDrawer.getChildAt(rm_index);
-                                                //Toast.makeText(getApplicationContext(), (selectedBlockID)+" / "+rm_index + " / " + (22-blockDrawer.getChildCount()), Toast.LENGTH_SHORT).show();
-                                                blockDrawer.removeView(rm);
-                                                blockDrawer_children.remove(rm);
-                                                removed_blockDrawer_children.add(rm);
-                                                selectedBlockID = -1;
-                                            }
-                                        }
-                                    }
-                                    updateGameBoard();
-                                }
+                                placeStone(v);
                             }
                         });
                         break;
                     case 1:
-                        param.height = size;
-                        param.width = size;
-                        param.setGravity(Gravity.CENTER);
-                        param.columnSpec = GridLayout.spec(i);
-                        param.rowSpec = GridLayout.spec(j);
                         oImageView.setImageResource(R.drawable.green_s_1);
                         break;
                     case 2:
-                        param.height = size;
-                        param.width = size;
-                        param.setGravity(Gravity.CENTER);
-                        param.columnSpec = GridLayout.spec(i);
-                        param.rowSpec = GridLayout.spec(j);
                         oImageView.setImageResource(R.drawable.red_s_1);
                         break;
                     case 3:
-                        param.height = size;
-                        param.width = size;
-                        param.setGravity(Gravity.CENTER);
-                        param.columnSpec = GridLayout.spec(i);
-                        param.rowSpec = GridLayout.spec(j);
                         oImageView.setImageResource(R.drawable.blue_s_1);
                         break;
                     case 4:
-                        param.height = size;
-                        param.width = size;
-                        param.setGravity(Gravity.CENTER);
-                        param.columnSpec = GridLayout.spec(i);
-                        param.rowSpec = GridLayout.spec(j);
                         oImageView.setImageResource(R.drawable.yellow_s_1);
                         break;
                 }
@@ -276,9 +221,68 @@ public class FullscreenActivity extends Activity {
         }
     }
 
-    private void vibrate(){
+
+    private void placeStone(View v) {
+        if (selectedBlockID >= 0) {
+            for (int i = 0; i < gameBoardLayout.getColumnCount(); i++) {
+                for (int j = 0; j < gameBoardLayout.getRowCount(); j++) {
+                    if (gameBoardLayout.getChildAt((i * 20) + j).equals(v)) {
+                        byte[][] b;
+                        b = blocks.getStone(selectedBlockID);
+                        //If single Stone, just place it
+                        if (selectedBlockID != 0) {
+                            //Check if stone reaches over field - Should be similar with hitting other blocks
+                            if ((b[0][b.length - 1] != 0 && i + b.length > SIZE) || (b[1][b.length - 1] != 0 && i + b.length > SIZE)
+                                    || (b[b.length - 1][0] != 0 && j + b.length > SIZE) || (b[b.length - 1][1] != 0 && j + b.length > SIZE)) {
+                                System.out.println("No placing stone here");
+                                break;
+                            } else {
+                                for (int x = 0; x < b.length; x++) {
+                                    for (int y = 0; y < b[x].length; y++) {
+                                        if (b[x][y] != 0) {
+                                            gl.setSingleStone(b[x][y], i + y, j + x);
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            gl.setSingleStone(b[0][0], i, j);
+                        }
+
+                        // TODO: Somethings wrong with counting
+                        // wrong stone gets removed (i.e. Place first stone, then second)
+                        int count = 0;
+                        if (!removed_blockDrawer_children.isEmpty()) {
+                            for (ImageView t : removed_blockDrawer_children) {
+                                if ((int) t.getTag() < selectedBlockID) {
+                                    count++;
+                                }
+                            }
+                        }
+
+                        int rm_index = Math.max(0, (selectedBlockID) - count);
+                        ImageView rm = (ImageView) blockDrawer.getChildAt(rm_index);
+                        //Toast.makeText(getApplicationContext(), (selectedBlockID) + " / " + rm_index + " / " + (22 - blockDrawer.getChildCount()), Toast.LENGTH_SHORT).show();
+                        blockDrawer.removeView(rm);
+                        blockDrawer_children.remove(rm);
+                        removed_blockDrawer_children.add(rm);
+                        selectedBlockID = -1;
+                    }
+                }
+            }
+            updateGameBoard();
+        }
+    }
+
+    private void vibrate() {
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         // Vibrate for 500 milliseconds
         v.vibrate(500);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        finish();
     }
 }
