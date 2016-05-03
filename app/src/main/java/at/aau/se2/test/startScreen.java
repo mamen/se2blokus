@@ -56,7 +56,8 @@ public class startScreen extends Activity implements View.OnClickListener {
     /*doHosting
     * creates colors used for the Stones
     * Opens a Dialog, with those colors as items
-    * When one color is clicked, new Intent with game starts*/
+    * When one color is clicked, new Intent with game starts
+    * */
     private void doHosting() {
         final CharSequence colors[] = new CharSequence[]{"green", "red", "blue", "yellow"};
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);

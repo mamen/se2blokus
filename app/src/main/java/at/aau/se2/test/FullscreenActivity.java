@@ -14,7 +14,6 @@ import android.view.ViewGroup;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -107,7 +106,7 @@ public class FullscreenActivity extends Activity {
 
 
         //Alle Spielsteine hinzufügen
-        for (int i = 1; i < 22; i++) {
+        for (int i = 0; i < 21; i++) {
             final ImageView oImageView = new ImageView(this);
 
             String color = "";
@@ -140,7 +139,7 @@ public class FullscreenActivity extends Activity {
                 public boolean onTouch(View v, MotionEvent event) {
                     for (ImageView bdc : blockDrawer_children) {
                         if (bdc.equals(v)) {
-                            selectedBlockID = (int) bdc.getTag() - 1; //Gewählter Spielstein
+                            selectedBlockID = (int) bdc.getTag(); //Gewählter Spielstein
                             //Toast.makeText(getApplicationContext(), "ID: " + selectedBlockID, Toast.LENGTH_SHORT).show();
                             bdc.setBackgroundColor(Color.LTGRAY);
                         } else {
@@ -221,20 +220,28 @@ public class FullscreenActivity extends Activity {
         }
     }
 
-
+    /*
+    * Actual New Stone Placement:
+    **  Check Stone Placement:
+    ** - if(placerOverEdge) stone reaches over field
+    ** - if(hitSomeStones) stone hits another block
+    ** - check for gamerules here!? if(removed_blockDrawer_children.isEmpty())
+    **   -> firstStone -> corner, etc.
+    * */
     private void placeStone(View v) {
         if (selectedBlockID >= 0) {
             for (int i = 0; i < gameBoardLayout.getColumnCount(); i++) {
                 for (int j = 0; j < gameBoardLayout.getRowCount(); j++) {
                     if (gameBoardLayout.getChildAt((i * 20) + j).equals(v)) {
                         byte[][] b;
-                        b = blocks.getStone(selectedBlockID);
+                        b = blocks.getStone(selectedBlockID-1);
                         //If single Stone, just place it
                         if (selectedBlockID != 0) {
-                            //Check if stone reaches over field - Should be similar with hitting other blocks
-                            if ((b[0][b.length - 1] != 0 && i + b.length > SIZE) || (b[1][b.length - 1] != 0 && i + b.length > SIZE)
-                                    || (b[b.length - 1][0] != 0 && j + b.length > SIZE) || (b[b.length - 1][1] != 0 && j + b.length > SIZE)) {
+                            if (placeOverEdge(b, i, j)) {
                                 System.out.println("No placing stone here");
+                                break;
+                            } else if(hitSomeStones(b, i, j)) {
+                                System.out.println("Don't hurt other stones!");
                                 break;
                             } else {
                                 for (int x = 0; x < b.length; x++) {
@@ -249,8 +256,7 @@ public class FullscreenActivity extends Activity {
                             gl.setSingleStone(b[0][0], i, j);
                         }
 
-                        // TODO: Somethings wrong with counting
-                        // wrong stone gets removed (i.e. Place first stone, then second)
+                        // Counting goes right, selectedBlockID should be same than Tag.
                         int count = 0;
                         if (!removed_blockDrawer_children.isEmpty()) {
                             for (ImageView t : removed_blockDrawer_children) {
@@ -284,5 +290,35 @@ public class FullscreenActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         finish();
+    }
+
+
+    /*
+    * Checks if you place over the edges
+    * */
+    private boolean placeOverEdge(byte[][] b, int i, int j) {
+        for (int row = i; row < i+b.length; row++) {
+            for (int col = j; col < j+b.length; col++) {
+                if(b[col-j][row-i] != 0 && (row >= SIZE || col >= SIZE)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /*
+    * Checks if you hit other stones with your placement
+    * */
+    private boolean hitSomeStones(byte[][] b, int i, int j) {
+        byte[][] board = gl.getGameBoard();
+        for (int row = i; row < i+b.length; row++) {
+            for (int col = j; col < j+b.length; col++) {
+                if(b[col-j][row-i] != 0 && board[row][col] != 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
