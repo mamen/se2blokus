@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -232,16 +233,18 @@ public class FullscreenActivity extends Activity {
         if (selectedBlockID >= 0) {
             for (int i = 0; i < gameBoardLayout.getColumnCount(); i++) {
                 for (int j = 0; j < gameBoardLayout.getRowCount(); j++) {
-                    if (gameBoardLayout.getChildAt((i * 20) + j).equals(v)) {
+                    if (gameBoardLayout.getChildAt((i * SIZE) + j).equals(v)) {
                         byte[][] b;
                         b = blocks.getStone(selectedBlockID-1);
                         //If single Stone, just place it
                         if (selectedBlockID != 0) {
                             if (placeOverEdge(b, i, j)) {
+                                Toast.makeText(getApplicationContext(), ("You can't place that here"), Toast.LENGTH_SHORT).show();
                                 System.out.println("No placing stone here");
                                 break;
                             } else if(hitSomeStones(b, i, j)) {
                                 System.out.println("Don't hurt other stones!");
+                                Toast.makeText(getApplicationContext(), ("You can't place that here"), Toast.LENGTH_SHORT).show();
                                 break;
                             } else {
                                 for (int x = 0; x < b.length; x++) {
