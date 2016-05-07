@@ -34,7 +34,7 @@ public class FullscreenActivity extends Activity {
     private List<ImageView> blockDrawer_children;
     private List<ImageView> removed_blockDrawer_children;
     private byte playerID;
-    private static boolean firstrm = true;
+    private static boolean firstrm = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -198,7 +198,7 @@ public class FullscreenActivity extends Activity {
                         oImageView.setImageResource(R.drawable.gameboard_empty);
                         oImageView.setOnClickListener(new View.OnClickListener() {
                             public void onClick(View v) {
-                                placeStone(v);
+                                checkGameRules(v);
                             }
                         });
                         break;
@@ -219,6 +219,8 @@ public class FullscreenActivity extends Activity {
                 gameBoardLayout.addView(oImageView);
             }
         }
+        if (removed_blockDrawer_children == null)
+            Toast.makeText(getApplicationContext(), ("First goes in the corner"), Toast.LENGTH_SHORT).show();
     }
 
     /*
@@ -229,34 +231,33 @@ public class FullscreenActivity extends Activity {
     ** - check for gamerules here!? if(removed_blockDrawer_children.isEmpty())
     **   -> firstStone -> corner, etc.
     * */
-    private void placeStone(View v) {
+    private void checkGameRules(View v) {
         if (selectedBlockID >= 0) {
             for (int i = 0; i < gameBoardLayout.getColumnCount(); i++) {
                 for (int j = 0; j < gameBoardLayout.getRowCount(); j++) {
                     if (gameBoardLayout.getChildAt((i * SIZE) + j).equals(v)) {
                         byte[][] b;
-                        b = blocks.getStone(selectedBlockID-1);
+                        b = blocks.getStone(selectedBlockID - 1);
                         //If single Stone, just place it
-                        if (selectedBlockID != 0) {
-                            if (placeOverEdge(b, i, j)) {
-                                Toast.makeText(getApplicationContext(), ("You can't place that here"), Toast.LENGTH_SHORT).show();
-                                System.out.println("No placing stone here");
-                                break;
-                            } else if(hitSomeStones(b, i, j)) {
-                                System.out.println("Don't hurt other stones!");
-                                Toast.makeText(getApplicationContext(), ("You can't place that here"), Toast.LENGTH_SHORT).show();
-                                break;
-                            } else {
-                                for (int x = 0; x < b.length; x++) {
-                                    for (int y = 0; y < b[x].length; y++) {
-                                        if (b[x][y] != 0) {
-                                            gl.setSingleStone(b[x][y], i + y, j + x);
-                                        }
-                                    }
+                        if (!removed_blockDrawer_children.isEmpty()) {
+                            if (selectedBlockID != 0) {
+                                if (placeOverEdge(b, i, j)) {
+                                    Toast.makeText(getApplicationContext(), ("You can't place that here"), Toast.LENGTH_SHORT).show();
+                                    break;
+                                } else if (hitSomeStones(b, i, j)) {
+                                    Toast.makeText(getApplicationContext(), ("You can't place that here"), Toast.LENGTH_SHORT).show();
+                                    break;
+                                } else {
+                                    placeStone(b, i, j);
                                 }
+                            } else {
+                                gl.setSingleStone(b[0][0], i, j);
                             }
                         } else {
-                            gl.setSingleStone(b[0][0], i, j);
+                            if (hitTheCorner(b, i, j)) {
+                                placeStone(b, i, j);
+                                firstrm = true;
+                            }
                         }
 
                         // Counting goes right, selectedBlockID should be same than Tag.
@@ -269,13 +270,15 @@ public class FullscreenActivity extends Activity {
                             }
                         }
 
-                        int rm_index = Math.max(0, (selectedBlockID) - count);
-                        ImageView rm = (ImageView) blockDrawer.getChildAt(rm_index);
-                        //Toast.makeText(getApplicationContext(), (selectedBlockID) + " / " + rm_index + " / " + (22 - blockDrawer.getChildCount()), Toast.LENGTH_SHORT).show();
-                        blockDrawer.removeView(rm);
-                        blockDrawer_children.remove(rm);
-                        removed_blockDrawer_children.add(rm);
-                        selectedBlockID = -1;
+                        if (firstrm) {
+                            int rm_index = Math.max(0, (selectedBlockID) - count);
+                            ImageView rm = (ImageView) blockDrawer.getChildAt(rm_index);
+                            //Toast.makeText(getApplicationContext(), (selectedBlockID) + " / " + rm_index + " / " + (22 - blockDrawer.getChildCount()), Toast.LENGTH_SHORT).show();
+                            blockDrawer.removeView(rm);
+                            blockDrawer_children.remove(rm);
+                            removed_blockDrawer_children.add(rm);
+                            selectedBlockID = -1;
+                        }
                     }
                 }
             }
@@ -296,13 +299,19 @@ public class FullscreenActivity extends Activity {
     }
 
 
-    /*
-    * Checks if you place over the edges
-    * */
+    /**
+     * Checks if you place over the edges
+     *
+     * @param b - the byte array of your stone
+     * @param i - the row where you want to place it
+     * @param j - the col where you want to place it
+     * @return true, if your stone reaches over the board
+     * false, else
+     */
     private boolean placeOverEdge(byte[][] b, int i, int j) {
-        for (int row = i; row < i+b.length; row++) {
-            for (int col = j; col < j+b.length; col++) {
-                if(b[col-j][row-i] != 0 && (row >= SIZE || col >= SIZE)) {
+        for (int row = i; row < i + b.length; row++) {
+            for (int col = j; col < j + b.length; col++) {
+                if (b[col - j][row - i] != 0 && (row >= SIZE || col >= SIZE)) {
                     return true;
                 }
             }
@@ -310,18 +319,70 @@ public class FullscreenActivity extends Activity {
         return false;
     }
 
-    /*
-    * Checks if you hit other stones with your placement
-    * */
+
+    /**
+     * Checks if you hit other stones with your placement
+     *
+     * @param b - the byte array of your stone
+     * @param i - the row where you want to place it
+     * @param j - the col where you want to place it
+     * @return true, if you would hit other stones with this move
+     * false, else
+     */
     private boolean hitSomeStones(byte[][] b, int i, int j) {
         byte[][] board = gl.getGameBoard();
-        for (int row = i; row < i+b.length; row++) {
-            for (int col = j; col < j+b.length; col++) {
-                if(b[col-j][row-i] != 0 && board[row][col] != 0) {
+        for (int row = i; row < i + b.length; row++) {
+            for (int col = j; col < j + b.length; col++) {
+                if (b[col - j][row - i] != 0 && board[row][col] != 0) {
                     return true;
                 }
             }
         }
         return false;
+    }
+
+
+    /**
+     * Method for "First Stone to Corner"-Rule -- needs to be adapted to 1 vs. 1 because of two colors
+     *
+     * @param b - the byte array of your stone
+     * @param i - the row where you want to place it
+     * @param j - the col where you want to place it
+     * @return true, if stone fits in the corner
+     * false, if stone is not in the corner
+     */
+    private boolean hitTheCorner(byte[][] b, int i, int j) {
+        if (!placeOverEdge(b, i, j) && !hitSomeStones(b, i, j)) {
+            for (int bRow = 0; bRow < b.length; bRow++) {
+                for (int bCol = 0; bCol < b.length; bCol++) {
+                    if (b[bRow][bCol] != 0 &&
+                            ((i + bRow) == 0 && (j + bCol) == 0) ||
+                            ((i + bRow) == SIZE - 1 && (j + bCol) == 0) ||
+                            ((i + bRow) == 0 && (j + bCol) == SIZE - 1) ||
+                            ((i + bRow) == SIZE - 1 && (j + bCol) == SIZE - 1)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * places the stone, byte by byte
+     *
+     * @param b - the byte array of your stone
+     * @param i - the row where you want to place it
+     * @param j - the col where you want to place it
+     */
+    private void placeStone(byte[][] b, int i, int j) {
+        for (int x = 0; x < b.length; x++) {
+            for (int y = 0; y < b[x].length; y++) {
+                if (b[x][y] != 0) {
+                    gl.setSingleStone(b[x][y], i + y, j + x);
+                }
+            }
+        }
     }
 }
