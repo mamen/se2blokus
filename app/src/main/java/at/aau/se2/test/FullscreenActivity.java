@@ -38,6 +38,7 @@ public class FullscreenActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        selectedBlockID = -1;
 
         setContentView(R.layout.activity_fullscreen);
 
@@ -439,7 +440,6 @@ public class FullscreenActivity extends Activity {
                                 corner++;
                             }
                         }
-
                     }
                 }
             }
