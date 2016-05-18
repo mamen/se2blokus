@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="fill_parent"
     tools:context="at.aau.se2.test.startScreen"
     android:background="@drawable/application_dummy_start">
 
-    <RelativeLayout
+    <android.support.percent.PercentFrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center_vertical"
@@ -17,7 +18,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:id="@+id/hostButton"
-            android:layout_marginTop="230dip"
+            app:layout_marginTopPercent="40%"
             android:background="@mipmap/hostbutton"
             android:layout_alignParentTop="true"
             android:layout_alignParentStart="true"
@@ -28,7 +29,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:id="@+id/joinButton"
-            android:layout_marginTop="25dip"
+            app:layout_marginTopPercent="50%"
             android:background="@mipmap/joinbutton"
             android:layout_below="@+id/hostButton"
             android:layout_alignParentStart="true"
@@ -38,10 +39,10 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:id="@+id/settingsButton"
-            android:layout_marginTop="99dip"
+            app:layout_marginTopPercent="60%"
             android:background="@mipmap/settingsbutton"
-            android:layout_below="@+id/hostButton"
+            android:layout_below="@+id/joinButton"
             android:layout_alignParentStart="true"
             android:clickable="true" />
-    </RelativeLayout>
+    </android.support.percent.PercentFrameLayout>
 </LinearLayout>

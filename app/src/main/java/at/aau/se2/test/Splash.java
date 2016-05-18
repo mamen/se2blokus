@@ -7,6 +7,7 @@ import android.os.Bundle;
 /**
  * Created by KingSeybro on 24.04.2016.
  */
+
 public class Splash extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -15,7 +16,7 @@ public class Splash extends Activity {
         Thread timer = new Thread() {
             public void run() {
                 try {
-                    sleep(1000);
+                    sleep(2000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 } finally {

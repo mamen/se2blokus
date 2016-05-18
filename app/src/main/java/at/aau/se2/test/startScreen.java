@@ -29,13 +29,13 @@ public class startScreen extends Activity implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.hostButton:
-                doHosting();
+                goOn(true);
                 break;
             case R.id.joinButton:
-                doSomething();
+                goOn(false);
                 break;
             case R.id.settingsButton:
-
+                doHosting();
                 break;
         }
     }
@@ -74,19 +74,21 @@ public class startScreen extends Activity implements View.OnClickListener {
     }
 
 
-    /*doSomething
-    * Opens a Dialog with no effect right now*/
-    private void doSomething() {
-        new AlertDialog.Builder(this)
-                .setTitle("Delete")
-                .setMessage("If you press \"Ok\" right now, your phone explodes\nSame goes for \"Cancel\"")
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-            }
-        }).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+
+
+    private void goOn(final Boolean host){
+        final CharSequence colors[] = new CharSequence[]{"green", "red", "blue", "yellow"};
+        final Intent intent = new Intent("at.aau.se2.test.CONNECTSCREEN");
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Pick a color");
+        builder.setItems(colors, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                intent.putExtra("chosen_color", colors[which]);
+                intent.putExtra("host",""+host);
+                startActivity(intent);
             }
-        }).setIcon(android.R.drawable.ic_dialog_alert).show();
+        });
+        builder.show();
     }
 }
