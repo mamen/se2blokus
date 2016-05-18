@@ -17,7 +17,7 @@ public class GameLogic {
 
     private static GameLogic instance;
 
-    private static Context context;
+    private Context context;
 
     private Player player;
 

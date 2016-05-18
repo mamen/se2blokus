@@ -42,7 +42,7 @@ public class FullscreenActivity extends Activity {
         byte playerID = -1;
         selectedBlockID = -1;
 
-        String color = "";
+        String color;
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             color = extras.getString("chosen_color");
