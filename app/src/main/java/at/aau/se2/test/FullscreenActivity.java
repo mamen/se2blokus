@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Vibrator;
 import android.view.Display;
 import android.view.Gravity;
@@ -19,10 +20,6 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
- */
 public class FullscreenActivity extends Activity {
 
     private GridLayout gameBoardLayout;
@@ -33,6 +30,7 @@ public class FullscreenActivity extends Activity {
     private List<ImageView> blockDrawer_children;
     private List<ImageView> removed_blockDrawer_children;
     private Player player;
+    boolean doubleBackToExitPressedOnce = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +63,6 @@ public class FullscreenActivity extends Activity {
         // create player-object
         player = new Player(playerID);
 
-
         gl = GameLogic.getInstance(player, this.getApplicationContext());
 
         //1. Statusbar verstecken
@@ -74,25 +71,6 @@ public class FullscreenActivity extends Activity {
         updateGameBoard();
         //3. BlockDrawer erzeugen
         initializeBlockDrawer();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        hideStatusBar();
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        hideStatusBar();
-    }
-
-    private void hideStatusBar() {
-        View decorView = getWindow().getDecorView();
-        // Hide the status bar.
-        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
-        decorView.setSystemUiVisibility(uiOptions);
     }
 
     private void initializeBlockDrawer() {
@@ -139,22 +117,6 @@ public class FullscreenActivity extends Activity {
             });
         }
 
-    }
-
-    //Bilschirmbreite
-    private int getScreenWidth() {
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        return size.x;
-    }
-
-    //Bilschirmhöhe
-    private int getScreenHeight() {
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        return size.y;
     }
 
     private void updateGameBoard() {
@@ -244,11 +206,7 @@ public class FullscreenActivity extends Activity {
         v.vibrate(500);
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        finish();
-    }
+
 
     /**
      * Removes the used stone from the View
@@ -271,4 +229,68 @@ public class FullscreenActivity extends Activity {
         removed_blockDrawer_children.add(rm);
         selectedBlockID = -1;
     }
+
+    /**
+     *
+     * @return
+     */
+    private int getScreenWidth() {
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        return size.x;
+    }
+
+    //Bilschirmhöhe
+    private int getScreenHeight() {
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        return size.y;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        hideStatusBar();
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        hideStatusBar();
+    }
+
+    private void hideStatusBar() {
+        View decorView = getWindow().getDecorView();
+        // Hide the status bar.
+        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+        decorView.setSystemUiVisibility(uiOptions);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            finish();
+            return;
+        }
+
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce=false;
+            }
+        }, 2000);
+    }
+
 }
