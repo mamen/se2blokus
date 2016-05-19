@@ -30,9 +30,12 @@ public class GameLogic {
     public static GameLogic getInstance (Player player, Context context) {
         if (GameLogic.instance == null) {
             GameLogic.instance = new GameLogic(player, context);
+        } else {
+            GameLogic.instance.player = player;
         }
         return GameLogic.instance;
     }
+
 
     private void setupNewGameBoard() {
         gameBoard = new byte[SIZE][SIZE];
