@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.view.Display;
+import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -73,6 +74,9 @@ public class FullscreenActivity extends Activity {
         initializeBlockDrawer();
     }
 
+    /**
+     * Initializes the blockdrawer for the user
+     */
     private void initializeBlockDrawer() {
         LinearLayout blockDrawer_parent = (LinearLayout) findViewById(R.id.blockDrawer_parent);
         ViewGroup.LayoutParams params = blockDrawer_parent.getLayoutParams();
@@ -100,11 +104,39 @@ public class FullscreenActivity extends Activity {
             blockDrawer_children.add(oImageView);
 
             //Touch-Eventhandler initialisieren
+            oImageView.setOnDragListener(new View.OnDragListener() {
+                @Override
+                public boolean onDrag(View v, DragEvent event){
+                    Toast.makeText(getApplicationContext(), ("Drag"), Toast.LENGTH_SHORT).show();
+                    switch (event.getAction()) {
+                        case DragEvent.ACTION_DRAG_STARTED:
+                            Toast.makeText(getApplicationContext(), ("Drag started"), Toast.LENGTH_SHORT).show();
+                            break;
+                        case DragEvent.ACTION_DRAG_ENTERED:
+                            Toast.makeText(getApplicationContext(), ("Drag entered"), Toast.LENGTH_SHORT).show();
+                            break;
+                        case DragEvent.ACTION_DRAG_EXITED:
+                            Toast.makeText(getApplicationContext(), ("Drag exited"), Toast.LENGTH_SHORT).show();
+                            break;
+                        case DragEvent.ACTION_DROP:
+                            Toast.makeText(getApplicationContext(), ("Drag drop"), Toast.LENGTH_SHORT).show();
+                            break;
+                        case DragEvent.ACTION_DRAG_ENDED:
+                            Toast.makeText(getApplicationContext(), ("Drag ended"), Toast.LENGTH_SHORT).show();
+                        default:
+                            break;
+                    }
+                    return true;
+                }
+            });
+
             oImageView.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
+
                     for (ImageView bdc : blockDrawer_children) {
                         if (bdc.equals(v)) {
+                            Toast.makeText(getApplicationContext(), ("touch"), Toast.LENGTH_SHORT).show();
                             selectedBlockID = (int) bdc.getTag(); //Gewählter Spielstein
                             //Toast.makeText(getApplicationContext(), "ID: " + selectedBlockID, Toast.LENGTH_SHORT).show();
                             bdc.setBackgroundColor(Color.LTGRAY);
@@ -115,10 +147,14 @@ public class FullscreenActivity extends Activity {
                     return false;
                 }
             });
+
         }
 
     }
 
+    /**
+     * Updates the gameboard after a block is placed
+     */
     private void updateGameBoard() {
         byte[][] board = gl.getGameBoard();
 
@@ -172,6 +208,10 @@ public class FullscreenActivity extends Activity {
             Toast.makeText(getApplicationContext(), ("First goes in the corner"), Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * checks, if your placement is valid
+     * @param v
+     */
     private void isYourPlacementValid(View v) {
         if (selectedBlockID >= 0) {
             for (int i = 0; i < gameBoardLayout.getColumnCount(); i++) {
@@ -200,6 +240,9 @@ public class FullscreenActivity extends Activity {
 
     }
 
+    /**
+     * makes your phone vibrate
+     */
     private void vibrate() {
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         // Vibrate for 500 milliseconds
@@ -231,8 +274,8 @@ public class FullscreenActivity extends Activity {
     }
 
     /**
-     *
-     * @return
+     * Returns the screen width
+     * @return width of screen
      */
     private int getScreenWidth() {
         Display display = getWindowManager().getDefaultDisplay();
@@ -241,7 +284,10 @@ public class FullscreenActivity extends Activity {
         return size.x;
     }
 
-    //Bilschirmhöhe
+    /**
+     * Returns the screen height
+     * @return height of screen
+     */
     private int getScreenHeight() {
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();

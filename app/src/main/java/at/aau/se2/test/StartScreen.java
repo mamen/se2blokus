@@ -10,7 +10,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 
-public class startScreen extends Activity implements View.OnClickListener {
+public class StartScreen extends Activity implements View.OnClickListener {
     private ImageButton hostGame;
     private ImageButton joinGame;
     private ImageButton settings;

@@ -37,7 +37,7 @@ import java.util.Map;
  */
 
 
-public class connectScreen extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
+public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         Connections.ConnectionRequestListener,
         Connections.MessageListener,

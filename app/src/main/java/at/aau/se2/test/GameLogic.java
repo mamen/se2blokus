@@ -92,7 +92,6 @@ public class GameLogic {
         return false;
     }
 
-
     /**
      * Method for "First Stone to Corner"-Rule -- needs to be adapted to 1 vs. 1 because of two colors
      * Should be working for all stones now
