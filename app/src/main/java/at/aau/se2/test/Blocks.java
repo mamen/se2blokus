@@ -1,8 +1,5 @@
 package at.aau.se2.test;
 
-/**
- * Created by Markus on 22.04.2016.
- */
 public class Blocks {
     private byte playerID;
     private byte[][][] stones;
@@ -126,5 +123,27 @@ public class Blocks {
 
     public byte[][] getStone(int num){
         return stones[num];
+    }
+
+    public byte[][] rotate(int deg, int stoneID){
+        byte[][] stone = getStone((byte)stoneID);
+        byte[][] newStone = new byte[stone.length][stone[0].length];
+
+        for(int i = 0; i < stone.length; i++){
+            for(int j = 0; j < stone[i].length; j++){
+                switch(deg){
+                    case 90:
+                        newStone[j][stone.length-i-1] = stone[i][j];
+                        break;
+                    case 180:
+                        newStone[stone.length-i-1][stone.length-j-1] = stone[i][j];
+                        break;
+                    case 270:
+                        newStone[stone.length-j-1][i] = stone[i][j];
+                        break;
+                }
+            }
+        }
+        return newStone;
     }
 }

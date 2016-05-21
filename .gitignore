@@ -7,6 +7,7 @@
 /build
 /captures
 /.idea/*
+local.properties
 
 ### Android ###
 # Built application files

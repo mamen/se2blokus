@@ -1,96 +1,171 @@
 package at.aau.se2.test;
 
 import android.app.Activity;
+import android.content.ClipData;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Vibrator;
 import android.view.Display;
+import android.view.DragEvent;
 import android.view.Gravity;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
- */
 public class FullscreenActivity extends Activity {
 
+    private RelativeLayout fullscreenLayout;
     private GridLayout gameBoardLayout;
     private LinearLayout blockDrawer;
     private GameLogic gl;
     private static final int SIZE = 20;
     private int selectedBlockID;
-    private Blocks blocks;
     private List<ImageView> blockDrawer_children;
     private List<ImageView> removed_blockDrawer_children;
-    private byte playerID;
+    private Player player;
+    private boolean doubleBackToExitPressedOnce = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        selectedBlockID = -1;
-
         setContentView(R.layout.activity_fullscreen);
 
-        gl = GameLogic.getInstance();
+        //Initialisierung div. Variablen
+        fullscreenLayout = (RelativeLayout) findViewById(R.id.contentPanel);
 
-//        playerID = (byte)(1+Math.random()*3);
+        byte playerID = -1;
+        selectedBlockID = -1;
 
-        String color = "";
+        String color;
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             color = extras.getString("chosen_color");
-            switch (color) {
-                case "green":
-                    playerID = 1;
-                    break;
-                case "red":
-                    playerID = 2;
-                    break;
-                case "blue":
-                    playerID = 3;
-                    break;
-                case "yellow":
-                    playerID = 4;
-                    break;
+            if(color != null) {
+                switch (color) {
+                    case "green":
+                        playerID = 1;
+                        break;
+                    case "red":
+                        playerID = 2;
+                        break;
+                    case "blue":
+                        playerID = 3;
+                        break;
+                    case "yellow":
+                        playerID = 4;
+                        break;
+                    default:
+                        break;
+                }
             }
         }
-        blocks = new Blocks(playerID);
-        //1. Statusbar verstecken
+
+        // lade Player
+        player = new Player(playerID);
+
+        // lade GameLogic
+        gl = GameLogic.getInstance(player, this.getApplicationContext());
+
+        // Statusbar verstecken
         hideStatusBar();
-        //2. Spielbrett erzeugen
+
+        // Spielbrett erzeugen
         updateGameBoard();
-        //3. BlockDrawer erzeugen
+
+        // BlockDrawer erzeugen
         initializeBlockDrawer();
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        hideStatusBar();
-    }
+        // Draglistener erstellen
+        gameBoardLayout.setOnDragListener(new View.OnDragListener() {
 
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        hideStatusBar();
-    }
+            byte index_i = -1;
+            byte index_j = -1;
+            ImageView accept;
+            ImageView cancel;
+            ImageView draggedImage;
 
-    private void hideStatusBar() {
-        View decorView = getWindow().getDecorView();
-        // Hide the status bar.
-        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
-        decorView.setSystemUiVisibility(uiOptions);
+            @Override
+            public boolean onDrag(View v, DragEvent event) {
+
+                switch (event.getAction()) {
+                    case DragEvent.ACTION_DROP:
+                        //Drop nur auf das Spielfeld möglich
+                        if(v instanceof GridLayout){
+
+                            draggedImage = (ImageView)event.getLocalState();
+
+                            // Indexberechnung, wo der Stein platziert werden soll
+                            index_i = (byte)Math.round(event.getX() / (v.getWidth() / 20));
+                            index_j = (byte)Math.round(event.getY() / (v.getHeight() / 20));
+
+                            //außerhalb des bildschirmes platziert
+                            if(event.getX() > v.getWidth()){
+                                index_i = 19;
+                            }
+                            if (event.getY() > v.getHeight()){
+                                index_j = 19;
+                            }
+                            if(event.getX() < 0){
+                                index_i = 0;
+                            }
+                            if (event.getY() < 0) {
+                                index_j = 0;
+                            }
+
+                            // Accept-Button
+                            RelativeLayout.LayoutParams params_accept = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,RelativeLayout.LayoutParams.WRAP_CONTENT);
+                            accept = new ImageView(getApplicationContext());
+                            accept.setImageResource(R.drawable.checkmark);
+                            params_accept.setMargins(0,v.getHeight()+accept.getHeight(), 0,0);
+                            accept.setLayoutParams(params_accept);
+
+                            accept.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    // Platzieren nicht möglich
+                                    if(!isYourPlacementValid(index_i, index_j)){
+                                        vibrate(500);
+                                    }
+                                    fullscreenLayout.removeView(accept);
+                                    fullscreenLayout.removeView(cancel);
+                                }
+                            });
+
+                            // Cancel-Button
+                            RelativeLayout.LayoutParams params_cancel = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,RelativeLayout.LayoutParams.WRAP_CONTENT);
+                            cancel = new ImageView(getApplicationContext());
+                            cancel.setImageResource(R.drawable.cancel);
+                            params_cancel.setMargins(Math.round(v.getWidth()/2),v.getHeight()+cancel.getHeight(), 0,0);
+                            cancel.setLayoutParams(params_cancel);
+
+                            cancel.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    fullscreenLayout.removeView(accept);
+                                    fullscreenLayout.removeView(cancel);
+                                }
+                            });
+
+                            // Buttons zum View hinzufügen
+                            fullscreenLayout.addView(accept);
+                            fullscreenLayout.addView(cancel);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                return true;
+            }
+        });
     }
 
     private void initializeBlockDrawer() {
@@ -102,29 +177,14 @@ public class FullscreenActivity extends Activity {
 
         blockDrawer = (LinearLayout) findViewById(R.id.blockDrawer);
 
-        blockDrawer_children = new ArrayList<ImageView>();
-        removed_blockDrawer_children = new ArrayList<ImageView>();
+        blockDrawer_children = new ArrayList<>();
+        removed_blockDrawer_children = new ArrayList<>();
 
+        String color = player.getPlayerColor();
 
         //Alle Spielsteine hinzufügen
         for (int i = 0; i < 21; i++) {
             final ImageView oImageView = new ImageView(this);
-
-            String color = "";
-            switch (playerID) {
-                case 1:
-                    color = "green";
-                    break;
-                case 2:
-                    color = "red";
-                    break;
-                case 3:
-                    color = "blue";
-                    break;
-                case 4:
-                    color = "yellow";
-                    break;
-            }
 
             oImageView.setImageResource(getResources().getIdentifier(color + "_" + i, "drawable", getPackageName()));
             oImageView.setTag(i);
@@ -135,39 +195,26 @@ public class FullscreenActivity extends Activity {
             blockDrawer_children.add(oImageView);
 
             //Touch-Eventhandler initialisieren
-            oImageView.setOnTouchListener(new View.OnTouchListener() {
+            oImageView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
-                public boolean onTouch(View v, MotionEvent event) {
+                public boolean onLongClick(View v) {
+                    vibrate(100);
+                    ClipData data = ClipData.newPlainText("", "");
+                    View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(v);
+                    v.startDrag(data, shadowBuilder, v, 0);
+
+
                     for (ImageView bdc : blockDrawer_children) {
                         if (bdc.equals(v)) {
                             selectedBlockID = (int) bdc.getTag(); //Gewählter Spielstein
-                            //Toast.makeText(getApplicationContext(), "ID: " + selectedBlockID, Toast.LENGTH_SHORT).show();
-                            bdc.setBackgroundColor(Color.LTGRAY);
-                        } else {
-                            bdc.setBackgroundColor(Color.TRANSPARENT); //Highlight löschen
                         }
                     }
-                    return false;
+
+                    return true;
                 }
             });
         }
 
-    }
-
-    //Bilschirmbreite
-    private int getScreenWidth() {
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        return size.x;
-    }
-
-    //Bilschirmhöhe
-    private int getScreenHeight() {
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        return size.y;
     }
 
     private void updateGameBoard() {
@@ -178,29 +225,27 @@ public class FullscreenActivity extends Activity {
 
         //Sicherheitshalber alle vorherigen Elemente auf dem gameBoard löschen
         gameBoardLayout.removeAllViews();
+        //Toast.makeText(getApplicationContext(),"GAMEBOARDID =  " + gameBoardLayout.getId(), Toast.LENGTH_LONG).show();
 
         gameBoardLayout.setColumnCount(SIZE);
         gameBoardLayout.setRowCount(SIZE);
 
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
+
                 ImageView oImageView = new ImageView(this);
                 GridLayout.LayoutParams param = new GridLayout.LayoutParams();
                 int size = getScreenWidth() / SIZE;
                 //param.stuff extracted because duplicate code
                 param.height = size;
                 param.width = size;
+
                 param.setGravity(Gravity.CENTER);
                 param.columnSpec = GridLayout.spec(i);
                 param.rowSpec = GridLayout.spec(j);
                 switch (board[i][j]) {
                     case 0:
                         oImageView.setImageResource(R.drawable.gameboard_empty);
-                        oImageView.setOnClickListener(new View.OnClickListener() {
-                            public void onClick(View v) {
-                                isYourPlacementValid(v);
-                            }
-                        });
                         break;
                     case 1:
                         oImageView.setImageResource(R.drawable.green_s_1);
@@ -216,257 +261,41 @@ public class FullscreenActivity extends Activity {
                         break;
                 }
                 oImageView.setLayoutParams(param);
+
                 gameBoardLayout.addView(oImageView);
             }
         }
-        if (removed_blockDrawer_children == null)
-            Toast.makeText(getApplicationContext(), ("First goes in the corner"), Toast.LENGTH_SHORT).show();
     }
 
-
-    private void isYourPlacementValid(View v) {
+    private boolean isYourPlacementValid(int x, int y) {
         if (selectedBlockID >= 0) {
-            for (int i = 0; i < gameBoardLayout.getColumnCount(); i++) {
-                for (int j = 0; j < gameBoardLayout.getRowCount(); j++) {
-                    if (gameBoardLayout.getChildAt((i * SIZE) + j).equals(v)) {
-                        byte[][] b;
-                        b = blocks.getStone(selectedBlockID - 1);
-                        if (!removed_blockDrawer_children.isEmpty()) {
-                            if (checkTheRules(b, i, j)) {
-                                placeStone(b, i, j);
-                                removeFromBlockDrawer();
-                            } else {
-                                break;
-                            }
+                    byte[][] b;
+                    b = player.getStone(selectedBlockID - 1);
+                    if (!removed_blockDrawer_children.isEmpty()) {
+                        if (gl.checkTheRules(b, x, y)) {
+                            gl.placeStone(b, x, y);
+                            removeFromBlockDrawer();
                         } else {
-                            if (hitTheCorner(b, i, j)) {
-                                placeStone(b, i, j);
-                                removeFromBlockDrawer();
-                            }
+                            return false;
+                        }
+                    } else {
+                        if (gl.hitTheCorner(b, x, y)) {
+                            gl.placeStone(b, x, y);
+                            removeFromBlockDrawer();
+                        }else{
+                            vibrate(500);
                         }
                     }
                 }
-            }
-            updateGameBoard();
-        }
-
+        updateGameBoard();
+        return true;
     }
 
-    private void vibrate() {
+    private void vibrate(int duration) {
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         // Vibrate for 500 milliseconds
-        v.vibrate(500);
+        v.vibrate(duration);
     }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        finish();
-    }
-
-
-    /**
-     * Checks if you place over the edges
-     *
-     * @param b - the byte array of your stone
-     * @param i - the col where you want to place it
-     * @param j - the row where you want to place it
-     * @return true, if your stone reaches over the board
-     * false, else
-     */
-    private boolean placeOverEdge(byte[][] b, int i, int j) {
-        for (int col = i; col < i + b.length; col++) {
-            for (int row = j; row < j + b.length; row++) {
-                if (b[row - j][col - i] != 0 && (col >= SIZE || row >= SIZE)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-
-    /**
-     * Checks if you hit other stones with your placement
-     *
-     * @param b - the byte array of your stone
-     * @param i - the col where you want to place it
-     * @param j - the row where you want to place it
-     * @return true, if you would hit other stones with this move
-     * false, else
-     */
-    private boolean hitSomeStones(byte[][] b, int i, int j) {
-        byte[][] board = gl.getGameBoard();
-        for (int col = i; col < i + b.length; col++) {
-            for (int row = j; row < j + b.length; row++) {
-                if (b[row - j][col - i] != 0 && board[col][row] != 0) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-
-    /**
-     * Method for "First Stone to Corner"-Rule -- needs to be adapted to 1 vs. 1 because of two colors
-     * Should be working for all stones now
-     *
-     * @param b - the byte array of your stone
-     * @param i - the col where you want to place it
-     * @param j - the row where you want to place it
-     * @return true, if stone fits in the corner
-     * false, if stone is not in the corner
-     */
-    private boolean hitTheCorner(byte[][] b, int i, int j) {
-        if (!placeOverEdge(b, i, j) && !hitSomeStones(b, i, j)) {
-            byte[][] board = gl.getGameBoard();
-            for (int col = i; col < i + b.length; col++) {
-                for (int row = j; row < j + b.length; row++) {
-                    if (b[row - j][col - i] != 0) {
-                        if ((col == 0 && row == 0) ||
-                                (col == 0 && row == SIZE - 1) ||
-                                (col == SIZE - 1 && row == 0) ||
-                                (col == SIZE - 1 && row == SIZE - 1)) {
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
-        } else {
-            Toast.makeText(getApplicationContext(), ("Why does this fail?"), Toast.LENGTH_SHORT).show();
-        }
-        return false;
-    }
-
-    /**
-     * Checks the game rules, if your stone touches your color only by corner.
-     * Also works at the edges, without Exceptions (as far as tested)
-     * Different behaviour for the walls and the Corners, maybe something is extractable.
-     * If-loops checks, if we touch one stone
-     * Else-If checks then, if we touch at least one corner
-     * Color sensitive
-     *
-     * @param b - the byte array of your stone
-     * @param i - the col where you want to place it
-     * @param j - the row where you want to place it
-     * @return false, if stone Placement would be invalid
-     * true, else
-     */
-
-    private boolean checkTheRules(byte[][] b, int i, int j) {
-        byte[][] board = gl.getGameBoard();
-        if (placeOverEdge(b, i, j)) {
-            return false;
-        } else if (hitSomeStones(b, i, j)) {
-            return false;
-        } else {
-            int corner = 0; //We need at least one cornerContact to make it valid
-            for (int col = i; col < i + b.length; col++) {
-                for (int row = j; row < j + b.length; row++) {
-                    if (b[row - j][col - i] != 0) {
-                        //Let the cases begin
-                            //Bottom seems fine
-                        if ((row + 1) >= SIZE && (((col + 1) < SIZE) && (col - 1) >= 0)) {
-                            if (checkSurroundings(board[col + 1][row], board[col - 1][row], board[col][row - 1])) {
-                                Toast.makeText(getApplicationContext(), ("Bottom Wall test"), Toast.LENGTH_SHORT).show();
-                                return false;
-                            } else if (checkSurroundings(board[col - 1][row - 1], board[col + 1][row - 1])) {
-                                corner++;
-                            }
-                            //Right seems fine
-                        } else if ((col + 1) >= SIZE && (((row + 1) < SIZE) && (row - 1) >= 0)) {
-                            if (checkSurroundings(board[col][row - 1], board[col - 1][row], board[col][row + 1])) {
-                                Toast.makeText(getApplicationContext(), ("Right Wall test"), Toast.LENGTH_SHORT).show();
-                                return false;
-                            } else if (checkSurroundings(board[col - 1][row - 1], board[col - 1][row + 1])) {
-                                corner++;
-                            }
-                            //Top seems fine
-                        } else if ((row - 1) < 0 && ((col - 1) >= 0 && (col + 1) < SIZE)) {
-                            if (checkSurroundings(board[col - 1][row], board[col][row + 1], board[col + 1][row])) {
-                                Toast.makeText(getApplicationContext(), ("Top Wall test"), Toast.LENGTH_SHORT).show();
-                                return false;
-                            } else if (checkSurroundings(board[col - 1][row + 1], board[col + 1][row + 1])) {
-                                corner++;
-                            }
-                            //Left seems fine
-                        } else if ((col - 1) < 0 && ((row - 1) >= 0 && (row + 1) < SIZE)) {
-                            if (checkSurroundings(board[col][row - 1], board[col + 1][row], board[col][row + 1])) {
-                                Toast.makeText(getApplicationContext(), ("Left Wall test"), Toast.LENGTH_SHORT).show();
-                                return false;
-                            } else if (checkSurroundings(board[col + 1][row - 1], board[col + 1][row + 1])) {
-                                corner++;
-                            }
-                            //Right down seems fine
-                        } else if ((row + 1) >= SIZE && (col + 1) >= SIZE) {
-                            if (checkSurroundings(board[col - 1][row], board[col][row - 1])) {
-                                Toast.makeText(getApplicationContext(), ("Right down corner test"), Toast.LENGTH_SHORT).show();
-                                return false;
-                            } else if (checkSurroundings(board[col - 1][row - 1])) {
-                                corner++;
-                            }
-                            //Right upper seems fine
-                        } else if ((row - 1) < 0 && (col + 1) >= SIZE) {
-                            if (checkSurroundings(board[col - 1][row], board[col][row + 1])) {
-                                Toast.makeText(getApplicationContext(), ("Right upper corner test"), Toast.LENGTH_SHORT).show();
-                                return false;
-                            } else if (checkSurroundings(board[col - 1][row + 1])) {
-                                corner++;
-                            }
-                            //Left down seems fine
-                        } else if ((row + 1) >= SIZE && (col - 1) < 0) {
-                            if (checkSurroundings(board[col + 1][row], board[col][row - 1])) {
-                                Toast.makeText(getApplicationContext(), ("Left down corner test"), Toast.LENGTH_SHORT).show();
-                                return false;
-                            } else if (checkSurroundings(board[col + 1][row - 1])) {
-                                corner++;
-                            }
-                            //Left upper seems fine
-                        } else if ((row - 1) < 0 && (col - 1) < 0) {
-                            if (checkSurroundings(board[col + 1][row], board[col][row + 1])) {
-                                Toast.makeText(getApplicationContext(), ("Left upper corner test"), Toast.LENGTH_SHORT).show();
-                                return false;
-                            } else if (checkSurroundings(board[col + 1][row + 1])) {
-                                corner++;
-                            }
-                        } else {
-                            //Inside field seems fine
-                            if (checkSurroundings(board[col + 1][row], board[col][row + 1], board[col - 1][row], board[col][row - 1])) {
-                                Toast.makeText(getApplicationContext(), ("That's invalid, dude!"), Toast.LENGTH_SHORT).show();
-                                return false;
-                            } else if (checkSurroundings(board[col - 1][row - 1], board[col + 1][row - 1], board[col - 1][row + 1], board[col + 1][row + 1])) {
-                                corner++;
-                            }
-                        }
-                    }
-                }
-            }
-            if (corner != 0)
-                return true;
-        }
-        return false;
-    }
-
-
-    /**
-     * places the stone, byte by byte
-     *
-     * @param b - the byte array of your stone
-     * @param i - the col where you want to place it
-     * @param j - the row where you want to place it
-     */
-    private void placeStone(byte[][] b, int i, int j) {
-        for (int x = 0; x < b.length; x++) {
-            for (int y = 0; y < b[x].length; y++) {
-                if (b[x][y] != 0) {
-                    gl.setSingleStone(b[x][y], i + y, j + x);
-                }
-            }
-        }
-    }
-
 
     /**
      * Removes the used stone from the View
@@ -490,18 +319,65 @@ public class FullscreenActivity extends Activity {
         selectedBlockID = -1;
     }
 
-
-    /**
-     * Checks, if the surroundings are colored or not
-     *
-     * @param surroundings - bytes representing the color of the player
-     * @return true, if one of the surroundings matches the current playerColor
-     * false, else
-     */
-    public boolean checkSurroundings(byte... surroundings) {
-        for (byte check : surroundings) {
-            if (check == playerID) return true;
-        }
-        return false;
+    //Bildschirmbreite
+    private int getScreenWidth() {
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        return size.x;
     }
+
+    //Bilschirmhöhe
+    private int getScreenHeight() {
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        return size.y;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        hideStatusBar();
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        hideStatusBar();
+    }
+
+    private void hideStatusBar() {
+        View decorView = getWindow().getDecorView();
+        // Hide the status bar.
+        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+        decorView.setSystemUiVisibility(uiOptions);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            super.finish();
+            finish();
+            return;
+        }
+
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce=false;
+            }
+        }, 2000);
+    }
+
 }
