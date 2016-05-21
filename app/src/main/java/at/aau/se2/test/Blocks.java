@@ -1,8 +1,5 @@
 package at.aau.se2.test;
 
-/**
- * Created by Markus on 22.04.2016.
- */
 public class Blocks {
     private byte playerID;
     private byte[][][] stones;

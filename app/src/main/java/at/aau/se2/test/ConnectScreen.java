@@ -32,11 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by Tobias on 27.04.2016.
- */
-
-
 public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         Connections.ConnectionRequestListener,
@@ -53,7 +48,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
     private boolean isConnected;
     private String remoteHostEndpoint;
     private List<String> remotePeerEndpoints = new ArrayList<>();
-    private HashMap<String, String> ID_Name_Map = new HashMap<String, String>();
+    private HashMap<String, String> ID_Name_Map = new HashMap<>();
 
     //Graphic fields
     private TextView actStatus;
@@ -99,7 +94,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
 
         debugging("api erstellt");
         setupView();
-        if(doHosting == true){
+        if(doHosting){
             connectionButton.setText("Advertise connection");
         }
         else {

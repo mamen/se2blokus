@@ -32,7 +32,7 @@ public class FullscreenActivity extends Activity {
     private List<ImageView> blockDrawer_children;
     private List<ImageView> removed_blockDrawer_children;
     private Player player;
-    boolean doubleBackToExitPressedOnce = false;
+    private boolean doubleBackToExitPressedOnce = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -297,8 +297,6 @@ public class FullscreenActivity extends Activity {
         v.vibrate(duration);
     }
 
-
-
     /**
      * Removes the used stone from the View
      */
@@ -365,6 +363,7 @@ public class FullscreenActivity extends Activity {
     @Override
     public void onBackPressed() {
         if (doubleBackToExitPressedOnce) {
+            super.finish();
             finish();
             return;
         }

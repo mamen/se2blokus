@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Bloxx</string>
-    <string name="action_settings">Settings</string>
+    <string name="menu_joinGame">Join Game</string>
+    <string name="menu_hostGame">Host Game</string>
+    <string name="menu_settings">Settings</string>
 
     <string name="connection_type_host">Host</string>
     <string name="connection_type_client">Client</string>

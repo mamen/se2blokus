@@ -7,9 +7,6 @@ import android.widget.Toast;
 
 import java.util.Arrays;
 
-/**
- * Created by Markus on 22.04.2016.
- */
 public class GameLogic {
 
     private static int SIZE = 20;
