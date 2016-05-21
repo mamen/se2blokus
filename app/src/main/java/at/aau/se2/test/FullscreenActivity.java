@@ -49,7 +49,7 @@ public class FullscreenActivity extends Activity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             color = extras.getString("chosen_color");
-            if(color != null) {
+            if (color != null) {
                 switch (color) {
                     case "green":
                         playerID = 1;
@@ -99,40 +99,44 @@ public class FullscreenActivity extends Activity {
                 switch (event.getAction()) {
                     case DragEvent.ACTION_DROP:
                         //Drop nur auf das Spielfeld möglich
-                        if(v instanceof GridLayout){
+                        if (v instanceof GridLayout) {
 
-                            draggedImage = (ImageView)event.getLocalState();
+                            draggedImage = (ImageView) event.getLocalState();
 
-                            // Indexberechnung, wo der Stein platziert werden soll
-                            index_i = (byte)Math.round(event.getX() / (v.getWidth() / 20));
-                            index_j = (byte)Math.round(event.getY() / (v.getHeight() / 20));
+                            // Indexberechnung, wo der Stein platziert werden soll // v.getWidth/getHeight liefert bei jedem Stein 480 zurück
+                            index_i = (byte) Math.floor(event.getX() / (v.getWidth() / 20));
+                            index_j = (byte) Math.floor(event.getY() / (v.getHeight() / 20));
+
 
                             //außerhalb des bildschirmes platziert
-                            if(event.getX() > v.getWidth()){
-                                index_i = 19;
-                            }
-                            if (event.getY() > v.getHeight()){
-                                index_j = 19;
-                            }
-                            if(event.getX() < 0){
-                                index_i = 0;
-                            }
-                            if (event.getY() < 0) {
-                                index_j = 0;
+                            if (event.getX() > v.getWidth() || event.getY() > v.getHeight()
+                                    || event.getX() < 0 || event.getY() < 0) {
+                                if (event.getX() > v.getWidth()) {
+                                    index_i = 19;
+                                }
+                                if (event.getY() > v.getHeight()) {
+                                    index_j = 19;
+                                }
+                                if (event.getX() < 0) {
+                                    index_i = 0;
+                                }
+                                if (event.getY() < 0) {
+                                    index_j = 0;
+                                }
                             }
 
                             // Accept-Button
-                            RelativeLayout.LayoutParams params_accept = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,RelativeLayout.LayoutParams.WRAP_CONTENT);
+                            RelativeLayout.LayoutParams params_accept = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
                             accept = new ImageView(getApplicationContext());
                             accept.setImageResource(R.drawable.checkmark);
-                            params_accept.setMargins(0,v.getHeight()+accept.getHeight(), 0,0);
+                            params_accept.setMargins(0, v.getHeight() + accept.getHeight(), 0, 0);
                             accept.setLayoutParams(params_accept);
 
                             accept.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
                                     // Platzieren nicht möglich
-                                    if(!isYourPlacementValid(index_i, index_j)){
+                                    if (!isYourPlacementValid(index_i, index_j)) {
                                         vibrate(500);
                                     }
                                     fullscreenLayout.removeView(accept);
@@ -141,10 +145,10 @@ public class FullscreenActivity extends Activity {
                             });
 
                             // Cancel-Button
-                            RelativeLayout.LayoutParams params_cancel = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,RelativeLayout.LayoutParams.WRAP_CONTENT);
+                            RelativeLayout.LayoutParams params_cancel = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
                             cancel = new ImageView(getApplicationContext());
                             cancel.setImageResource(R.drawable.cancel);
-                            params_cancel.setMargins(Math.round(v.getWidth()/2),v.getHeight()+cancel.getHeight(), 0,0);
+                            params_cancel.setMargins(Math.round(v.getWidth() / 2), v.getHeight() + cancel.getHeight(), 0, 0);
                             cancel.setLayoutParams(params_cancel);
 
                             cancel.setOnClickListener(new View.OnClickListener() {
@@ -243,6 +247,7 @@ public class FullscreenActivity extends Activity {
                 param.setGravity(Gravity.CENTER);
                 param.columnSpec = GridLayout.spec(i);
                 param.rowSpec = GridLayout.spec(j);
+
                 switch (board[i][j]) {
                     case 0:
                         oImageView.setImageResource(R.drawable.gameboard_empty);
@@ -269,27 +274,105 @@ public class FullscreenActivity extends Activity {
 
     private boolean isYourPlacementValid(int x, int y) {
         if (selectedBlockID >= 0) {
-                    byte[][] b;
-                    b = player.getStone(selectedBlockID - 1);
-                    if (!removed_blockDrawer_children.isEmpty()) {
-                        if (gl.checkTheRules(b, x, y)) {
-                            gl.placeStone(b, x, y);
-                            removeFromBlockDrawer();
-                        } else {
-                            return false;
-                        }
-                    } else {
-                        if (gl.hitTheCorner(b, x, y)) {
-                            gl.placeStone(b, x, y);
-                            removeFromBlockDrawer();
-                        }else{
-                            vibrate(500);
-                        }
-                    }
+            byte[][] b;
+            b = player.getStone(selectedBlockID - 1);
+
+            //Change x and y depending on selected Stone, to simulate more natural placement
+            x -= manipulateX(selectedBlockID - 1);
+            y -= manipulateY(selectedBlockID - 1);
+
+            if (!removed_blockDrawer_children.isEmpty()) {
+                if (gl.checkTheRules(b, x, y)) {
+                    gl.placeStone(b, x, y);
+                    removeFromBlockDrawer();
+                } else {
+                    return false;
                 }
+            } else {
+                if (gl.hitTheCorner(b, x, y)) {
+                    gl.placeStone(b, x, y);
+                    removeFromBlockDrawer();
+                } else {
+                    vibrate(500);
+                }
+            }
+        }
         updateGameBoard();
         return true;
     }
+
+    /**
+     * Manipulates the XPlacement, so that you can place it more natural
+     * Don't change the BlockOrder, or this won't work properly!!
+     *
+     * @param selectedBlock The tag of your stone
+     * @return an Integer, to change the placement in X-direction
+     */
+    private int manipulateX(int selectedBlock) {
+        switch (selectedBlock) {
+            case 0:
+            case 1:
+            case 2:
+            case 4:
+            case 14:
+            case 15:
+            case 17:
+                return 0;
+            case 3:
+            case 5:
+            case 6:
+            case 7:
+            case 8:
+            case 9:
+            case 10:
+            case 11:
+            case 12:
+            case 13:
+            case 16:
+            case 18:
+            case 19:
+                return 1;
+        }
+        return 0;
+    }
+
+    /**
+     * Manipulates the YPlacement, so that you can place it more natural
+     * Don't change the BlockOrder, or this won't work properly!!
+     *
+     * @param selectedBlock The tag of your stone
+     * @return an Integer, to change the placement in Y-direction
+     */
+    private int manipulateY(int selectedBlock) {
+        switch (selectedBlock) {
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+            case 6:
+            case 7:
+            case 8:
+            case 9:
+            case 12:
+                return 0;
+            case 10:
+            case 11:
+            case 13:
+            case 15:
+            case 16:
+            case 17:
+            case 18:
+            case 19:
+                return 1;
+            case 14:
+                return 2;
+
+        }
+        return 0;
+    }
+
 
     private void vibrate(int duration) {
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -375,7 +458,7 @@ public class FullscreenActivity extends Activity {
 
             @Override
             public void run() {
-                doubleBackToExitPressedOnce=false;
+                doubleBackToExitPressedOnce = false;
             }
         }, 2000);
     }
