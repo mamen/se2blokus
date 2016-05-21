@@ -3,19 +3,15 @@ package at.aau.se2.test;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
-import android.util.Log;
 import android.view.Display;
 import android.view.DragEvent;
 import android.view.Gravity;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -43,6 +39,7 @@ public class FullscreenActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fullscreen);
 
+        //Initialisierung div. Variablen
         fullscreenLayout = (RelativeLayout) findViewById(R.id.contentPanel);
 
         byte playerID = -1;
@@ -52,32 +49,42 @@ public class FullscreenActivity extends Activity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             color = extras.getString("chosen_color");
-            switch (color) {
-                case "green":
-                    playerID = 1;
-                    break;
-                case "red":
-                    playerID = 2;
-                    break;
-                case "blue":
-                    playerID = 3;
-                    break;
-                case "yellow":
-                    playerID = 4;
-                    break;
+            if(color != null) {
+                switch (color) {
+                    case "green":
+                        playerID = 1;
+                        break;
+                    case "red":
+                        playerID = 2;
+                        break;
+                    case "blue":
+                        playerID = 3;
+                        break;
+                    case "yellow":
+                        playerID = 4;
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 
-        // create player-object
+        // lade Player
         player = new Player(playerID);
 
+        // lade GameLogic
         gl = GameLogic.getInstance(player, this.getApplicationContext());
 
-        //1. Statusbar verstecken
+        // Statusbar verstecken
         hideStatusBar();
-        //2. Spielbrett erzeugen
+
+        // Spielbrett erzeugen
         updateGameBoard();
 
+        // BlockDrawer erzeugen
+        initializeBlockDrawer();
+
+        // Draglistener erstellen
         gameBoardLayout.setOnDragListener(new View.OnDragListener() {
 
             byte index_i = -1;
@@ -88,21 +95,15 @@ public class FullscreenActivity extends Activity {
 
             @Override
             public boolean onDrag(View v, DragEvent event) {
-                //ImageView block;
-                //GridLayout gameBoard;
 
                 switch (event.getAction()) {
                     case DragEvent.ACTION_DROP:
-                        if(v instanceof GridLayout){ //only drop on GameBoard
-                            Toast.makeText(getApplicationContext(),"i: " + index_i + " j: " + index_j, Toast.LENGTH_SHORT);
-                            //gameBoard = (GridLayout)v;
-                            //block = (ImageView) event.getLocalState();
+                        //Drop nur auf das Spielfeld möglich
+                        if(v instanceof GridLayout){
 
                             draggedImage = (ImageView)event.getLocalState();
 
-                            RelativeLayout.LayoutParams params_accept = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,RelativeLayout.LayoutParams.WRAP_CONTENT);
-                            RelativeLayout.LayoutParams params_cancel = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,RelativeLayout.LayoutParams.WRAP_CONTENT);
-
+                            // Indexberechnung, wo der Stein platziert werden soll
                             index_i = (byte)Math.round(event.getX() / (v.getWidth() / 20));
                             index_j = (byte)Math.round(event.getY() / (v.getHeight() / 20));
 
@@ -120,26 +121,17 @@ public class FullscreenActivity extends Activity {
                                 index_j = 0;
                             }
 
-
-
-
+                            // Accept-Button
+                            RelativeLayout.LayoutParams params_accept = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,RelativeLayout.LayoutParams.WRAP_CONTENT);
                             accept = new ImageView(getApplicationContext());
                             accept.setImageResource(R.drawable.checkmark);
-
-                            cancel = new ImageView(getApplicationContext());
-                            cancel.setImageResource(R.drawable.cancel);
-
                             params_accept.setMargins(0,v.getHeight()+accept.getHeight(), 0,0);
-                            params_cancel.setMargins(Math.round(v.getWidth()/2),v.getHeight()+accept.getHeight(), 0,0);
-
                             accept.setLayoutParams(params_accept);
-                            cancel.setLayoutParams(params_cancel);
-
-
 
                             accept.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
+                                    // Platzieren nicht möglich
                                     if(!isYourPlacementValid(index_i, index_j)){
                                         vibrate(500);
                                     }
@@ -147,6 +139,13 @@ public class FullscreenActivity extends Activity {
                                     fullscreenLayout.removeView(cancel);
                                 }
                             });
+
+                            // Cancel-Button
+                            RelativeLayout.LayoutParams params_cancel = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,RelativeLayout.LayoutParams.WRAP_CONTENT);
+                            cancel = new ImageView(getApplicationContext());
+                            cancel.setImageResource(R.drawable.cancel);
+                            params_cancel.setMargins(Math.round(v.getWidth()/2),v.getHeight()+cancel.getHeight(), 0,0);
+                            cancel.setLayoutParams(params_cancel);
 
                             cancel.setOnClickListener(new View.OnClickListener() {
                                 @Override
@@ -156,7 +155,7 @@ public class FullscreenActivity extends Activity {
                                 }
                             });
 
-
+                            // Buttons zum View hinzufügen
                             fullscreenLayout.addView(accept);
                             fullscreenLayout.addView(cancel);
                         }
@@ -167,9 +166,6 @@ public class FullscreenActivity extends Activity {
                 return true;
             }
         });
-
-        //3. BlockDrawer erzeugen
-        initializeBlockDrawer();
     }
 
     private void initializeBlockDrawer() {
@@ -181,8 +177,8 @@ public class FullscreenActivity extends Activity {
 
         blockDrawer = (LinearLayout) findViewById(R.id.blockDrawer);
 
-        blockDrawer_children = new ArrayList<ImageView>();
-        removed_blockDrawer_children = new ArrayList<ImageView>();
+        blockDrawer_children = new ArrayList<>();
+        removed_blockDrawer_children = new ArrayList<>();
 
         String color = player.getPlayerColor();
 
@@ -325,10 +321,7 @@ public class FullscreenActivity extends Activity {
         selectedBlockID = -1;
     }
 
-    /**
-     *
-     * @return
-     */
+    //Bildschirmbreite
     private int getScreenWidth() {
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
