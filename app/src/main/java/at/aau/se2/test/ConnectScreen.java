@@ -151,7 +151,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
     }
 
     /**
-     * Create fields to access/write from/to the graphic elements of the connectScreen.
+     * Create fields to access/write from/to the graphic elements of the ConnectScreen.
      */
     private void setupView() {
         actStatus = (TextView) findViewById( R.id.text_status );

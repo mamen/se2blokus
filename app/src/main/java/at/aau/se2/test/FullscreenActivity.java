@@ -1,21 +1,25 @@
 package at.aau.se2.test;
 
 import android.app.Activity;
+import android.content.ClipData;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.util.Log;
 import android.view.Display;
 import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -23,6 +27,7 @@ import java.util.List;
 
 public class FullscreenActivity extends Activity {
 
+    private RelativeLayout fullscreenLayout;
     private GridLayout gameBoardLayout;
     private LinearLayout blockDrawer;
     private GameLogic gl;
@@ -37,6 +42,8 @@ public class FullscreenActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fullscreen);
+
+        fullscreenLayout = (RelativeLayout) findViewById(R.id.contentPanel);
 
         byte playerID = -1;
         selectedBlockID = -1;
@@ -70,13 +77,101 @@ public class FullscreenActivity extends Activity {
         hideStatusBar();
         //2. Spielbrett erzeugen
         updateGameBoard();
+
+        gameBoardLayout.setOnDragListener(new View.OnDragListener() {
+
+            byte index_i = -1;
+            byte index_j = -1;
+            ImageView accept;
+            ImageView cancel;
+            ImageView draggedImage;
+
+            @Override
+            public boolean onDrag(View v, DragEvent event) {
+                //ImageView block;
+                //GridLayout gameBoard;
+
+                switch (event.getAction()) {
+                    case DragEvent.ACTION_DROP:
+                        if(v instanceof GridLayout){ //only drop on GameBoard
+                            Toast.makeText(getApplicationContext(),"i: " + index_i + " j: " + index_j, Toast.LENGTH_SHORT);
+                            //gameBoard = (GridLayout)v;
+                            //block = (ImageView) event.getLocalState();
+
+                            draggedImage = (ImageView)event.getLocalState();
+
+                            RelativeLayout.LayoutParams params_accept = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,RelativeLayout.LayoutParams.WRAP_CONTENT);
+                            RelativeLayout.LayoutParams params_cancel = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,RelativeLayout.LayoutParams.WRAP_CONTENT);
+
+                            index_i = (byte)Math.round(event.getX() / (v.getWidth() / 20));
+                            index_j = (byte)Math.round(event.getY() / (v.getHeight() / 20));
+
+                            //außerhalb des bildschirmes platziert
+                            if(event.getX() > v.getWidth()){
+                                index_i = 19;
+                            }
+                            if (event.getY() > v.getHeight()){
+                                index_j = 19;
+                            }
+                            if(event.getX() < 0){
+                                index_i = 0;
+                            }
+                            if (event.getY() < 0) {
+                                index_j = 0;
+                            }
+
+
+
+
+                            accept = new ImageView(getApplicationContext());
+                            accept.setImageResource(R.drawable.checkmark);
+
+                            cancel = new ImageView(getApplicationContext());
+                            cancel.setImageResource(R.drawable.cancel);
+
+                            params_accept.setMargins(0,v.getHeight()+accept.getHeight(), 0,0);
+                            params_cancel.setMargins(Math.round(v.getWidth()/2),v.getHeight()+accept.getHeight(), 0,0);
+
+                            accept.setLayoutParams(params_accept);
+                            cancel.setLayoutParams(params_cancel);
+
+
+
+                            accept.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    if(!isYourPlacementValid(index_i, index_j)){
+                                        vibrate();
+                                    }
+                                    fullscreenLayout.removeView(accept);
+                                    fullscreenLayout.removeView(cancel);
+                                }
+                            });
+
+                            cancel.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    fullscreenLayout.removeView(accept);
+                                    fullscreenLayout.removeView(cancel);
+                                }
+                            });
+
+
+                            fullscreenLayout.addView(accept);
+                            fullscreenLayout.addView(cancel);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                return true;
+            }
+        });
+
         //3. BlockDrawer erzeugen
         initializeBlockDrawer();
     }
 
-    /**
-     * Initializes the blockdrawer for the user
-     */
     private void initializeBlockDrawer() {
         LinearLayout blockDrawer_parent = (LinearLayout) findViewById(R.id.blockDrawer_parent);
         ViewGroup.LayoutParams params = blockDrawer_parent.getLayoutParams();
@@ -104,57 +199,31 @@ public class FullscreenActivity extends Activity {
             blockDrawer_children.add(oImageView);
 
             //Touch-Eventhandler initialisieren
-            oImageView.setOnDragListener(new View.OnDragListener() {
-                @Override
-                public boolean onDrag(View v, DragEvent event){
-                    Toast.makeText(getApplicationContext(), ("Drag"), Toast.LENGTH_SHORT).show();
-                    switch (event.getAction()) {
-                        case DragEvent.ACTION_DRAG_STARTED:
-                            Toast.makeText(getApplicationContext(), ("Drag started"), Toast.LENGTH_SHORT).show();
-                            break;
-                        case DragEvent.ACTION_DRAG_ENTERED:
-                            Toast.makeText(getApplicationContext(), ("Drag entered"), Toast.LENGTH_SHORT).show();
-                            break;
-                        case DragEvent.ACTION_DRAG_EXITED:
-                            Toast.makeText(getApplicationContext(), ("Drag exited"), Toast.LENGTH_SHORT).show();
-                            break;
-                        case DragEvent.ACTION_DROP:
-                            Toast.makeText(getApplicationContext(), ("Drag drop"), Toast.LENGTH_SHORT).show();
-                            break;
-                        case DragEvent.ACTION_DRAG_ENDED:
-                            Toast.makeText(getApplicationContext(), ("Drag ended"), Toast.LENGTH_SHORT).show();
-                        default:
-                            break;
-                    }
-                    return true;
-                }
-            });
-
             oImageView.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
+                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                        ClipData data = ClipData.newPlainText("", "");
+                        View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(v);
+                        v.startDrag(data, shadowBuilder, v, 0);
 
-                    for (ImageView bdc : blockDrawer_children) {
-                        if (bdc.equals(v)) {
-                            Toast.makeText(getApplicationContext(), ("touch"), Toast.LENGTH_SHORT).show();
-                            selectedBlockID = (int) bdc.getTag(); //Gewählter Spielstein
-                            //Toast.makeText(getApplicationContext(), "ID: " + selectedBlockID, Toast.LENGTH_SHORT).show();
-                            bdc.setBackgroundColor(Color.LTGRAY);
-                        } else {
-                            bdc.setBackgroundColor(Color.TRANSPARENT); //Highlight löschen
+
+                        for (ImageView bdc : blockDrawer_children) {
+                            if (bdc.equals(v)) {
+                                selectedBlockID = (int) bdc.getTag(); //Gewählter Spielstein
+                            }
                         }
+
+                        return true;
+                    } else {
+                        return false;
                     }
-                    return false;
                 }
             });
-
         }
 
     }
 
-    /**
-     * Updates the gameboard after a block is placed
-     */
     private void updateGameBoard() {
         byte[][] board = gl.getGameBoard();
 
@@ -163,29 +232,27 @@ public class FullscreenActivity extends Activity {
 
         //Sicherheitshalber alle vorherigen Elemente auf dem gameBoard löschen
         gameBoardLayout.removeAllViews();
+        //Toast.makeText(getApplicationContext(),"GAMEBOARDID =  " + gameBoardLayout.getId(), Toast.LENGTH_LONG).show();
 
         gameBoardLayout.setColumnCount(SIZE);
         gameBoardLayout.setRowCount(SIZE);
 
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
+
                 ImageView oImageView = new ImageView(this);
                 GridLayout.LayoutParams param = new GridLayout.LayoutParams();
                 int size = getScreenWidth() / SIZE;
                 //param.stuff extracted because duplicate code
                 param.height = size;
                 param.width = size;
+
                 param.setGravity(Gravity.CENTER);
                 param.columnSpec = GridLayout.spec(i);
                 param.rowSpec = GridLayout.spec(j);
                 switch (board[i][j]) {
                     case 0:
                         oImageView.setImageResource(R.drawable.gameboard_empty);
-                        oImageView.setOnClickListener(new View.OnClickListener() {
-                            public void onClick(View v) {
-                                isYourPlacementValid(v);
-                            }
-                        });
                         break;
                     case 1:
                         oImageView.setImageResource(R.drawable.green_s_1);
@@ -201,48 +268,36 @@ public class FullscreenActivity extends Activity {
                         break;
                 }
                 oImageView.setLayoutParams(param);
+
                 gameBoardLayout.addView(oImageView);
             }
         }
-        if (removed_blockDrawer_children == null)
-            Toast.makeText(getApplicationContext(), ("First goes in the corner"), Toast.LENGTH_SHORT).show();
     }
 
-    /**
-     * checks, if your placement is valid
-     * @param v
-     */
-    private void isYourPlacementValid(View v) {
+    private boolean isYourPlacementValid(int x, int y) {
         if (selectedBlockID >= 0) {
-            for (int i = 0; i < gameBoardLayout.getColumnCount(); i++) {
-                for (int j = 0; j < gameBoardLayout.getRowCount(); j++) {
-                    if (gameBoardLayout.getChildAt((i * SIZE) + j).equals(v)) {
-                        byte[][] b;
-                        b = player.getStone(selectedBlockID - 1);
-                        if (!removed_blockDrawer_children.isEmpty()) {
-                            if (gl.checkTheRules(b, i, j)) {
-                                gl.placeStone(b, i, j);
-                                removeFromBlockDrawer();
-                            } else {
-                                break;
-                            }
+                    byte[][] b;
+                    b = player.getStone(selectedBlockID - 1);
+                    if (!removed_blockDrawer_children.isEmpty()) {
+                        if (gl.checkTheRules(b, x, y)) {
+                            gl.placeStone(b, x, y);
+                            removeFromBlockDrawer();
                         } else {
-                            if (gl.hitTheCorner(b, i, j)) {
-                                gl.placeStone(b, i, j);
-                                removeFromBlockDrawer();
-                            }
+                            return false;
+                        }
+                    } else {
+                        if (gl.hitTheCorner(b, x, y)) {
+                            gl.placeStone(b, x, y);
+                            removeFromBlockDrawer();
+                        }else{
+                            vibrate();
                         }
                     }
                 }
-            }
-            updateGameBoard();
-        }
-
+        updateGameBoard();
+        return true;
     }
 
-    /**
-     * makes your phone vibrate
-     */
     private void vibrate() {
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         // Vibrate for 500 milliseconds
@@ -274,8 +329,8 @@ public class FullscreenActivity extends Activity {
     }
 
     /**
-     * Returns the screen width
-     * @return width of screen
+     *
+     * @return
      */
     private int getScreenWidth() {
         Display display = getWindowManager().getDefaultDisplay();
@@ -284,10 +339,7 @@ public class FullscreenActivity extends Activity {
         return size.x;
     }
 
-    /**
-     * Returns the screen height
-     * @return height of screen
-     */
+    //Bilschirmhöhe
     private int getScreenHeight() {
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
