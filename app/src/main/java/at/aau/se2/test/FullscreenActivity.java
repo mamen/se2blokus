@@ -141,7 +141,7 @@ public class FullscreenActivity extends Activity {
                                 @Override
                                 public void onClick(View v) {
                                     if(!isYourPlacementValid(index_i, index_j)){
-                                        vibrate();
+                                        vibrate(500);
                                     }
                                     fullscreenLayout.removeView(accept);
                                     fullscreenLayout.removeView(cancel);
@@ -199,25 +199,22 @@ public class FullscreenActivity extends Activity {
             blockDrawer_children.add(oImageView);
 
             //Touch-Eventhandler initialisieren
-            oImageView.setOnTouchListener(new View.OnTouchListener() {
+            oImageView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                        ClipData data = ClipData.newPlainText("", "");
-                        View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(v);
-                        v.startDrag(data, shadowBuilder, v, 0);
+                public boolean onLongClick(View v) {
+                    vibrate(100);
+                    ClipData data = ClipData.newPlainText("", "");
+                    View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(v);
+                    v.startDrag(data, shadowBuilder, v, 0);
 
 
-                        for (ImageView bdc : blockDrawer_children) {
-                            if (bdc.equals(v)) {
-                                selectedBlockID = (int) bdc.getTag(); //Gewählter Spielstein
-                            }
+                    for (ImageView bdc : blockDrawer_children) {
+                        if (bdc.equals(v)) {
+                            selectedBlockID = (int) bdc.getTag(); //Gewählter Spielstein
                         }
-
-                        return true;
-                    } else {
-                        return false;
                     }
+
+                    return true;
                 }
             });
         }
@@ -290,7 +287,7 @@ public class FullscreenActivity extends Activity {
                             gl.placeStone(b, x, y);
                             removeFromBlockDrawer();
                         }else{
-                            vibrate();
+                            vibrate(500);
                         }
                     }
                 }
@@ -298,10 +295,10 @@ public class FullscreenActivity extends Activity {
         return true;
     }
 
-    private void vibrate() {
+    private void vibrate(int duration) {
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         // Vibrate for 500 milliseconds
-        v.vibrate(500);
+        v.vibrate(duration);
     }
 
 

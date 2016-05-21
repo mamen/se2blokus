@@ -21,7 +21,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".startScreen">
+        <activity android:name=".StartScreen">
             <intent-filter>
                 <action android:name="at.aau.se2.test.STARTSCREEN" />
                 <category android:name="android.intent.category.DEFAULT" />
