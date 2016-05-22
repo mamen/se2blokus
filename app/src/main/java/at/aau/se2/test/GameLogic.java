@@ -2,10 +2,7 @@ package at.aau.se2.test;
 
 import android.content.Context;
 import android.os.Vibrator;
-import android.util.Log;
 import android.widget.Toast;
-
-import java.util.Arrays;
 
 public class GameLogic {
 
