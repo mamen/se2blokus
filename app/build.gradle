@@ -54,7 +54,7 @@ def coverageSourceDirs = [
 task jacocoTestReport(type: JacocoReport, dependsOn: "test") {
     group = "Reporting"
 
-    description = "Generate Jacoco coverage reports"
+    description = "Generate Jacoco coverage reports "
 
     classDirectories = fileTree(
             dir: '../app/build/intermediates/classes',
