@@ -179,7 +179,7 @@ public class FullscreenActivity extends Activity {
                                 });
 
                                 // Buttons zum View hinzufügen
-                                if (preValidation(index_i, index_j)) { //Ungültiger Zug, braucht nur den Cancel Button
+                                if (isYourPlacementValid(index_i, index_j)) { //Ungültiger Zug, braucht nur den Cancel Button
                                     fullscreenLayout.addView(accept);
                                 }
                                 fullscreenLayout.addView(cancel);
@@ -334,22 +334,25 @@ public class FullscreenActivity extends Activity {
      */
     private boolean isYourPlacementValid(int x, int y) {
         if (selectedBlockID >= 0) {
-            byte[][] b;
-            b = player.getStone(selectedBlockID - 1);
+            byte[][] b = player.getStone(selectedBlockID - 1);
 
-            if (!removed_blockDrawer_children.isEmpty()) {
-                if (gl.checkTheRules(b, x, y)) {
+            if (preValidation(x, y)) {
+                if (!removed_blockDrawer_children.isEmpty()) {
+                    if (gl.checkTheRules(b, x, y)) {
 
+                    } else {
+                        return false;
+                    }
                 } else {
-                    return false;
+                    if (gl.hitTheCorner(b, x, y)) {
+
+                    } else {
+                        vibrate(500);
+                        return false;
+                    }
                 }
             } else {
-                if (gl.hitTheCorner(b, x, y)) {
-
-                } else {
-                    vibrate(500);
-                    return false;
-                }
+                return false;
             }
         }
         return true;
