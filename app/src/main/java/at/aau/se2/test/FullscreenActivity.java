@@ -39,7 +39,7 @@ public class FullscreenActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fullscreen);
 
-        //Initialisierung div. Variablen
+        //Initialisierung div. Variablen.
         fullscreenLayout = (RelativeLayout) findViewById(R.id.contentPanel);
 
         byte playerID = -1;
