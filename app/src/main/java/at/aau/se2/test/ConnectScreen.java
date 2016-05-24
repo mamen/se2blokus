@@ -99,6 +99,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
                 .build();
         //debugging("api erstellt");
         setupView();
+        
         if(doHosting == true){
             connectionButton.setText("Advertise connection");
         }

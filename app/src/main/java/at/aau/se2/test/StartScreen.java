@@ -65,7 +65,7 @@ public class StartScreen extends Activity implements View.OnClickListener {
         txt_joinGame.setTypeface(font);
         txt_settings.setTypeface(font);
 
-        txt_logo.setTextSize(90);
+        txt_logo.setTextSize(80);
         txt_hostGame.setTextSize(40);
         txt_joinGame.setTextSize(40);
         txt_settings.setTextSize(40);
