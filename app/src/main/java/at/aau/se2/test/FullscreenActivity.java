@@ -109,6 +109,7 @@ public class FullscreenActivity extends Activity {
                         } else {
                             testView.setVisibility(View.VISIBLE);
                         }
+                        dragged = false;
                         Log.d("DragStart", "Started");
                         break;
                     case DragEvent.ACTION_DRAG_ENTERED:
@@ -177,7 +178,7 @@ public class FullscreenActivity extends Activity {
                                             vibrate(500);
                                             restore(index_i, index_j);
                                         } else {
-//                                            testView.setVisibility(View.INVISIBLE); //Müsste unnötig sein
+                                            testView.setVisibility(View.INVISIBLE); //Müsste unnötig sein
                                             placeIt(player.getStone(selectedBlockID - 1), index_i, index_j); //Wirkliches Plazieren vom Stein
 //                                            boardToLog();
                                         }
