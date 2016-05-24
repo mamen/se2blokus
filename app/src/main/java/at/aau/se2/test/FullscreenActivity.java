@@ -104,14 +104,31 @@ public class FullscreenActivity extends Activity {
                     case DragEvent.ACTION_DROP:
                         //Drop nur auf das Spielfeld möglich
                         if (v instanceof GridLayout) {
+                            Toast.makeText(getApplicationContext(),"DROP",Toast.LENGTH_SHORT);
                             draggedImage = (ImageView) event.getLocalState();
 
                             // Indexberechnung, wo der Stein platziert werden soll // v.getWidth/getHeight liefert bei jedem Stein 480 zurück
-                            index_i = (byte) Math.floor(event.getX() / (v.getWidth() / 20));
-                            index_j = (byte) Math.floor(event.getY() / (v.getHeight() / 20));
+                            // Indexmanipulation, abhängig vom gewählten Stein (TODO Bei Drehung ziemlich sicher anzupassen!!)
+                            index_i = (byte) (Math.floor(event.getX() / Math.floor(v.getWidth() / 20)) - manipulateX(selectedBlockID - 1));
+                            index_j = (byte) (Math.floor(event.getY() / Math.floor(v.getHeight() / 20)) - manipulateY(selectedBlockID - 1));
 
-                            //außerhalb des bildschirmes platziert
-                            if (event.getX() > v.getWidth() || event.getY() > v.getHeight()
+                            //außerhalb des gültigen bereichs platziert
+                            if(index_i < 0 || index_i > 19){
+                                if(index_i < 0){
+                                    index_i = 0;
+                                }else{
+                                    index_i = 19;
+                                }
+                            }
+
+                            if(index_j < 0 || index_j > 19){
+                                if(index_j < 0){
+                                    index_j = 0;
+                                }else{
+                                    index_j = 19;
+                                }
+                            }
+                            /*if (event.getX() > v.getWidth() || event.getY() > v.getHeight()
                                     || event.getX() < 0 || event.getY() < 0) {
                                 if (event.getX() > v.getWidth()) {
                                     index_i = 19;
@@ -125,11 +142,7 @@ public class FullscreenActivity extends Activity {
                                 if (event.getY() < 0) {
                                     index_j = 0;
                                 }
-                            }
-
-                            //Indexmanipulation, abhängig vom gewählten Stein (TODO Bei Drehung ziemlich sicher anzupassen!!)
-                            index_i -= manipulateX(selectedBlockID - 1);
-                            index_j -= manipulateY(selectedBlockID - 1);
+                            }*/
 
                             //Preview erfolgreich gezeichnet?
                             final boolean drawn = drawStone(index_i, index_j);
@@ -437,7 +450,7 @@ public class FullscreenActivity extends Activity {
             case 14:
             case 15:
             case 17:
-                return 0;
+                return 1;
             case 3:
             case 5:
             case 6:
