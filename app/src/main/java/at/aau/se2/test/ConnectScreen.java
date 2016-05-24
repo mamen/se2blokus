@@ -351,7 +351,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
                         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                         sendMessage("NEWPLAYER-"+ Nearby.Connections.getLocalDeviceId(apiClient) +"-"+username);
                         messageAdapter.notifyDataSetChanged();
-                        sendMessage(username + " connected!");
+                        //sendMessage(username + " connected!");
                         //participants++;
                         debugging("Request accepted NR: "+ ID_Name_Map.size());
                         checkStartGame();
@@ -366,6 +366,8 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
     }
 
     private void checkStartGame(){
+        debugging("found that!");
+        setupParticipantList();
         if(isHost){
             if(ID_Name_Map.size() == 2 || ID_Name_Map.size() == 4){
                 startButton.setVisibility(View.VISIBLE);
@@ -381,6 +383,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
 
     private void setupParticipantList(){
         String partString = listCurrentParticipants();
+        messageAdapter.clear();
         messageAdapter.add(partString);
         messageAdapter.notifyDataSetChanged();
     }
