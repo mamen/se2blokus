@@ -18,13 +18,13 @@ public class GameLogic {
 
     private Player player;
 
-    private GameLogic (Player player, Context context) {
+    private GameLogic(Player player, Context context) {
         this.player = player;
         this.context = context;
         setupNewGameBoard();
     }
 
-    public static GameLogic getInstance (Player player, Context context) {
+    public static GameLogic getInstance(Player player, Context context) {
         if (GameLogic.instance == null) {
             GameLogic.instance = new GameLogic(player, context);
         } else {
@@ -36,18 +36,18 @@ public class GameLogic {
 
     private void setupNewGameBoard() {
         gameBoard = new byte[SIZE][SIZE];
-        for(int i = 0; i < SIZE; i++){
-            for(int j = 0; j < SIZE; j++){
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
                 gameBoard[i][j] = 0;
             }
         }
     }
 
-    public byte[][] getGameBoard(){
+    public byte[][] getGameBoard() {
         return gameBoard;
     }
 
-    public void setSingleStone(byte val, int x, int y){
+    public void setSingleStone(byte val, int x, int y) {
         gameBoard[x][y] = val;
     }
 
@@ -63,7 +63,7 @@ public class GameLogic {
     public boolean placeOverEdge(byte[][] b, int i, int j) {
         for (int col = i; col < i + b.length; col++) {
             for (int row = j; row < j + b.length; row++) {
-                if (b[row - j][col - i] != 0 && (col >= SIZE || row >= SIZE)) {
+                if (b[row - j][col - i] != 0 && (col >= SIZE || row >= SIZE || col < 0 || row < 0)) {
                     return true;
                 }
             }
@@ -84,7 +84,7 @@ public class GameLogic {
         byte[][] board = getGameBoard();
         for (int col = i; col < i + b.length; col++) {
             for (int row = j; row < j + b.length; row++) {
-                if (b[row - j][col - i] != 0 && board[col][row] != 0) {
+                if (b[row - j][col - i] > 5 && board[col][row] != 0) {
                     return true;
                 }
             }
@@ -108,7 +108,7 @@ public class GameLogic {
             byte[][] board = getGameBoard();
             for (int col = i; col < i + b.length; col++) {
                 for (int row = j; row < j + b.length; row++) {
-                    if (b[row - j][col - i] != 0) {
+                    if (b[row - j][col - i] != 0 && b[row - j][col - i] != 5) {
                         if ((col == 0 && row == 0) ||
                                 (col == 0 && row == SIZE - 1) ||
                                 (col == SIZE - 1 && row == 0) ||
@@ -139,7 +139,6 @@ public class GameLogic {
      * @return false, if stone Placement would be invalid
      * true, else
      */
-
     public boolean checkTheRules(byte[][] b, int i, int j) {
         byte[][] board = getGameBoard();
         if (placeOverEdge(b, i, j)) {
@@ -253,7 +252,49 @@ public class GameLogic {
         }
     }
 
+    /**
+     * Remembers the field (Size of to-be-placed stone) where the stone should be placed,
+     * to restore it just in case.
+     *
+     * @param b - byte Array of your stone
+     * @param i - the col where you want to restore it
+     * @param j - the row where you want to restore it
+     * @return the remembered Field
+     */
+    public byte[][] rememberField(byte[][] b, int i, int j) {
+        byte[][] retArr = new byte[b.length][b.length];
+        byte[][] help = getGameBoard();
+        for (int x = 0; x < b.length; x++) {
+            for (int y = 0; y < b.length; y++) {
+                if ((i + y) >= SIZE || (j + x) >= SIZE) {
 
+                } else {
+                    retArr[x][y] = help[i + y][j + x];
+                }
+            }
+        }
+        return retArr;
+    }
+
+
+    /**
+     * Restores the field, if the placement was wrong
+     *
+     * @param b - byte Array of your stone
+     * @param i - the col where you want to restore it
+     * @param j - the row where you want to restore it
+     */
+    public void restoreField(byte[][] b, int i, int j) {
+        for (int x = 0; x < b.length; x++) {
+            for (int y = 0; y < b[x].length; y++) {
+                if ((i + y) >= SIZE || (j + x) >= SIZE) {
+
+                } else {
+                    setSingleStone(b[x][y], i + y, j + x);
+                }
+            }
+        }
+    }
 
 
     /**
