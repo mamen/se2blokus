@@ -34,7 +34,7 @@ public class FullscreenActivity extends Activity {
     private List<ImageView> removed_blockDrawer_children;
     private Player player;
     private boolean doubleBackToExitPressedOnce = false;
-    private View testView;
+    private ImageView testView;
     private byte[][] rememberField;
 
     @Override
@@ -96,11 +96,37 @@ public class FullscreenActivity extends Activity {
             ImageView accept;
             ImageView cancel;
             ImageView draggedImage;
+            boolean dragged = false;
 
             @Override
             public boolean onDrag(View v, DragEvent event) {
 
                 switch (event.getAction()) {
+                    case DragEvent.ACTION_DRAG_STARTED:
+                        dragged = true;
+                        if (dragged) {
+                            testView.setVisibility(View.INVISIBLE);
+                        } else {
+                            testView.setVisibility(View.VISIBLE);
+                        }
+                        Log.d("DragStart", "Started");
+                        break;
+                    case DragEvent.ACTION_DRAG_ENTERED:
+                        dragged = true;
+                        Log.d("DragEntered", "Entered");
+                        break;
+                    case DragEvent.ACTION_DRAG_EXITED:
+                        dragged = false;
+                        Log.d("DragExited", "Exited");
+                        break;
+                    case DragEvent.ACTION_DRAG_ENDED:
+                        if (dragged) {
+                            testView.setVisibility(View.INVISIBLE);
+                        } else {
+                            testView.setVisibility(View.VISIBLE);
+                        }
+                        Log.d("DragEnded", "Ended");
+                        break;
                     case DragEvent.ACTION_DROP:
                         //Drop nur auf das Spielfeld möglich
                         if (v instanceof GridLayout) {
@@ -136,6 +162,7 @@ public class FullscreenActivity extends Activity {
 
                             // Accept-Button
                             if (drawn) {
+//                                testView.setVisibility(View.INVISIBLE);
                                 RelativeLayout.LayoutParams params_accept = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
                                 accept = new ImageView(getApplicationContext());
                                 accept.setImageResource(R.drawable.checkmark);
@@ -173,6 +200,7 @@ public class FullscreenActivity extends Activity {
                                     public void onClick(View v) {
                                         fullscreenLayout.removeView(accept);
                                         fullscreenLayout.removeView(cancel);
+                                        testView.setVisibility(View.VISIBLE);
                                         restore(index_i, index_j);
 //                                        boardToLog();
                                     }
@@ -184,7 +212,7 @@ public class FullscreenActivity extends Activity {
                                 }
                                 fullscreenLayout.addView(cancel);
                             } else {
-                                testView.setVisibility(View.VISIBLE);
+
                             }
                         }
                         break;
@@ -237,7 +265,7 @@ public class FullscreenActivity extends Activity {
                             selectedBlockID = (int) bdc.getTag(); //Gewählter Spielstein
                         }
                     }
-                    testView = v;
+                    testView = (ImageView) v;
                     testView.setVisibility(View.INVISIBLE);
                     return true;
                 }
@@ -416,7 +444,6 @@ public class FullscreenActivity extends Activity {
      * @param j - the row where you want to restore it
      */
     private void restore(int i, int j) {
-        testView.setVisibility(View.VISIBLE);
         gl.restoreField(rememberField, i, j);
         updateGameBoard();
     }
@@ -525,6 +552,7 @@ public class FullscreenActivity extends Activity {
 
     /**
      * Stone placement, removal from BlockDrawer and Update
+     *
      * @param b - byte Array of your stone
      * @param i - the col where you want to restore it
      * @param j - the row where you want to restore it
