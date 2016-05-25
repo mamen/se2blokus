@@ -36,6 +36,7 @@ public class FullscreenActivity extends Activity {
     private boolean doubleBackToExitPressedOnce = false;
     private ImageView testView;
     private byte[][] rememberField;
+    private boolean elementFinished;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +49,7 @@ public class FullscreenActivity extends Activity {
         byte playerID = -1;
         selectedBlockID = -1;
         rememberField = new byte[3][3];
+        elementFinished = true;
 
         String color;
         Bundle extras = getIntent().getExtras();
@@ -125,6 +127,7 @@ public class FullscreenActivity extends Activity {
                             testView.setVisibility(View.INVISIBLE);
                         } else {
                             testView.setVisibility(View.VISIBLE);
+                            elementFinished = true;
                         }
                         Log.d("DragEnded", "Ended");
                         break;
@@ -184,6 +187,7 @@ public class FullscreenActivity extends Activity {
                                         }
                                         fullscreenLayout.removeView(accept);
                                         fullscreenLayout.removeView(cancel);
+                                        elementFinished = true;
 //                                        boardToLog();
                                     }
                                 });
@@ -202,6 +206,7 @@ public class FullscreenActivity extends Activity {
                                         fullscreenLayout.removeView(accept);
                                         fullscreenLayout.removeView(cancel);
                                         testView.setVisibility(View.VISIBLE);
+                                        elementFinished = true;
                                         restore(index_i, index_j);
 //                                        boardToLog();
                                     }
@@ -255,20 +260,24 @@ public class FullscreenActivity extends Activity {
             oImageView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    vibrate(100);
-                    ClipData data = ClipData.newPlainText("", "");
-                    View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(v);
-                    v.startDrag(data, shadowBuilder, v, 0);
+                    if (elementFinished) {
+                        vibrate(100);
+                        ClipData data = ClipData.newPlainText("", "");
+                        View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(v);
+                        v.startDrag(data, shadowBuilder, v, 0);
 
 
-                    for (ImageView bdc : blockDrawer_children) {
-                        if (bdc.equals(v)) {
-                            selectedBlockID = (int) bdc.getTag(); //Gewählter Spielstein
+                        for (ImageView bdc : blockDrawer_children) {
+                            if (bdc.equals(v)) {
+                                selectedBlockID = (int) bdc.getTag(); //Gewählter Spielstein
+                            }
                         }
+                        testView = (ImageView) v;
+                        testView.setVisibility(View.INVISIBLE);
+                        elementFinished = false;
+                        return true;
                     }
-                    testView = (ImageView) v;
-                    testView.setVisibility(View.INVISIBLE);
-                    return true;
+                return true;
                 }
             });
         }
