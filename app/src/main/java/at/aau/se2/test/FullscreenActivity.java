@@ -137,7 +137,7 @@ public class FullscreenActivity extends Activity {
                         Log.d("DragEnded", "Ended");
                         break;
                     case DragEvent.ACTION_DROP:
-                        //Drop nur auf das Spielfeld möglich
+                        //Drop nur auf das Spielfeld möglich //Braucht glaub ich gar keine Abfrage, weil der DragListener auf dem GridLayout liegt
                         if (v instanceof GridLayout) {
                             draggedImage = (ImageView) event.getLocalState();
 
@@ -267,7 +267,7 @@ public class FullscreenActivity extends Activity {
                     if (elementFinished) {
                         vibrate(100);
                         ClipData data = ClipData.newPlainText("", "");
-                        //Je kleiner v.getHeight, desto näher beim Cursor
+                        //v.getHeight()/2 -> Mitte vom Stein; v.getHeight -> Unterm Stein
                         shadowBuilder = new OwnDragShadowBuilder(v, v.getWidth()/2, v.getHeight());
                         v.startDrag(data, shadowBuilder, v, 0);
 
