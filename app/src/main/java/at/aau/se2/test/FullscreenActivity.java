@@ -364,20 +364,28 @@ public class FullscreenActivity extends Activity {
                         oImageView.setImageResource(R.drawable.gameboard_empty);
                         break;
                     case 1:
-                    case 6:
                         oImageView.setImageResource(R.drawable.green_s_1);
                         break;
+                    case 6:
+                        oImageView.setImageResource(R.drawable.green_s_1_preview);
+                        break;
                     case 2:
-                    case 7:
                         oImageView.setImageResource(R.drawable.red_s_1);
                         break;
+                    case 7:
+                        oImageView.setImageResource(R.drawable.red_s_1_preview);
+                        break;
                     case 3:
-                    case 8:
                         oImageView.setImageResource(R.drawable.blue_s_1);
                         break;
+                    case 8:
+                        oImageView.setImageResource(R.drawable.blue_s_1_preview);
+                        break;
                     case 4:
-                    case 9:
                         oImageView.setImageResource(R.drawable.yellow_s_1);
+                        break;
+                    case 9:
+                        oImageView.setImageResource(R.drawable.yellow_s_1_preview);
                         break;
                 }
                 oImageView.setLayoutParams(param);
