@@ -38,6 +38,11 @@ public class FullscreenActivity extends Activity {
     private byte[][] rememberField;
     private boolean elementFinished;
 
+    /*
+    TODO:
+        - blockrotation
+        - dragged image above finger
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,7 +53,7 @@ public class FullscreenActivity extends Activity {
 
         byte playerID = -1;
         selectedBlockID = -1;
-        rememberField = new byte[3][3];
+        rememberField = new byte[5][5];
         elementFinished = true;
 
         String color;
@@ -137,6 +142,28 @@ public class FullscreenActivity extends Activity {
                             draggedImage = (ImageView) event.getLocalState();
 
                             // Indexberechnung, wo der Stein platziert werden soll // v.getWidth/getHeight liefert bei jedem Stein 480 zurück
+                            // Indexmanipulation, abhängig vom gewählten Stein (TODO Bei Drehung ziemlich sicher anzupassen!!)
+                            index_i = (byte) (Math.floor(event.getX() / Math.floor(v.getWidth() / 20)) - manipulateX(selectedBlockID - 1));
+                            index_j = (byte) (Math.floor(event.getY() / Math.floor(v.getHeight() / 20)) - manipulateY(selectedBlockID - 1));
+
+                            //außerhalb des gültigen bereichs platziert
+                            if(index_i < 0 || index_i > 19){
+                                if(index_i < 0){
+                                    index_i = 0;
+                                }else{
+                                    index_i = 19;
+                                }
+                            }
+
+                            if(index_j < 0 || index_j > 19){
+                                if(index_j < 0){
+                                    index_j = 0;
+                                }else{
+                                    index_j = 19;
+                                }
+                            }
+                            /*
+                            // Indexberechnung, wo der Stein platziert werden soll // v.getWidth/getHeight liefert bei jedem Stein 480 zurück
                             index_i = (byte) Math.floor(event.getX() / (v.getWidth() / 20));
                             index_j = (byte) Math.floor(event.getY() / (v.getHeight() / 20));
 
@@ -157,9 +184,10 @@ public class FullscreenActivity extends Activity {
                                 }
                             }
 
-                            //Indexmanipulation, abhängig vom gewählten Stein (TODO Bei Drehung ziemlich sicher anzupassen!!)
+                            //Indexmanipulation, abhängig vom gewählten Stein
                             index_i -= manipulateX(selectedBlockID - 1);
                             index_j -= manipulateY(selectedBlockID - 1);
+                             */
 
                             //Preview erfolgreich gezeichnet?
                             final boolean drawn = drawStone(index_i, index_j);
