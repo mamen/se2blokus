@@ -37,6 +37,7 @@ public class FullscreenActivity extends Activity {
     private ImageView testView;
     private byte[][] rememberField;
     private boolean elementFinished;
+    private View.DragShadowBuilder shadowBuilder;
 
     /*
     TODO:
@@ -107,7 +108,6 @@ public class FullscreenActivity extends Activity {
 
             @Override
             public boolean onDrag(View v, DragEvent event) {
-
                 switch (event.getAction()) {
                     case DragEvent.ACTION_DRAG_STARTED:
                         dragged = true;
@@ -141,7 +141,7 @@ public class FullscreenActivity extends Activity {
                         if (v instanceof GridLayout) {
                             draggedImage = (ImageView) event.getLocalState();
 
-                            // Indexberechnung, wo der Stein platziert werden soll // v.getWidth/getHeight liefert bei jedem Stein 480 zurück
+                            // Indexberechnung, wo der Stein platziert werden soll
                             // Indexmanipulation, abhängig vom gewählten Stein (TODO Bei Drehung ziemlich sicher anzupassen!!)
                             index_i = (byte) (Math.floor(event.getX() / Math.floor(v.getWidth() / 20)) - manipulateX(selectedBlockID - 1));
                             index_j = (byte) (Math.floor(event.getY() / Math.floor(v.getHeight() / 20)) - manipulateY(selectedBlockID - 1));
@@ -162,32 +162,6 @@ public class FullscreenActivity extends Activity {
                                     index_j = 19;
                                 }
                             }
-                            /*
-                            // Indexberechnung, wo der Stein platziert werden soll // v.getWidth/getHeight liefert bei jedem Stein 480 zurück
-                            index_i = (byte) Math.floor(event.getX() / (v.getWidth() / 20));
-                            index_j = (byte) Math.floor(event.getY() / (v.getHeight() / 20));
-
-                            //außerhalb des bildschirmes platziert
-                            if (event.getX() > v.getWidth() || event.getY() > v.getHeight()
-                                    || event.getX() < 0 || event.getY() < 0) {
-                                if (event.getX() > v.getWidth()) {
-                                    index_i = 19;
-                                }
-                                if (event.getY() > v.getHeight()) {
-                                    index_j = 19;
-                                }
-                                if (event.getX() < 0) {
-                                    index_i = 0;
-                                }
-                                if (event.getY() < 0) {
-                                    index_j = 0;
-                                }
-                            }
-
-                            //Indexmanipulation, abhängig vom gewählten Stein
-                            index_i -= manipulateX(selectedBlockID - 1);
-                            index_j -= manipulateY(selectedBlockID - 1);
-                             */
 
                             //Preview erfolgreich gezeichnet?
                             final boolean drawn = drawStone(index_i, index_j);
@@ -246,7 +220,9 @@ public class FullscreenActivity extends Activity {
                                 }
                                 fullscreenLayout.addView(cancel);
                             } else {
-
+                                elementFinished = true;
+                                dragged = false;
+                                testView.setVisibility(View.VISIBLE);
                             }
                         }
                         break;
@@ -291,9 +267,9 @@ public class FullscreenActivity extends Activity {
                     if (elementFinished) {
                         vibrate(100);
                         ClipData data = ClipData.newPlainText("", "");
-                        View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(v);
+                        //Je kleiner v.getHeight, desto näher beim Cursor
+                        shadowBuilder = new OwnDragShadowBuilder(v, v.getWidth()/2, v.getHeight());
                         v.startDrag(data, shadowBuilder, v, 0);
-
 
                         for (ImageView bdc : blockDrawer_children) {
                             if (bdc.equals(v)) {
@@ -682,5 +658,7 @@ public class FullscreenActivity extends Activity {
         s += '\n';
         Log.d("Board", s);
     }
+
+
 
 }
