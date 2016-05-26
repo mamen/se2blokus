@@ -317,4 +317,15 @@ public class GameLogic {
         // Vibrate for 500 milliseconds
         v.vibrate(500);
     }
+
+    public byte[][] rotate(byte[][] stone) {
+        byte[][] newStone = new byte[stone.length][stone[0].length];
+
+        for (int i = 0; i < stone.length; i++) {
+            for (int j = 0; j < stone[i].length; j++) {
+                newStone[j][stone.length - i - 1] = stone[i][j];
+            }
+        }
+        return newStone;
+    }
 }

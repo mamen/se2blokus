@@ -38,6 +38,7 @@ public class FullscreenActivity extends Activity {
     private byte[][] rememberField;
     private boolean elementFinished;
     private View.DragShadowBuilder shadowBuilder;
+    private int transposeCount;
 
     /*
     TODO:
@@ -103,6 +104,7 @@ public class FullscreenActivity extends Activity {
             byte index_j = -1;
             ImageView accept;
             ImageView cancel;
+            ImageView transpose;
             ImageView draggedImage;
             boolean dragged = false;
 
@@ -139,6 +141,7 @@ public class FullscreenActivity extends Activity {
                     case DragEvent.ACTION_DROP:
                         //Drop nur auf das Spielfeld möglich //Braucht glaub ich gar keine Abfrage, weil der DragListener auf dem GridLayout liegt
                         if (v instanceof GridLayout) {
+                            transposeCount = 0;
                             draggedImage = (ImageView) event.getLocalState();
 
                             // Indexberechnung, wo der Stein platziert werden soll
@@ -147,18 +150,18 @@ public class FullscreenActivity extends Activity {
                             index_j = (byte) (Math.floor(event.getY() / Math.floor(v.getHeight() / 20)) - manipulateY(selectedBlockID - 1));
 
                             //außerhalb des gültigen bereichs platziert
-                            if(index_i < 0 || index_i > 19){
-                                if(index_i < 0){
+                            if (index_i < 0 || index_i > 19) {
+                                if (index_i < 0) {
                                     index_i = 0;
-                                }else{
+                                } else {
                                     index_i = 19;
                                 }
                             }
 
-                            if(index_j < 0 || index_j > 19){
-                                if(index_j < 0){
+                            if (index_j < 0 || index_j > 19) {
+                                if (index_j < 0) {
                                     index_j = 0;
-                                }else{
+                                } else {
                                     index_j = 19;
                                 }
                             }
@@ -199,7 +202,7 @@ public class FullscreenActivity extends Activity {
                                 RelativeLayout.LayoutParams params_cancel = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
                                 cancel = new ImageView(getApplicationContext());
                                 cancel.setImageResource(R.drawable.cancel);
-                                params_cancel.setMargins(Math.round(v.getWidth() / 2), v.getHeight() + cancel.getHeight(), 0, 0);
+                                params_cancel.setMargins(Math.round(v.getWidth() / 3), v.getHeight() + cancel.getHeight(), 0, 0);
                                 cancel.setLayoutParams(params_cancel);
 
                                 cancel.setOnClickListener(new View.OnClickListener() {
@@ -214,11 +217,28 @@ public class FullscreenActivity extends Activity {
                                     }
                                 });
 
+                                RelativeLayout.LayoutParams params_transpose = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                                transpose = new ImageView(getApplicationContext());
+                                transpose.setImageResource(R.drawable.transpose);
+                                params_transpose.setMargins(Math.round((2*v.getWidth())/3), v.getHeight() + transpose.getHeight(), 0, 0);
+                                transpose.setLayoutParams(params_transpose);
+
+                                transpose.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        restore(index_i, index_j);
+                                        transposeCount = (transposeCount + 1) % 4;
+                                        drawStone(index_i, index_j);
+                                    }
+                                });
+
+
                                 // Buttons zum View hinzufügen
                                 if (isYourPlacementValid(index_i, index_j)) { //Ungültiger Zug, braucht nur den Cancel Button
                                     fullscreenLayout.addView(accept);
                                 }
                                 fullscreenLayout.addView(cancel);
+                                fullscreenLayout.addView(transpose);
                             } else {
                                 elementFinished = true;
                                 dragged = false;
@@ -268,7 +288,7 @@ public class FullscreenActivity extends Activity {
                         vibrate(100);
                         ClipData data = ClipData.newPlainText("", "");
                         //v.getHeight()/2 -> Mitte vom Stein; v.getHeight -> Unterm Stein
-                        shadowBuilder = new OwnDragShadowBuilder(v, v.getWidth()/2, v.getHeight());
+                        shadowBuilder = new OwnDragShadowBuilder(v, v.getWidth() / 2, v.getHeight());
                         v.startDrag(data, shadowBuilder, v, 0);
 
                         for (ImageView bdc : blockDrawer_children) {
@@ -281,7 +301,7 @@ public class FullscreenActivity extends Activity {
                         elementFinished = false;
                         return true;
                     }
-                return true;
+                    return true;
                 }
             });
         }
@@ -420,8 +440,11 @@ public class FullscreenActivity extends Activity {
         if (selectedBlockID >= 0) {
             byte[][] b;
             b = player.getStone(selectedBlockID - 1);
-            b = changeToPreview(b, true);
+            for (int i = 0; i < transposeCount; i++) {
+                b = gl.rotate(b);
+            }
 
+            b = changeToPreview(b, true);
             if (gl.placeOverEdge(b, x, y)) {
                 Toast.makeText(getApplicationContext(), "I'm sorry, but I can't draw this", Toast.LENGTH_SHORT).show();
                 changeToPreview(b, false);
@@ -431,6 +454,7 @@ public class FullscreenActivity extends Activity {
                 gl.placeStone(b, x, y);
                 changeToPreview(b, false);
             }
+
         }
         updateGameBoard();
         return true;
@@ -658,7 +682,6 @@ public class FullscreenActivity extends Activity {
         s += '\n';
         Log.d("Board", s);
     }
-
 
 
 }
