@@ -14,6 +14,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -38,7 +39,7 @@ public class FullscreenActivity extends Activity {
     private byte[][] rememberField;
     private boolean elementFinished;
     private View.DragShadowBuilder shadowBuilder;
-    private int transposeCount;
+    private int transposeCount; //Zähler wie oft der Stein gedreht wurde
 
     /*
     TODO:
@@ -102,34 +103,29 @@ public class FullscreenActivity extends Activity {
 
             byte index_i = -1;
             byte index_j = -1;
-            ImageView accept;
-            ImageView cancel;
-            ImageView transpose;
+            ImageButton accept;
+            ImageButton cancel;
+            ImageButton transpose;
             ImageView draggedImage;
             boolean dragged = false;
 
             @Override
             public boolean onDrag(View v, DragEvent event) {
                 switch (event.getAction()) {
-                    case DragEvent.ACTION_DRAG_STARTED:
-                        dragged = true;
-                        if (dragged) {
-                            testView.setVisibility(View.INVISIBLE);
-                        } else {
-                            testView.setVisibility(View.VISIBLE);
-                        }
+                    case DragEvent.ACTION_DRAG_STARTED: //LongClick startet den Drag, Bild unsichtbar machen
+                        testView.setVisibility(View.INVISIBLE);
                         dragged = false;
                         Log.d("DragStart", "Started");
                         break;
-                    case DragEvent.ACTION_DRAG_ENTERED:
+                    case DragEvent.ACTION_DRAG_ENTERED: //Im Spielfeld
                         dragged = true;
                         Log.d("DragEntered", "Entered");
                         break;
-                    case DragEvent.ACTION_DRAG_EXITED:
+                    case DragEvent.ACTION_DRAG_EXITED: //Außerhalb vom Spielfeld
                         dragged = false;
                         Log.d("DragExited", "Exited");
                         break;
-                    case DragEvent.ACTION_DRAG_ENDED:
+                    case DragEvent.ACTION_DRAG_ENDED: //Wird geworfen, egal wo der Drag beendet wird
                         if (dragged) {
                             testView.setVisibility(View.INVISIBLE);
                         } else {
@@ -138,112 +134,132 @@ public class FullscreenActivity extends Activity {
                         }
                         Log.d("DragEnded", "Ended");
                         break;
-                    case DragEvent.ACTION_DROP:
-                        //Drop nur auf das Spielfeld möglich //Braucht glaub ich gar keine Abfrage, weil der DragListener auf dem GridLayout liegt
-                        if (v instanceof GridLayout) {
-                            transposeCount = 0;
-                            draggedImage = (ImageView) event.getLocalState();
+                    case DragEvent.ACTION_DROP: //Drop wird nur geworfen, wenn man im Spielfeld dropped
 
-                            // Indexberechnung, wo der Stein platziert werden soll
-                            // Indexmanipulation, abhängig vom gewählten Stein (TODO Bei Drehung ziemlich sicher anzupassen!!)
-                            index_i = (byte) (Math.floor(event.getX() / Math.floor(v.getWidth() / 20)) - manipulateX(selectedBlockID - 1));
-                            index_j = (byte) (Math.floor(event.getY() / Math.floor(v.getHeight() / 20)) - manipulateY(selectedBlockID - 1));
+                        transposeCount = 0; //Neuer Stein, Zähler zurücksetzen
+                        draggedImage = (ImageView) event.getLocalState();
 
-                            //außerhalb des gültigen bereichs platziert
-                            if (index_i < 0 || index_i > 19) {
-                                if (index_i < 0) {
-                                    index_i = 0;
-                                } else {
-                                    index_i = 19;
-                                }
-                            }
+                        // Indexberechnung, wo der Stein platziert werden soll
+                        // Indexmanipulation, abhängig vom gewählten Stein
+                        index_i = (byte) (Math.floor(event.getX() / Math.floor(v.getWidth() / 20)) - manipulateX(selectedBlockID - 1));
+                        index_j = (byte) (Math.floor(event.getY() / Math.floor(v.getHeight() / 20)) - manipulateY(selectedBlockID - 1));
 
-                            if (index_j < 0 || index_j > 19) {
-                                if (index_j < 0) {
-                                    index_j = 0;
-                                } else {
-                                    index_j = 19;
-                                }
-                            }
-
-                            //Preview erfolgreich gezeichnet?
-                            final boolean drawn = drawStone(index_i, index_j);
-
-                            // Accept-Button
-                            if (drawn) {
-//                                testView.setVisibility(View.INVISIBLE);
-                                RelativeLayout.LayoutParams params_accept = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-                                accept = new ImageView(getApplicationContext());
-                                accept.setImageResource(R.drawable.checkmark);
-                                params_accept.setMargins(0, v.getHeight() + accept.getHeight(), 0, 0);
-                                accept.setLayoutParams(params_accept);
-
-                                accept.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        // Platzieren nicht möglich - Preview wieder löschen und Bild im BlockDrawer wieder anzeigen
-                                        if (!isYourPlacementValid(index_i, index_j)) {
-                                            vibrate(500);
-                                            restore(index_i, index_j);
-                                        } else {
-                                            testView.setVisibility(View.INVISIBLE); //Müsste unnötig sein
-                                            placeIt(player.getStone(selectedBlockID - 1), index_i, index_j); //Wirkliches Plazieren vom Stein
-//                                            boardToLog();
-                                        }
-                                        fullscreenLayout.removeView(accept);
-                                        fullscreenLayout.removeView(cancel);
-                                        elementFinished = true;
-//                                        boardToLog();
-                                    }
-                                });
-
-
-                                // Cancel-Button
-                                RelativeLayout.LayoutParams params_cancel = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-                                cancel = new ImageView(getApplicationContext());
-                                cancel.setImageResource(R.drawable.cancel);
-                                params_cancel.setMargins(Math.round(v.getWidth() / 3), v.getHeight() + cancel.getHeight(), 0, 0);
-                                cancel.setLayoutParams(params_cancel);
-
-                                cancel.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        fullscreenLayout.removeView(accept);
-                                        fullscreenLayout.removeView(cancel);
-                                        testView.setVisibility(View.VISIBLE);
-                                        elementFinished = true;
-                                        restore(index_i, index_j);
-//                                        boardToLog();
-                                    }
-                                });
-
-                                RelativeLayout.LayoutParams params_transpose = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-                                transpose = new ImageView(getApplicationContext());
-                                transpose.setImageResource(R.drawable.transpose);
-                                params_transpose.setMargins(Math.round((2*v.getWidth())/3), v.getHeight() + transpose.getHeight(), 0, 0);
-                                transpose.setLayoutParams(params_transpose);
-
-                                transpose.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        restore(index_i, index_j);
-                                        transposeCount = (transposeCount + 1) % 4;
-                                        drawStone(index_i, index_j);
-                                    }
-                                });
-
-
-                                // Buttons zum View hinzufügen
-                                if (isYourPlacementValid(index_i, index_j)) { //Ungültiger Zug, braucht nur den Cancel Button
-                                    fullscreenLayout.addView(accept);
-                                }
-                                fullscreenLayout.addView(cancel);
-                                fullscreenLayout.addView(transpose);
+                        //außerhalb des gültigen bereichs platziert
+                        if (index_i < 0 || index_i > 19) {
+                            if (index_i < 0) {
+                                index_i = 0;
                             } else {
-                                elementFinished = true;
-                                dragged = false;
-                                testView.setVisibility(View.VISIBLE);
+                                index_i = 19;
                             }
+                        }
+
+                        if (index_j < 0 || index_j > 19) {
+                            if (index_j < 0) {
+                                index_j = 0;
+                            } else {
+                                index_j = 19;
+                            }
+                        }
+
+                        //Preview erfolgreich gezeichnet?
+                        final boolean drawn = drawStone(index_i, index_j);
+
+                        // Accept-Button
+                        if (drawn) {
+//                                testView.setVisibility(View.INVISIBLE);
+                            RelativeLayout.LayoutParams params_accept = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                            accept = new ImageButton(getApplicationContext());
+                            accept.setImageResource(R.drawable.checkmark);
+                            params_accept.setMargins(0, v.getHeight() + accept.getHeight(), 0, 0);
+                            accept.setLayoutParams(params_accept);
+
+                            accept.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    // Platzieren nicht möglich - Preview wieder löschen und Bild im BlockDrawer wieder anzeigen
+                                    if (!isYourPlacementValid(index_i, index_j)) {
+                                        vibrate(500);
+                                        restore(index_i, index_j);
+                                    } else {
+                                        testView.setVisibility(View.INVISIBLE); //Müsste unnötig sein
+                                        byte[][] b = player.getStone(selectedBlockID - 1);
+                                        for (int a = 0; a < transposeCount; a++) { //Stein drehen, je nachdem wie oft der Button gedrückt wurde
+                                            b = gl.rotate(b);
+                                        }
+                                        placeIt(b, index_i, index_j); //Wirkliches Plazieren vom Stein
+//                                            boardToLog();
+                                    }
+                                    fullscreenLayout.removeView(accept);
+                                    fullscreenLayout.removeView(cancel);
+                                    fullscreenLayout.removeView(transpose);
+                                    elementFinished = true; //Nächster Stein kann geLongClicked werden
+//                                        boardToLog();
+                                }
+                            });
+
+
+                            // Cancel-Button
+                            RelativeLayout.LayoutParams params_cancel = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                            cancel = new ImageButton(getApplicationContext());
+                            cancel.setImageResource(R.drawable.cancel);
+                            params_cancel.setMargins(Math.round(v.getWidth() / 3), v.getHeight() + cancel.getHeight(), 0, 0);
+                            cancel.setLayoutParams(params_cancel);
+
+                            cancel.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    fullscreenLayout.removeView(accept);
+                                    fullscreenLayout.removeView(cancel);
+                                    fullscreenLayout.removeView(transpose);
+                                    testView.setVisibility(View.VISIBLE);
+                                    elementFinished = true;
+                                    restore(index_i, index_j);
+//                                        boardToLog();
+                                }
+                            });
+
+                            RelativeLayout.LayoutParams params_transpose = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                            transpose = new ImageButton(getApplicationContext());
+                            transpose.setImageResource(R.drawable.transpose);
+                            params_transpose.setMargins(Math.round((2 * v.getWidth()) / 3), v.getHeight() + transpose.getHeight(), 0, 0);
+                            transpose.setLayoutParams(params_transpose);
+
+                            //Board wiederherstellen, Stein drehen und neue Preview zeichnen, Accept Button nur bei gültigem Zug anzeigen
+                            //Try-Catch, da ich Accept nicht zweimal adden darf
+                            transpose.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    restore(index_i, index_j);
+                                    transposeCount = (transposeCount + 1) % 4;
+                                    boolean drawn = drawStone(index_i, index_j);
+                                    if (drawn) {
+                                        if (!isYourPlacementValid(index_i, index_j)) {
+                                            fullscreenLayout.removeView(accept);
+                                        } else {
+                                            try {
+                                                fullscreenLayout.addView(accept);
+                                            } catch (IllegalStateException e) {
+
+                                            }
+                                        }
+                                    } else {
+                                        cancel.performClick();
+                                    }
+                                }
+                            });
+
+
+                            // Buttons zum View hinzufügen
+                            if (isYourPlacementValid(index_i, index_j)) { //Ungültiger Zug, braucht Accept Button nicht
+                                fullscreenLayout.addView(accept);
+                            }
+                            fullscreenLayout.addView(cancel);
+                            fullscreenLayout.addView(transpose);
+                        } else {
+                            //Preview wurde nicht gezeichnet
+                            elementFinished = true;
+                            dragged = false;
+                            testView.setVisibility(View.VISIBLE);
                         }
                         break;
                     default:
@@ -288,7 +304,7 @@ public class FullscreenActivity extends Activity {
                         vibrate(100);
                         ClipData data = ClipData.newPlainText("", "");
                         //v.getHeight()/2 -> Mitte vom Stein; v.getHeight -> Unterm Stein
-                        shadowBuilder = new OwnDragShadowBuilder(v, v.getWidth() / 2, v.getHeight());
+                        shadowBuilder = new OwnDragShadowBuilder(v, v.getWidth() / 2, v.getHeight() / 2);
                         v.startDrag(data, shadowBuilder, v, 0);
 
                         for (ImageView bdc : blockDrawer_children) {
@@ -306,24 +322,6 @@ public class FullscreenActivity extends Activity {
             });
         }
 
-    }
-
-    /**
-     * Checks, if the preview would overwrite some stone
-     *
-     * @param i - the col where you want to place it
-     * @param j - the row where you want to place it
-     * @return false, if you would hit some stone
-     * true, else
-     */
-    private boolean preValidation(int i, int j) {
-        byte[][] b = player.getStone(selectedBlockID - 1);
-        for (int x = 0; x < rememberField.length; x++) {
-            for (int y = 0; y < rememberField[x].length; y++) {
-                if (b[x][y] != 0 && rememberField[x][y] != 0) return false;
-            }
-        }
-        return true;
     }
 
 
@@ -405,8 +403,10 @@ public class FullscreenActivity extends Activity {
     private boolean isYourPlacementValid(int x, int y) {
         if (selectedBlockID >= 0) {
             byte[][] b = player.getStone(selectedBlockID - 1);
-
-            if (preValidation(x, y)) {
+            for (int a = 0; a < transposeCount; a++) {
+                b = gl.rotate(b);
+            }
+            if (preValidation()) {
                 if (!removed_blockDrawer_children.isEmpty()) {
                     if (gl.checkTheRules(b, x, y)) {
 
@@ -429,7 +429,27 @@ public class FullscreenActivity extends Activity {
     }
 
     /**
+     * Checks, if the preview would overwrite some stone
+     *
+     * @return false, if you would hit some stone
+     * true, else
+     */
+    private boolean preValidation() {
+        byte[][] b = player.getStone(selectedBlockID - 1);
+        for (int a = 0; a < transposeCount; a++) {
+            b = gl.rotate(b);
+        }
+        for (int x = 0; x < rememberField.length; x++) {
+            for (int y = 0; y < rememberField[x].length; y++) {
+                if (b[x][y] != 0 && rememberField[x][y] != 0) return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Tries to place a preview of your stone placement after letting go of the Drag
+     * Stone gets rotated as many times as the transpose-button was pressed
      *
      * @param x - the col where you want to place it
      * @param y - the row where you want to place it
@@ -438,13 +458,12 @@ public class FullscreenActivity extends Activity {
      */
     private boolean drawStone(int x, int y) {
         if (selectedBlockID >= 0) {
-            byte[][] b;
-            b = player.getStone(selectedBlockID - 1);
-            for (int i = 0; i < transposeCount; i++) {
+            byte[][] b = player.getStone(selectedBlockID - 1);
+            for (int a = 0; a < transposeCount; a++) {
                 b = gl.rotate(b);
             }
-
             b = changeToPreview(b, true);
+
             if (gl.placeOverEdge(b, x, y)) {
                 Toast.makeText(getApplicationContext(), "I'm sorry, but I can't draw this", Toast.LENGTH_SHORT).show();
                 changeToPreview(b, false);
@@ -454,7 +473,6 @@ public class FullscreenActivity extends Activity {
                 gl.placeStone(b, x, y);
                 changeToPreview(b, false);
             }
-
         }
         updateGameBoard();
         return true;

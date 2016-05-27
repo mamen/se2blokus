@@ -47,9 +47,6 @@ public class GameLogic {
         return gameBoard;
     }
 
-    public void setSingleStone(byte val, int x, int y) {
-        gameBoard[x][y] = val;
-    }
 
     /**
      * Checks if you place over the edges
@@ -105,7 +102,6 @@ public class GameLogic {
      */
     public boolean hitTheCorner(byte[][] b, int i, int j) {
         if (!placeOverEdge(b, i, j) && !hitSomeStones(b, i, j)) {
-            byte[][] board = getGameBoard();
             for (int col = i; col < i + b.length; col++) {
                 for (int row = j; row < j + b.length; row++) {
                     if (b[row - j][col - i] != 0 && b[row - j][col - i] != 5) {
@@ -236,7 +232,7 @@ public class GameLogic {
 
 
     /**
-     * places the stone, byte by byte
+     * Places the stone, byte by byte
      *
      * @param b - the byte array of your stone
      * @param i - the col where you want to place it
@@ -246,7 +242,7 @@ public class GameLogic {
         for (int x = 0; x < b.length; x++) {
             for (int y = 0; y < b[x].length; y++) {
                 if (b[x][y] != 0) {
-                    setSingleStone(b[x][y], i + y, j + x);
+                    gameBoard[i + y][j + x] = b[x][y];
                 }
             }
         }
@@ -290,7 +286,7 @@ public class GameLogic {
                 if ((i + y) >= SIZE || (j + x) >= SIZE) {
 
                 } else {
-                    setSingleStone(b[x][y], i + y, j + x);
+                    gameBoard[i + y][j + x] = b[x][y];
                 }
             }
         }
@@ -318,6 +314,12 @@ public class GameLogic {
         v.vibrate(500);
     }
 
+    /**
+     * Rotates the stone one time
+     *
+     * @param stone - stone, which is to be rotated
+     * @return rotated stone
+     */
     public byte[][] rotate(byte[][] stone) {
         byte[][] newStone = new byte[stone.length][stone[0].length];
 
