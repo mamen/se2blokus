@@ -173,14 +173,24 @@ public class FullscreenActivity extends Activity {
                         move_up.setImageResource(R.drawable.move_up);
 
                         move_up.setOnClickListener(new View.OnClickListener() {
-                           @Override
-                           public void onClick(View v) {
-                               restore(index_i , index_j);
-                               drawn = drawStone(index_i , (index_j-1 < 0) ? 0 : --index_j);
-                               if (isYourPlacementValid(index_i, index_j)) { //Ungültiger Zug, braucht Accept Button nicht
-                                   fullscreenLayout.addView(accept);
-                               }
-                           }
+                            @Override
+                            public void onClick(View v) {
+                                restore(index_i, index_j);
+                                if (drawStone(index_i, (index_j - 1 < 0) ? 0 : --index_j)) {
+                                    try {
+                                        if (isYourPlacementValid(index_i, index_j)) { //Ungültiger Zug, braucht Accept Button nicht
+                                            fullscreenLayout.addView(accept);
+                                        } else {
+                                            fullscreenLayout.removeView(accept);
+                                        }
+                                    } catch (IllegalStateException e) {
+                                        e.printStackTrace();
+                                    }
+                                } else {
+                                    restore(index_i, index_j);
+                                    cancel.performClick();
+                                }
+                            }
                         });
 
                         move_down = new ImageButton(getApplicationContext());
@@ -189,10 +199,20 @@ public class FullscreenActivity extends Activity {
                         move_down.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                restore(index_i , index_j);
-                                drawn = drawStone(index_i , (index_j+1 > 20) ? 20 : ++index_j);
-                                if (isYourPlacementValid(index_i, index_j)) { //Ungültiger Zug, braucht Accept Button nicht
-                                    fullscreenLayout.addView(accept);
+                                restore(index_i, index_j);
+                                if (drawStone(index_i, (index_j + 1 > 20) ? 20 : ++index_j)) {
+                                    try {
+                                        if (isYourPlacementValid(index_i, index_j)) { //Ungültiger Zug, braucht Accept Button nicht
+                                            fullscreenLayout.addView(accept);
+                                        } else {
+                                            fullscreenLayout.removeView(accept);
+                                        }
+                                    } catch (IllegalStateException e) {
+                                        e.printStackTrace();
+                                    }
+                                } else {
+                                    restore(index_i, index_j);
+                                    cancel.performClick();
                                 }
                             }
                         });
@@ -203,10 +223,20 @@ public class FullscreenActivity extends Activity {
                         move_left.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                restore(index_i , index_j);
-                                drawn = drawStone((index_i-1 < 0) ? 0 : --index_i, index_j);
-                                if (isYourPlacementValid(index_i, index_j)) { //Ungültiger Zug, braucht Accept Button nicht
-                                    fullscreenLayout.addView(accept);
+                                restore(index_i, index_j);
+                                if (drawStone((index_i - 1 < 0) ? 0 : --index_i, index_j)) {
+                                    try {
+                                        if (isYourPlacementValid(index_i, index_j)) { //Ungültiger Zug, braucht Accept Button nicht
+                                            fullscreenLayout.addView(accept);
+                                        } else {
+                                            fullscreenLayout.removeView(accept);
+                                        }
+                                    } catch (IllegalStateException e) {
+                                        e.printStackTrace();
+                                    }
+                                } else {
+                                    restore(index_i, index_j);
+                                    cancel.performClick();
                                 }
                             }
                         });
@@ -217,10 +247,20 @@ public class FullscreenActivity extends Activity {
                         move_right.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                restore(index_i , index_j);
-                                drawn = drawStone((index_i+1 > 20) ? 20 : ++index_i, index_j);
-                                if (isYourPlacementValid(index_i, index_j)) { //Ungültiger Zug, braucht Accept Button nicht
-                                    fullscreenLayout.addView(accept);
+                                restore(index_i, index_j);
+                                if (drawStone((index_i + 1 > 20) ? 20 : ++index_i, index_j)) {
+                                    try {
+                                        if (isYourPlacementValid(index_i, index_j)) { //Ungültiger Zug, braucht Accept Button nicht
+                                            fullscreenLayout.addView(accept);
+                                        } else {
+                                            fullscreenLayout.removeView(accept);
+                                        }
+                                    } catch (IllegalStateException e) {
+                                        e.printStackTrace();
+                                    }
+                                } else {
+                                    restore(index_i, index_j);
+                                    cancel.performClick();
                                 }
                             }
                         });
@@ -232,10 +272,10 @@ public class FullscreenActivity extends Activity {
                         RelativeLayout.LayoutParams params_move_left = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
 
                         //TODO: Berechnungen falsch, momentan einfach wird einfach irgendetwas gerechnet ;)
-                        params_move_up.setMargins((int)Math.floor(gameBoardLayout.getHeight()/2),0,0,0);
-                        params_move_right.setMargins((int)Math.floor(gameBoardLayout.getHeight()/4)*3, (int)Math.floor(gameBoardLayout.getHeight()/2), 0, 0);
-                        params_move_down.setMargins((int)Math.floor(gameBoardLayout.getHeight()/2), (int)Math.floor(gameBoardLayout.getHeight()/4)*3, 0, 0);
-                        params_move_left.setMargins(0, (int)Math.floor(gameBoardLayout.getHeight()/2), 0, 0);
+                        params_move_up.setMargins((int) Math.floor(gameBoardLayout.getHeight() / 2), 0, 0, 0);
+                        params_move_right.setMargins((int) Math.floor(gameBoardLayout.getHeight() / 4) * 3, (int) Math.floor(gameBoardLayout.getHeight() / 2), 0, 0);
+                        params_move_down.setMargins((int) Math.floor(gameBoardLayout.getHeight() / 2), (int) Math.floor(gameBoardLayout.getHeight() / 4) * 3, 0, 0);
+                        params_move_left.setMargins(0, (int) Math.floor(gameBoardLayout.getHeight() / 2), 0, 0);
 
                         move_up.setLayoutParams(params_move_up);
                         move_right.setLayoutParams(params_move_right);
@@ -322,7 +362,7 @@ public class FullscreenActivity extends Activity {
                                 public void onClick(View v) {
                                     restore(index_i, index_j);
                                     transposeCount = (transposeCount + 1) % 4;
-                                    boolean drawn = drawStone(index_i, index_j);
+                                    drawn = drawStone(index_i, index_j);
                                     if (drawn) {
                                         if (!isYourPlacementValid(index_i, index_j)) {
                                             fullscreenLayout.removeView(accept);
@@ -444,15 +484,16 @@ public class FullscreenActivity extends Activity {
             }
         }
 
-        updatePartOfGameBoard(0,0,SIZE,SIZE);
+        updatePartOfGameBoard(0, 0, SIZE, SIZE);
     }
 
     /**
      * Updates the GameBoard
+     *
      * @param startX start-position (X) for the update
      * @param startY start-position (Y) for the update
-     * @param endX  end-position (X) for the update
-     * @param endY end-position (Y) for the update
+     * @param endX   end-position (X) for the update
+     * @param endY   end-position (Y) for the update
      */
     private void updatePartOfGameBoard(int startX, int startY, int endX, int endY) {
         byte[][] board = gl.getGameBoard();
@@ -461,7 +502,7 @@ public class FullscreenActivity extends Activity {
 
         for (int i = startX; i < endX; i++) {
             for (int j = startY; j < endY; j++) {
-                ImageView oImageView = (ImageView)gameBoardLayout.getChildAt(20*i+j);
+                ImageView oImageView = (ImageView) gameBoardLayout.getChildAt(20 * i + j);
                 GridLayout.LayoutParams param = new GridLayout.LayoutParams();
                 int size = getScreenWidth() / SIZE;
                 //param.stuff extracted because duplicate code
@@ -502,10 +543,10 @@ public class FullscreenActivity extends Activity {
                         oImageView.setImageResource(R.drawable.yellow_s_1_preview);
                         break;
                 }
-                int index = i*20+j;
+                int index = i * 20 + j;
                 oImageView.setLayoutParams(param);
                 gameBoardLayout.removeViewAt(index);
-                gameBoardLayout.addView(oImageView,index);
+                gameBoardLayout.addView(oImageView, index);
             }
         }
     }
@@ -595,7 +636,7 @@ public class FullscreenActivity extends Activity {
                 changeToPreview(b, false);
             }
         }
-        updatePartOfGameBoard(x,y,(x+6 > 20) ? 20 : x+6,(y+6 > 20) ? 20 : y+6);
+        updatePartOfGameBoard(x, y, (x + 6 > 20) ? 20 : x + 6, (y + 6 > 20) ? 20 : y + 6);
         return true;
     }
 
@@ -631,7 +672,7 @@ public class FullscreenActivity extends Activity {
     private void restore(int i, int j) {
         gl.restoreField(rememberField, i, j);
 
-        updatePartOfGameBoard(i,j,(i+5 > 19) ? 19 : i+5,(j+5 > 19) ? 19 : j+5);
+        updatePartOfGameBoard(i, j, (i + 5 > 20) ? 20 : i + 5, (j + 5 > 20) ? 20 : j + 5);
         //updateGameBoard();
     }
 
@@ -747,7 +788,7 @@ public class FullscreenActivity extends Activity {
     private void placeIt(byte[][] b, int i, int j) {
         gl.placeStone(b, i, j);
         removeFromBlockDrawer();
-        updatePartOfGameBoard(i,j,(i+b.length),(j+b.length));
+        updatePartOfGameBoard(i, j, (i + b.length), (j + b.length));
         //updateGameBoard();
     }
 
