@@ -40,8 +40,6 @@ public class FullscreenActivity extends Activity {
     private boolean elementFinished;
     private View.DragShadowBuilder shadowBuilder;
     private int transposeCount; //Zähler wie oft der Stein gedreht wurde
-    private static byte moved_i = 0;
-    private static byte moved_j = 0;
 
     /*
     TODO:
@@ -176,9 +174,8 @@ public class FullscreenActivity extends Activity {
                         move_up.setOnClickListener(new View.OnClickListener() {
                            @Override
                            public void onClick(View v) {
-                               restore((index_i - moved_i), (index_j - moved_j));
-                               moved_j++;
-                               drawStone((index_i - moved_i), (index_j - moved_j));
+                               restore(index_i , index_j);
+                               drawStone(index_i , --index_j);
                            }
                         });
 
@@ -188,9 +185,8 @@ public class FullscreenActivity extends Activity {
                         move_down.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                restore((index_i - moved_i), (index_j - moved_j));
-                                moved_j++;
-                                drawStone((index_i - moved_i), (index_j + moved_j));
+                                restore(index_i , index_j);
+                                drawStone(index_i , ++index_j);
                             }
                         });
 
@@ -200,9 +196,8 @@ public class FullscreenActivity extends Activity {
                         move_left.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                restore((index_i - moved_i), (index_j - moved_j));
-                                moved_i++;
-                                drawStone((index_i - moved_i), (index_j - moved_j));
+                                restore(index_i , index_j);
+                                drawStone(--index_i , index_j);
                             }
                         });
 
@@ -213,9 +208,8 @@ public class FullscreenActivity extends Activity {
                             int i = 0;
                             @Override
                             public void onClick(View v) {
-                                restore((index_i - moved_i), (index_j - moved_j));
-                                moved_i++;
-                                drawStone((index_i + moved_i), (index_j - moved_j));
+                                restore(index_i , index_j);
+                                drawStone(++index_i , index_j);
                             }
                         });
 
@@ -266,8 +260,6 @@ public class FullscreenActivity extends Activity {
                                         placeIt(b, index_i, index_j); //Wirkliches Plazieren vom Stein
 //                                            boardToLog();
                                     }
-                                    moved_i = 0;
-                                    moved_j = 0;
                                     fullscreenLayout.removeView(accept);
                                     fullscreenLayout.removeView(cancel);
                                     fullscreenLayout.removeView(transpose);
@@ -298,8 +290,6 @@ public class FullscreenActivity extends Activity {
                                     fullscreenLayout.removeView(move_right);
                                     fullscreenLayout.removeView(move_down);
                                     fullscreenLayout.removeView(move_left);
-                                    moved_i = 0;
-                                    moved_j = 0;
                                     testView.setVisibility(View.VISIBLE);
                                     elementFinished = true;
                                     restore(index_i, index_j);
