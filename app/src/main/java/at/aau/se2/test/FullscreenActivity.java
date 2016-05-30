@@ -40,6 +40,8 @@ public class FullscreenActivity extends Activity {
     private boolean elementFinished;
     private View.DragShadowBuilder shadowBuilder;
     private int transposeCount; //Zähler wie oft der Stein gedreht wurde
+    private static byte moved_i = 0;
+    private static byte moved_j = 0;
 
     /*
     TODO:
@@ -106,6 +108,10 @@ public class FullscreenActivity extends Activity {
             ImageButton accept;
             ImageButton cancel;
             ImageButton transpose;
+            ImageButton move_up;
+            ImageButton move_right;
+            ImageButton move_down;
+            ImageButton move_left;
             ImageView draggedImage;
             boolean dragged = false;
 
@@ -164,6 +170,77 @@ public class FullscreenActivity extends Activity {
                         //Preview erfolgreich gezeichnet?
                         final boolean drawn = drawStone(index_i, index_j);
 
+                        move_up = new ImageButton(getApplicationContext());
+                        move_up.setImageResource(R.drawable.move_up);
+
+                        move_up.setOnClickListener(new View.OnClickListener() {
+                           @Override
+                           public void onClick(View v) {
+                               restore((index_i - moved_i), (index_j - moved_j));
+                               moved_j++;
+                               drawStone((index_i - moved_i), (index_j - moved_j));
+                           }
+                        });
+
+                        move_down = new ImageButton(getApplicationContext());
+                        move_down.setImageResource(R.drawable.move_down);
+
+                        move_down.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                restore((index_i - moved_i), (index_j - moved_j));
+                                moved_j++;
+                                drawStone((index_i - moved_i), (index_j + moved_j));
+                            }
+                        });
+
+                        move_left = new ImageButton(getApplicationContext());
+                        move_left.setImageResource(R.drawable.move_left);
+
+                        move_left.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                restore((index_i - moved_i), (index_j - moved_j));
+                                moved_i++;
+                                drawStone((index_i - moved_i), (index_j - moved_j));
+                            }
+                        });
+
+                        move_right = new ImageButton(getApplicationContext());
+                        move_right.setImageResource(R.drawable.move_right);
+
+                        move_right.setOnClickListener(new View.OnClickListener() {
+                            int i = 0;
+                            @Override
+                            public void onClick(View v) {
+                                restore((index_i - moved_i), (index_j - moved_j));
+                                moved_i++;
+                                drawStone((index_i + moved_i), (index_j - moved_j));
+                            }
+                        });
+
+
+                        RelativeLayout.LayoutParams params_move_up = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                        RelativeLayout.LayoutParams params_move_right = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                        RelativeLayout.LayoutParams params_move_down = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                        RelativeLayout.LayoutParams params_move_left = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+
+
+                        params_move_up.setMargins((int)Math.floor(gameBoardLayout.getHeight()/2)-32,0,0,0);
+                        params_move_right.setMargins(gameBoardLayout.getWidth()-64, (int)Math.floor(gameBoardLayout.getHeight()/2)-32, 0, 0);
+                        params_move_down.setMargins((int)Math.floor(gameBoardLayout.getHeight()/2), (gameBoardLayout.getHeight()-64), 0, 0);
+                        params_move_left.setMargins(0, (int)Math.floor(gameBoardLayout.getHeight()/2), 0, 0);
+
+                        move_up.setLayoutParams(params_move_up);
+                        move_right.setLayoutParams(params_move_right);
+                        move_down.setLayoutParams(params_move_down);
+                        move_left.setLayoutParams(params_move_left);
+
+                        fullscreenLayout.addView(move_up);
+                        fullscreenLayout.addView(move_right);
+                        fullscreenLayout.addView(move_down);
+                        fullscreenLayout.addView(move_left);
+
                         // Accept-Button
                         if (drawn) {
 //                                testView.setVisibility(View.INVISIBLE);
@@ -189,9 +266,15 @@ public class FullscreenActivity extends Activity {
                                         placeIt(b, index_i, index_j); //Wirkliches Plazieren vom Stein
 //                                            boardToLog();
                                     }
+                                    moved_i = 0;
+                                    moved_j = 0;
                                     fullscreenLayout.removeView(accept);
                                     fullscreenLayout.removeView(cancel);
                                     fullscreenLayout.removeView(transpose);
+                                    fullscreenLayout.removeView(move_up);
+                                    fullscreenLayout.removeView(move_right);
+                                    fullscreenLayout.removeView(move_down);
+                                    fullscreenLayout.removeView(move_left);
                                     elementFinished = true; //Nächster Stein kann geLongClicked werden
 //                                        boardToLog();
                                 }
@@ -211,6 +294,12 @@ public class FullscreenActivity extends Activity {
                                     fullscreenLayout.removeView(accept);
                                     fullscreenLayout.removeView(cancel);
                                     fullscreenLayout.removeView(transpose);
+                                    fullscreenLayout.removeView(move_up);
+                                    fullscreenLayout.removeView(move_right);
+                                    fullscreenLayout.removeView(move_down);
+                                    fullscreenLayout.removeView(move_left);
+                                    moved_i = 0;
+                                    moved_j = 0;
                                     testView.setVisibility(View.VISIBLE);
                                     elementFinished = true;
                                     restore(index_i, index_j);
