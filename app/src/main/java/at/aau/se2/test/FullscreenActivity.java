@@ -112,6 +112,7 @@ public class FullscreenActivity extends Activity {
             ImageButton move_left;
             ImageView draggedImage;
             boolean dragged = false;
+            boolean drawn;
 
             @Override
             public boolean onDrag(View v, DragEvent event) {
@@ -166,7 +167,7 @@ public class FullscreenActivity extends Activity {
                         }
 
                         //Preview erfolgreich gezeichnet?
-                        final boolean drawn = drawStone(index_i, index_j);
+                        drawn = drawStone(index_i, index_j);
 
                         move_up = new ImageButton(getApplicationContext());
                         move_up.setImageResource(R.drawable.move_up);
@@ -175,7 +176,10 @@ public class FullscreenActivity extends Activity {
                            @Override
                            public void onClick(View v) {
                                restore(index_i , index_j);
-                               drawStone(index_i , --index_j);
+                               drawn = drawStone(index_i , (index_j-1 < 0) ? 0 : --index_j);
+                               if (isYourPlacementValid(index_i, index_j)) { //Ungültiger Zug, braucht Accept Button nicht
+                                   fullscreenLayout.addView(accept);
+                               }
                            }
                         });
 
@@ -186,7 +190,10 @@ public class FullscreenActivity extends Activity {
                             @Override
                             public void onClick(View v) {
                                 restore(index_i , index_j);
-                                drawStone(index_i , ++index_j);
+                                drawn = drawStone(index_i , (index_j+1 > 20) ? 20 : ++index_j);
+                                if (isYourPlacementValid(index_i, index_j)) { //Ungültiger Zug, braucht Accept Button nicht
+                                    fullscreenLayout.addView(accept);
+                                }
                             }
                         });
 
@@ -197,7 +204,10 @@ public class FullscreenActivity extends Activity {
                             @Override
                             public void onClick(View v) {
                                 restore(index_i , index_j);
-                                drawStone(--index_i , index_j);
+                                drawn = drawStone((index_i-1 < 0) ? 0 : --index_i, index_j);
+                                if (isYourPlacementValid(index_i, index_j)) { //Ungültiger Zug, braucht Accept Button nicht
+                                    fullscreenLayout.addView(accept);
+                                }
                             }
                         });
 
@@ -205,11 +215,13 @@ public class FullscreenActivity extends Activity {
                         move_right.setImageResource(R.drawable.move_right);
 
                         move_right.setOnClickListener(new View.OnClickListener() {
-                            int i = 0;
                             @Override
                             public void onClick(View v) {
                                 restore(index_i , index_j);
-                                drawStone(++index_i , index_j);
+                                drawn = drawStone((index_i+1 > 20) ? 20 : ++index_i, index_j);
+                                if (isYourPlacementValid(index_i, index_j)) { //Ungültiger Zug, braucht Accept Button nicht
+                                    fullscreenLayout.addView(accept);
+                                }
                             }
                         });
 
@@ -219,10 +231,10 @@ public class FullscreenActivity extends Activity {
                         RelativeLayout.LayoutParams params_move_down = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
                         RelativeLayout.LayoutParams params_move_left = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
 
-
-                        params_move_up.setMargins((int)Math.floor(gameBoardLayout.getHeight()/2)-32,0,0,0);
-                        params_move_right.setMargins(gameBoardLayout.getWidth()-64, (int)Math.floor(gameBoardLayout.getHeight()/2)-32, 0, 0);
-                        params_move_down.setMargins((int)Math.floor(gameBoardLayout.getHeight()/2), (gameBoardLayout.getHeight()-64), 0, 0);
+                        //TODO: Berechnungen falsch, momentan einfach wird einfach irgendetwas gerechnet ;)
+                        params_move_up.setMargins((int)Math.floor(gameBoardLayout.getHeight()/2),0,0,0);
+                        params_move_right.setMargins((int)Math.floor(gameBoardLayout.getHeight()/4)*3, (int)Math.floor(gameBoardLayout.getHeight()/2), 0, 0);
+                        params_move_down.setMargins((int)Math.floor(gameBoardLayout.getHeight()/2), (int)Math.floor(gameBoardLayout.getHeight()/4)*3, 0, 0);
                         params_move_left.setMargins(0, (int)Math.floor(gameBoardLayout.getHeight()/2), 0, 0);
 
                         move_up.setLayoutParams(params_move_up);
@@ -405,8 +417,6 @@ public class FullscreenActivity extends Activity {
 
 
     private void updateGameBoard() {
-        byte[][] board = gl.getGameBoard();
-
         gameBoardLayout = null;
         gameBoardLayout = (GridLayout) findViewById(R.id.gameBoard);
 
@@ -421,6 +431,37 @@ public class FullscreenActivity extends Activity {
             for (int j = 0; j < SIZE; j++) {
 
                 ImageView oImageView = new ImageView(this);
+                GridLayout.LayoutParams param = new GridLayout.LayoutParams();
+                int size = getScreenWidth() / SIZE;
+                //param.stuff extracted because duplicate code
+                param.height = size;
+                param.width = size;
+
+                param.setGravity(Gravity.CENTER);
+                param.columnSpec = GridLayout.spec(i);
+                param.rowSpec = GridLayout.spec(j);
+                gameBoardLayout.addView(oImageView);
+            }
+        }
+
+        updatePartOfGameBoard(0,0,SIZE,SIZE);
+    }
+
+    /**
+     * Updates the GameBoard
+     * @param startX start-position (X) for the update
+     * @param startY start-position (Y) for the update
+     * @param endX  end-position (X) for the update
+     * @param endY end-position (Y) for the update
+     */
+    private void updatePartOfGameBoard(int startX, int startY, int endX, int endY) {
+        byte[][] board = gl.getGameBoard();
+
+        //Toast.makeText(this.getApplicationContext(),"updated from x: " + startX + " y: " + startY + " to x: " + endX + " y:"+endY, Toast.LENGTH_LONG).show();
+
+        for (int i = startX; i < endX; i++) {
+            for (int j = startY; j < endY; j++) {
+                ImageView oImageView = (ImageView)gameBoardLayout.getChildAt(20*i+j);
                 GridLayout.LayoutParams param = new GridLayout.LayoutParams();
                 int size = getScreenWidth() / SIZE;
                 //param.stuff extracted because duplicate code
@@ -461,9 +502,10 @@ public class FullscreenActivity extends Activity {
                         oImageView.setImageResource(R.drawable.yellow_s_1_preview);
                         break;
                 }
+                int index = i*20+j;
                 oImageView.setLayoutParams(param);
-
-                gameBoardLayout.addView(oImageView);
+                gameBoardLayout.removeViewAt(index);
+                gameBoardLayout.addView(oImageView,index);
             }
         }
     }
@@ -553,7 +595,7 @@ public class FullscreenActivity extends Activity {
                 changeToPreview(b, false);
             }
         }
-        updateGameBoard();
+        updatePartOfGameBoard(x,y,(x+6 > 20) ? 20 : x+6,(y+6 > 20) ? 20 : y+6);
         return true;
     }
 
@@ -588,7 +630,9 @@ public class FullscreenActivity extends Activity {
      */
     private void restore(int i, int j) {
         gl.restoreField(rememberField, i, j);
-        updateGameBoard();
+
+        updatePartOfGameBoard(i,j,(i+5 > 19) ? 19 : i+5,(j+5 > 19) ? 19 : j+5);
+        //updateGameBoard();
     }
 
     /**
@@ -703,7 +747,8 @@ public class FullscreenActivity extends Activity {
     private void placeIt(byte[][] b, int i, int j) {
         gl.placeStone(b, i, j);
         removeFromBlockDrawer();
-        updateGameBoard();
+        updatePartOfGameBoard(i,j,(i+b.length),(j+b.length));
+        //updateGameBoard();
     }
 
     //Bildschirmbreite
