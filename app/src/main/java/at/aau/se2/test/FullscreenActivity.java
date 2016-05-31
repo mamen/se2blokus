@@ -40,6 +40,7 @@ public class FullscreenActivity extends Activity {
     private boolean elementFinished;
     private View.DragShadowBuilder shadowBuilder;
     private int transposeCount; //Zähler wie oft der Stein gedreht wurde
+    private int score;
 
     /*
     TODO:
@@ -58,6 +59,7 @@ public class FullscreenActivity extends Activity {
         selectedBlockID = -1;
         rememberField = new byte[5][5];
         elementFinished = true;
+        score = 0;
 
         String color;
         Bundle extras = getIntent().getExtras();
@@ -169,6 +171,11 @@ public class FullscreenActivity extends Activity {
                         //Preview erfolgreich gezeichnet?
                         drawn = drawStone(index_i, index_j);
 
+                        //Bei left und up Probleme, das Stein nur richtig gedreht nach oben kann (Nullzeilen und Nullspalten)
+
+                        // Movement Buttons müssen try-catch, da nicht ersichtlich ist,
+                        // ob bei neuem moven, der Accept Button noch da ist
+                        // Wenn keine Preview gezeichnet wurde, muss der alte Zustand wiederhergestellt werden
                         move_up = new ImageButton(getApplicationContext());
                         move_up.setImageResource(R.drawable.move_up);
 
@@ -178,7 +185,7 @@ public class FullscreenActivity extends Activity {
                                 restore(index_i, index_j);
                                 if (drawStone(index_i, (index_j - 1 < 0) ? 0 : --index_j)) {
                                     try {
-                                        if (isYourPlacementValid(index_i, index_j)) { //Ungültiger Zug, braucht Accept Button nicht
+                                        if (isYourPlacementValid(index_i, index_j)) {
                                             fullscreenLayout.addView(accept);
                                         } else {
                                             fullscreenLayout.removeView(accept);
@@ -202,7 +209,7 @@ public class FullscreenActivity extends Activity {
                                 restore(index_i, index_j);
                                 if (drawStone(index_i, (index_j + 1 > 20) ? 20 : ++index_j)) {
                                     try {
-                                        if (isYourPlacementValid(index_i, index_j)) { //Ungültiger Zug, braucht Accept Button nicht
+                                        if (isYourPlacementValid(index_i, index_j)) {
                                             fullscreenLayout.addView(accept);
                                         } else {
                                             fullscreenLayout.removeView(accept);
@@ -212,7 +219,7 @@ public class FullscreenActivity extends Activity {
                                     }
                                 } else {
                                     restore(index_i, index_j);
-                                    cancel.performClick();
+                                    drawStone(index_i, --index_j);
                                 }
                             }
                         });
@@ -226,7 +233,7 @@ public class FullscreenActivity extends Activity {
                                 restore(index_i, index_j);
                                 if (drawStone((index_i - 1 < 0) ? 0 : --index_i, index_j)) {
                                     try {
-                                        if (isYourPlacementValid(index_i, index_j)) { //Ungültiger Zug, braucht Accept Button nicht
+                                        if (isYourPlacementValid(index_i, index_j)) {
                                             fullscreenLayout.addView(accept);
                                         } else {
                                             fullscreenLayout.removeView(accept);
@@ -236,7 +243,8 @@ public class FullscreenActivity extends Activity {
                                     }
                                 } else {
                                     restore(index_i, index_j);
-                                    cancel.performClick();
+                                    drawStone(--index_i, index_j);
+//                                    cancel.performClick();
                                 }
                             }
                         });
@@ -250,7 +258,7 @@ public class FullscreenActivity extends Activity {
                                 restore(index_i, index_j);
                                 if (drawStone((index_i + 1 > 20) ? 20 : ++index_i, index_j)) {
                                     try {
-                                        if (isYourPlacementValid(index_i, index_j)) { //Ungültiger Zug, braucht Accept Button nicht
+                                        if (isYourPlacementValid(index_i, index_j)) {
                                             fullscreenLayout.addView(accept);
                                         } else {
                                             fullscreenLayout.removeView(accept);
@@ -260,7 +268,7 @@ public class FullscreenActivity extends Activity {
                                     }
                                 } else {
                                     restore(index_i, index_j);
-                                    cancel.performClick();
+                                    drawStone(--index_i, index_j);
                                 }
                             }
                         });
@@ -282,14 +290,8 @@ public class FullscreenActivity extends Activity {
                         move_down.setLayoutParams(params_move_down);
                         move_left.setLayoutParams(params_move_left);
 
-                        fullscreenLayout.addView(move_up);
-                        fullscreenLayout.addView(move_right);
-                        fullscreenLayout.addView(move_down);
-                        fullscreenLayout.addView(move_left);
-
                         // Accept-Button
                         if (drawn) {
-//                                testView.setVisibility(View.INVISIBLE);
                             RelativeLayout.LayoutParams params_accept = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
                             accept = new ImageButton(getApplicationContext());
                             accept.setImageResource(R.drawable.checkmark);
@@ -310,17 +312,9 @@ public class FullscreenActivity extends Activity {
                                             b = gl.rotate(b);
                                         }
                                         placeIt(b, index_i, index_j); //Wirkliches Plazieren vom Stein
-//                                            boardToLog();
                                     }
-                                    fullscreenLayout.removeView(accept);
-                                    fullscreenLayout.removeView(cancel);
-                                    fullscreenLayout.removeView(transpose);
-                                    fullscreenLayout.removeView(move_up);
-                                    fullscreenLayout.removeView(move_right);
-                                    fullscreenLayout.removeView(move_down);
-                                    fullscreenLayout.removeView(move_left);
+                                    gl.removeViews(fullscreenLayout, accept, cancel, transpose, move_up, move_right, move_down, move_left);
                                     elementFinished = true; //Nächster Stein kann geLongClicked werden
-//                                        boardToLog();
                                 }
                             });
 
@@ -335,13 +329,7 @@ public class FullscreenActivity extends Activity {
                             cancel.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    fullscreenLayout.removeView(accept);
-                                    fullscreenLayout.removeView(cancel);
-                                    fullscreenLayout.removeView(transpose);
-                                    fullscreenLayout.removeView(move_up);
-                                    fullscreenLayout.removeView(move_right);
-                                    fullscreenLayout.removeView(move_down);
-                                    fullscreenLayout.removeView(move_left);
+                                    gl.removeViews(fullscreenLayout, accept, cancel, transpose, move_up, move_right, move_down, move_left);
                                     testView.setVisibility(View.VISIBLE);
                                     elementFinished = true;
                                     restore(index_i, index_j);
@@ -374,6 +362,7 @@ public class FullscreenActivity extends Activity {
                                             }
                                         }
                                     } else {
+                                        Toast.makeText(getApplicationContext(), "I'm sorry, but I can't draw this", Toast.LENGTH_SHORT).show();
                                         cancel.performClick();
                                     }
                                 }
@@ -384,8 +373,7 @@ public class FullscreenActivity extends Activity {
                             if (isYourPlacementValid(index_i, index_j)) { //Ungültiger Zug, braucht Accept Button nicht
                                 fullscreenLayout.addView(accept);
                             }
-                            fullscreenLayout.addView(cancel);
-                            fullscreenLayout.addView(transpose);
+                            gl.addViews(fullscreenLayout, cancel, transpose, move_up, move_right, move_down, move_left);
                         } else {
                             //Preview wurde nicht gezeichnet
                             elementFinished = true;
@@ -473,7 +461,6 @@ public class FullscreenActivity extends Activity {
                 ImageView oImageView = new ImageView(this);
                 GridLayout.LayoutParams param = new GridLayout.LayoutParams();
                 int size = getScreenWidth() / SIZE;
-                //param.stuff extracted because duplicate code
                 param.height = size;
                 param.width = size;
 
@@ -499,7 +486,8 @@ public class FullscreenActivity extends Activity {
         byte[][] board = gl.getGameBoard();
 
         //Toast.makeText(this.getApplicationContext(),"updated from x: " + startX + " y: " + startY + " to x: " + endX + " y:"+endY, Toast.LENGTH_LONG).show();
-
+        if (endX > 20) endX = 20;
+        if (endY > 20) endY = 20;
         for (int i = startX; i < endX; i++) {
             for (int j = startY; j < endY; j++) {
                 ImageView oImageView = (ImageView) gameBoardLayout.getChildAt(20 * i + j);
@@ -627,7 +615,6 @@ public class FullscreenActivity extends Activity {
             b = changeToPreview(b, true);
 
             if (gl.placeOverEdge(b, x, y)) {
-                Toast.makeText(getApplicationContext(), "I'm sorry, but I can't draw this", Toast.LENGTH_SHORT).show();
                 changeToPreview(b, false);
                 return false;
             } else {
@@ -671,7 +658,6 @@ public class FullscreenActivity extends Activity {
      */
     private void restore(int i, int j) {
         gl.restoreField(rememberField, i, j);
-
         updatePartOfGameBoard(i, j, (i + 5 > 20) ? 20 : i + 5, (j + 5 > 20) ? 20 : j + 5);
         //updateGameBoard();
     }
@@ -779,7 +765,7 @@ public class FullscreenActivity extends Activity {
 
 
     /**
-     * Stone placement, removal from BlockDrawer and Update
+     * Stone placement, removal from BlockDrawer, Update and calculating new Score and looking for anymore turns
      *
      * @param b - byte Array of your stone
      * @param i - the col where you want to restore it
@@ -787,8 +773,19 @@ public class FullscreenActivity extends Activity {
      */
     private void placeIt(byte[][] b, int i, int j) {
         gl.placeStone(b, i, j);
+
+        player.calculateScore(b);
+        player.removeFromArray(selectedBlockID - 1);
+
         removeFromBlockDrawer();
         updatePartOfGameBoard(i, j, (i + b.length), (j + b.length));
+
+        Toast.makeText(getApplicationContext(), "Your score is " + player.getScore(), Toast.LENGTH_SHORT).show();
+        if (anyTurnsLeft()) {
+            Toast.makeText(getApplicationContext(), "There are turns left, you go", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getApplicationContext(), "You lost buddy", Toast.LENGTH_SHORT).show();
+        }
         //updateGameBoard();
     }
 
@@ -867,4 +864,96 @@ public class FullscreenActivity extends Activity {
     }
 
 
+    /**
+     * Not excessively tested, but worked where I wanted it to work :)
+     *
+     * @return true, as soon as it sees another possible turn
+     * false, else
+     */
+    private boolean anyTurnsLeft() {
+        byte[] remainings = player.getRemainingStones();
+        byte[][] gameboard = gl.getGameBoard();
+        int rememberID = selectedBlockID;
+        int transposeRemember = transposeCount;
+        for (int i = 0; i < SIZE; i++) {        // Looking at whole gameboard -> i, j
+            for (int j = 0; j < SIZE; j++) {
+                if (gameboard[i][j] == player.getPlayerId()) { // Look only at places, where your color lies
+                    for (int st = 0; st < remainings.length; st++) { // Try only your remaining stones -> st(one); -1 -> stone was placed already
+                        if (remainings[st] != -1) {
+                            if (((i - 1) >= 0 && (j - 1) >= 0) || ((i + 1) < SIZE && (j - 1) >= 0) ||
+                                    ((i - 1) >= 0 && (j + 1) < SIZE) || ((i + 1) < SIZE && (j + 1) < SIZE)) { // Look only at the corners below your field[i][j]
+                                selectedBlockID = remainings[st] + 1;  // Because isYourPlacementValid calculates with selectedBlockID -1
+                                for (int tr = 0; tr < 4; tr++) { // Look at all four possible tranpositions
+                                    transposeCount = tr;
+                                    // The four corners...
+                                    if (((i - 1) >= 0 && (j - 1) >= 0)) {
+                                        if (drawStone(--i, --j)) { // drawStone needs to be called, to update rememberField
+                                            restore(i, j);
+                                            if (isYourPlacementValid(i, j)) { // Restore selectedBlockID (Should be always -1) and transposeCount
+                                                selectedBlockID = rememberID;
+                                                transposeCount = transposeRemember;
+                                                return true;
+                                            } else {
+                                                i++;
+                                                j++;
+                                            }
+                                        } else {
+                                            i++;
+                                            j++;
+                                        }
+                                    } else if (((i + 1) < SIZE && (j - 1) >= 0)) { // Another corner
+                                        if (drawStone(++i, --j)) {
+                                            restore(i, j);
+                                            if (isYourPlacementValid(i, j)) {
+                                                selectedBlockID = rememberID;
+                                                transposeCount = transposeRemember;
+                                                return true;
+                                            } else {
+                                                i--;
+                                                j++;
+                                            }
+                                        } else {
+                                            i--;
+                                            j++;
+                                        }
+                                    } else if (((i - 1) >= 0 && (j + 1) < SIZE)) { // Another corner
+                                        if (drawStone(--i, ++j)) {
+                                            restore(i, j);
+                                            if (isYourPlacementValid(i, j)) {
+                                                selectedBlockID = rememberID;
+                                                transposeCount = transposeRemember;
+                                                return true;
+                                            } else {
+                                                i++;
+                                                j--;
+                                            }
+                                        } else {
+                                            i++;
+                                            j--;
+                                        }
+                                    } else if (((i + 1) < SIZE && (j + 1) < SIZE)) { // Another corner
+                                        if (drawStone(++i, ++j)) {
+                                            restore(i, j);
+                                            if (isYourPlacementValid(i, j)) {
+                                                selectedBlockID = rememberID;
+                                                transposeCount = transposeRemember;
+                                                return true;
+                                            } else {
+                                                i--;
+                                                j--;
+                                            }
+                                        } else {
+                                            i--;
+                                            j--;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
 }

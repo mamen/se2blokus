@@ -3,6 +3,9 @@ package at.aau.se2.test;
 import android.content.Context;
 import android.os.Vibrator;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import java.util.Arrays;
@@ -150,7 +153,7 @@ public class GameLogic {
                         //Bottom seems fine
                         if ((row + 1) >= SIZE && (((col + 1) < SIZE) && (col - 1) >= 0)) {
                             if (checkSurroundings(board[col + 1][row], board[col - 1][row], board[col][row - 1])) {
-                                Toast.makeText(context, ("Bottom Wall test"), Toast.LENGTH_SHORT).show();
+//                                Toast.makeText(context, ("Bottom Wall test"), Toast.LENGTH_SHORT).show();
                                 return false;
                             } else if (checkSurroundings(board[col - 1][row - 1], board[col + 1][row - 1])) {
                                 corner++;
@@ -158,7 +161,7 @@ public class GameLogic {
                             //Right seems fine
                         } else if ((col + 1) >= SIZE && (((row + 1) < SIZE) && (row - 1) >= 0)) {
                             if (checkSurroundings(board[col][row - 1], board[col - 1][row], board[col][row + 1])) {
-                                Toast.makeText(context, ("Right Wall test"), Toast.LENGTH_SHORT).show();
+//                                Toast.makeText(context, ("Right Wall test"), Toast.LENGTH_SHORT).show();
                                 return false;
                             } else if (checkSurroundings(board[col - 1][row - 1], board[col - 1][row + 1])) {
                                 corner++;
@@ -166,7 +169,7 @@ public class GameLogic {
                             //Top seems fine
                         } else if ((row - 1) < 0 && ((col - 1) >= 0 && (col + 1) < SIZE)) {
                             if (checkSurroundings(board[col - 1][row], board[col][row + 1], board[col + 1][row])) {
-                                Toast.makeText(context, ("Top Wall test"), Toast.LENGTH_SHORT).show();
+//                                Toast.makeText(context, ("Top Wall test"), Toast.LENGTH_SHORT).show();
                                 return false;
                             } else if (checkSurroundings(board[col - 1][row + 1], board[col + 1][row + 1])) {
                                 corner++;
@@ -174,7 +177,7 @@ public class GameLogic {
                             //Left seems fine
                         } else if ((col - 1) < 0 && ((row - 1) >= 0 && (row + 1) < SIZE)) {
                             if (checkSurroundings(board[col][row - 1], board[col + 1][row], board[col][row + 1])) {
-                                Toast.makeText(context, ("Left Wall test"), Toast.LENGTH_SHORT).show();
+//                                Toast.makeText(context, ("Left Wall test"), Toast.LENGTH_SHORT).show();
                                 return false;
                             } else if (checkSurroundings(board[col + 1][row - 1], board[col + 1][row + 1])) {
                                 corner++;
@@ -182,7 +185,7 @@ public class GameLogic {
                             //Right down seems fine
                         } else if ((row + 1) >= SIZE && (col + 1) >= SIZE) {
                             if (checkSurroundings(board[col - 1][row], board[col][row - 1])) {
-                                Toast.makeText(context, ("Right down corner test"), Toast.LENGTH_SHORT).show();
+//                                Toast.makeText(context, ("Right down corner test"), Toast.LENGTH_SHORT).show();
                                 return false;
                             } else if (checkSurroundings(board[col - 1][row - 1])) {
                                 corner++;
@@ -190,7 +193,7 @@ public class GameLogic {
                             //Right upper seems fine
                         } else if ((row - 1) < 0 && (col + 1) >= SIZE) {
                             if (checkSurroundings(board[col - 1][row], board[col][row + 1])) {
-                                Toast.makeText(context, ("Right upper corner test"), Toast.LENGTH_SHORT).show();
+//                                Toast.makeText(context, ("Right upper corner test"), Toast.LENGTH_SHORT).show();
                                 return false;
                             } else if (checkSurroundings(board[col - 1][row + 1])) {
                                 corner++;
@@ -198,7 +201,7 @@ public class GameLogic {
                             //Left down seems fine
                         } else if ((row + 1) >= SIZE && (col - 1) < 0) {
                             if (checkSurroundings(board[col + 1][row], board[col][row - 1])) {
-                                Toast.makeText(context, ("Left down corner test"), Toast.LENGTH_SHORT).show();
+//                                Toast.makeText(context, ("Left down corner test"), Toast.LENGTH_SHORT).show();
                                 return false;
                             } else if (checkSurroundings(board[col + 1][row - 1])) {
                                 corner++;
@@ -206,7 +209,7 @@ public class GameLogic {
                             //Left upper seems fine
                         } else if ((row - 1) < 0 && (col - 1) < 0) {
                             if (checkSurroundings(board[col + 1][row], board[col][row + 1])) {
-                                Toast.makeText(context, ("Left upper corner test"), Toast.LENGTH_SHORT).show();
+//                                Toast.makeText(context, ("Left upper corner test"), Toast.LENGTH_SHORT).show();
                                 return false;
                             } else if (checkSurroundings(board[col + 1][row + 1])) {
                                 corner++;
@@ -215,7 +218,7 @@ public class GameLogic {
                             //Inside field seems fine
                             if (checkSurroundings(board[col + 1][row], board[col][row + 1], board[col - 1][row], board[col][row - 1])) {
                                 vibrate();
-                                Toast.makeText(context, ("That's invalid, dude!"), Toast.LENGTH_SHORT).show();
+//                                Toast.makeText(context, ("That's invalid, dude!"), Toast.LENGTH_SHORT).show();
                                 return false;
                             } else if (checkSurroundings(board[col - 1][row - 1], board[col + 1][row - 1], board[col - 1][row + 1], board[col + 1][row + 1])) {
                                 corner++;
@@ -329,5 +332,30 @@ public class GameLogic {
             }
         }
         return newStone;
+    }
+
+
+    /**
+     * Removes the Buttons from the Screen
+     *
+     * @param fullscreen - Layout
+     * @param v          - The Buttons
+     */
+    public void removeViews(RelativeLayout fullscreen, View... v) {
+        for (View view : v) {
+            fullscreen.removeView(view);
+        }
+    }
+
+    /**
+     * Adds the Buttons to the Screen
+     *
+     * @param fullscreen - Layout
+     * @param v          - The Buttons
+     */
+    public void addViews(RelativeLayout fullscreen, View... v) {
+        for (View view : v) {
+            fullscreen.addView(view);
+        }
     }
 }
