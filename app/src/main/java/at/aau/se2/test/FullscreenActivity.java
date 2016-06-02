@@ -40,7 +40,6 @@ public class FullscreenActivity extends Activity {
     private boolean elementFinished;
     private View.DragShadowBuilder shadowBuilder;
     private int transposeCount; //Zähler wie oft der Stein gedreht wurde
-    private int score;
 
     /*
     TODO:
@@ -59,7 +58,6 @@ public class FullscreenActivity extends Activity {
         selectedBlockID = -1;
         rememberField = new byte[5][5];
         elementFinished = true;
-        score = 0;
 
         String color;
         Bundle extras = getIntent().getExtras();
@@ -218,8 +216,8 @@ public class FullscreenActivity extends Activity {
                                         e.printStackTrace();
                                     }
                                 } else {
-                                    restore(index_i, index_j);
-                                    drawStone(index_i, --index_j);
+                                    restore(index_i, --index_j);
+                                    drawStone(index_i, index_j);
                                 }
                             }
                         });
@@ -242,8 +240,8 @@ public class FullscreenActivity extends Activity {
                                         e.printStackTrace();
                                     }
                                 } else {
-                                    restore(index_i, index_j);
-                                    drawStone(--index_i, index_j);
+                                    restore(--index_i, index_j);
+                                    drawStone(index_i, index_j);
 //                                    cancel.performClick();
                                 }
                             }
@@ -267,8 +265,8 @@ public class FullscreenActivity extends Activity {
                                         e.printStackTrace();
                                     }
                                 } else {
-                                    restore(index_i, index_j);
-                                    drawStone(--index_i, index_j);
+                                    restore(--index_i, index_j);
+                                    drawStone(index_i, index_j);
                                 }
                             }
                         });
@@ -404,11 +402,12 @@ public class FullscreenActivity extends Activity {
         String color = player.getPlayerColor();
 
         //Alle Spielsteine hinzufügen
-        for (int i = 0; i < 21; i++) {
+        for (int i = 0; i < 22; i++) {
             final ImageView oImageView = new ImageView(this);
 
             oImageView.setImageResource(getResources().getIdentifier(color + "_" + i, "drawable", getPackageName()));
             oImageView.setTag(i);
+
             GridLayout.LayoutParams param = new GridLayout.LayoutParams();
             param.setGravity(Gravity.CENTER);
             oImageView.setLayoutParams(param);
@@ -650,6 +649,7 @@ public class FullscreenActivity extends Activity {
         return retArr;
     }
 
+
     /**
      * Restores the field, to the state before the preview was drawn
      *
@@ -774,14 +774,25 @@ public class FullscreenActivity extends Activity {
     private void placeIt(byte[][] b, int i, int j) {
         gl.placeStone(b, i, j);
 
-        player.calculateScore(b);
+        if (player.getScore() == (player.MAX_STONES - 1)) {
+            player.addToScore(15); //GameRule: if last stone placed == single stone
+            player.calculateScore(b);
+        } else {
+            player.calculateScore(b);
+        }
         player.removeFromArray(selectedBlockID - 1);
+//        player.stonesToLog();
+        player.putToSaveIndices(b, i, j);
+//        player.printSaveIndices();
 
         removeFromBlockDrawer();
         updatePartOfGameBoard(i, j, (i + b.length), (j + b.length));
 
+//        Print score, just for testing
         Toast.makeText(getApplicationContext(), "Your score is " + player.getScore(), Toast.LENGTH_SHORT).show();
-        if (anyTurnsLeft()) {
+
+//        if there is another move to make doSomething; right now just for testing, can be used when needed
+        if (areTurnsLeft()) {
             Toast.makeText(getApplicationContext(), "There are turns left, you go", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(getApplicationContext(), "You lost buddy", Toast.LENGTH_SHORT).show();
@@ -870,88 +881,65 @@ public class FullscreenActivity extends Activity {
      * @return true, as soon as it sees another possible turn
      * false, else
      */
-    private boolean anyTurnsLeft() {
-        byte[] remainings = player.getRemainingStones();
-        byte[][] gameboard = gl.getGameBoard();
-        int rememberID = selectedBlockID;
-        int transposeRemember = transposeCount;
-        for (int i = 0; i < SIZE; i++) {        // Looking at whole gameboard -> i, j
-            for (int j = 0; j < SIZE; j++) {
-                if (gameboard[i][j] == player.getPlayerId()) { // Look only at places, where your color lies
-                    for (int st = 0; st < remainings.length; st++) { // Try only your remaining stones -> st(one); -1 -> stone was placed already
-                        if (remainings[st] != -1) {
-                            if (((i - 1) >= 0 && (j - 1) >= 0) || ((i + 1) < SIZE && (j - 1) >= 0) ||
-                                    ((i - 1) >= 0 && (j + 1) < SIZE) || ((i + 1) < SIZE && (j + 1) < SIZE)) { // Look only at the corners below your field[i][j]
-                                selectedBlockID = remainings[st] + 1;  // Because isYourPlacementValid calculates with selectedBlockID -1
-                                for (int tr = 0; tr < 4; tr++) { // Look at all four possible tranpositions
-                                    transposeCount = tr;
-                                    // The four corners...
-                                    if (((i - 1) >= 0 && (j - 1) >= 0)) {
-                                        if (drawStone(--i, --j)) { // drawStone needs to be called, to update rememberField
-                                            restore(i, j);
-                                            if (isYourPlacementValid(i, j)) { // Restore selectedBlockID (Should be always -1) and transposeCount
-                                                selectedBlockID = rememberID;
-                                                transposeCount = transposeRemember;
-                                                return true;
-                                            } else {
-                                                i++;
-                                                j++;
-                                            }
-                                        } else {
-                                            i++;
-                                            j++;
-                                        }
-                                    } else if (((i + 1) < SIZE && (j - 1) >= 0)) { // Another corner
-                                        if (drawStone(++i, --j)) {
-                                            restore(i, j);
-                                            if (isYourPlacementValid(i, j)) {
-                                                selectedBlockID = rememberID;
-                                                transposeCount = transposeRemember;
-                                                return true;
-                                            } else {
-                                                i--;
-                                                j++;
-                                            }
-                                        } else {
-                                            i--;
-                                            j++;
-                                        }
-                                    } else if (((i - 1) >= 0 && (j + 1) < SIZE)) { // Another corner
-                                        if (drawStone(--i, ++j)) {
-                                            restore(i, j);
-                                            if (isYourPlacementValid(i, j)) {
-                                                selectedBlockID = rememberID;
-                                                transposeCount = transposeRemember;
-                                                return true;
-                                            } else {
-                                                i++;
-                                                j--;
-                                            }
-                                        } else {
-                                            i++;
-                                            j--;
-                                        }
-                                    } else if (((i + 1) < SIZE && (j + 1) < SIZE)) { // Another corner
-                                        if (drawStone(++i, ++j)) {
-                                            restore(i, j);
-                                            if (isYourPlacementValid(i, j)) {
-                                                selectedBlockID = rememberID;
-                                                transposeCount = transposeRemember;
-                                                return true;
-                                            } else {
-                                                i--;
-                                                j--;
-                                            }
-                                        } else {
-                                            i--;
-                                            j--;
-                                        }
-                                    }
+    public boolean areTurnsLeft() {
+        int selectionRemember = selectedBlockID; // To restore if there is another possible move
+        int transposeRemember = transposeCount; // ---------||---------
+        byte[] remainingStones = player.getRemainingStones(); // What stones do you still have (Saved as tags)
+        ArrayList<IndexTuple> savedTuples = player.getSaveIndices(); // Tuples with the Indices of your placed stones
+        if (player.getSaveIndicesSize() < player.MAX_STONES) { // Probably useless, because you should not be able to lay more than MAX_STONES
+            for (IndexTuple tuple : savedTuples) { // Look at every IndexTuple (where your stones lay)
+                for (byte stone : remainingStones) { // Look at every stone you still have
+                    if (stone != -1) { // Already placed stone
+                        int i = tuple.getIndex_j(); // Index_i
+                        int j = tuple.getIndex_i(); // Index_j
+                        if (((i - 1) >= 0 && (j - 1) >= 0) || ((i + 1) < SIZE && (j - 1) >= 0) ||
+                                ((i - 1) >= 0 && (j + 1) < SIZE) || ((i + 1) < SIZE && (j + 1) < SIZE)) { // Look only at the corners below your field[i][j]
+                            selectedBlockID = stone + 1; // Test all remaining stones
+                            for (int tr = 0; tr < 4; tr++) {
+                                transposeCount = tr; //Test all four rotations
+                            }
+                            if (((i - 1) >= 0 && (j - 1) >= 0)) { // First corner
+                                if (cornerTesting(i - 1, j - 1, selectionRemember, transposeRemember)) {
+                                    return true;
+                                }
+                            } else if (((i + 1) < SIZE && (j - 1) >= 0)) { // Another corner
+                                if (cornerTesting(i + 1, j - 1, selectionRemember, transposeRemember)) {
+                                    return true;
+                                }
+                            } else if (((i - 1) >= 0 && (j + 1) < SIZE)) { // Another corner
+                                if (cornerTesting(i - 1, j + 1, selectionRemember, transposeRemember)) {
+                                    return true;
+                                }
+                            } else if (((i + 1) < SIZE && (j + 1) < SIZE)) { // Another corner
+                                if (cornerTesting(i + 1, j + 1, selectionRemember, transposeRemember)) {
+                                    return true;
                                 }
                             }
                         }
                     }
                 }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Watch one corner around your stone, to see if there is at least one more turn
+     *
+     * @param i                 - the col to check the placement
+     * @param j                 - the row to check the placement
+     * @param selectionRemember - if one placement is valid, reset selectedBlockID
+     * @param transposeRemember - if one placement is valid, reset transposeCount
+     * @return true, if there is one more turn
+     * false, else
+     */
+    public boolean cornerTesting(int i, int j, int selectionRemember, int transposeRemember) {
+        if (drawStone(i, j)) {
+            restore(i, j);
+            if (isYourPlacementValid(i, j)) {
+                selectedBlockID = selectionRemember;
+                transposeCount = transposeRemember;
+                return true;
             }
         }
         return false;
