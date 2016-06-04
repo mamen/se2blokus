@@ -33,6 +33,12 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name=".ColorScreen">
+            <intent-filter>
+                <action android:name="at.aau.se2.test.COLORSCREEN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".FullscreenActivity"
             android:screenOrientation="portrait"

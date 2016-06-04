@@ -9,10 +9,7 @@ import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ImageButton;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
 
 public class StartScreen extends Activity implements View.OnClickListener {
 
@@ -90,7 +87,7 @@ public class StartScreen extends Activity implements View.OnClickListener {
         builder.setItems(colors, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                intent.putExtra("chosen_color", colors[which]);
+                intent.putExtra("color", (byte) which);
                 startActivity(intent);
             }
         });
@@ -101,18 +98,8 @@ public class StartScreen extends Activity implements View.OnClickListener {
 
 
     private void goOn(final Boolean host){
-        final CharSequence colors[] = new CharSequence[]{"green", "red", "blue", "yellow"};
         final Intent intent = new Intent("at.aau.se2.test.CONNECTSCREEN");
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Pick a color");
-        builder.setItems(colors, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                intent.putExtra("chosen_color", colors[which]);
-                intent.putExtra("host",""+host);
-                startActivity(intent);
-            }
-        });
-        builder.show();
+        intent.putExtra("host",""+host);
+        startActivity(intent);
     }
 }

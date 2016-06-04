@@ -7,6 +7,8 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.Display;
 import android.view.DragEvent;
@@ -20,10 +22,21 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.nearby.Nearby;
+import com.google.android.gms.nearby.connection.Connections;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
-public class FullscreenActivity extends Activity {
+public class FullscreenActivity extends Activity implements GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        Connections.ConnectionRequestListener,
+        Connections.MessageListener,
+        Connections.EndpointDiscoveryListener,
+        View.OnClickListener{
 
     private RelativeLayout fullscreenLayout;
     private GridLayout gameBoardLayout;
@@ -40,6 +53,14 @@ public class FullscreenActivity extends Activity {
     private boolean elementFinished;
     private View.DragShadowBuilder shadowBuilder;
     private int transposeCount; //Zähler wie oft der Stein gedreht wurde
+    private Connection connection;
+    private GoogleApiClient apiClient;
+    private boolean isHost;
+    private boolean isConnected = true;
+    private String remoteHostEndpoint;
+    private List<String> remotePeerEndpoints = new ArrayList<>();
+    private HashMap<String, String> ID_Name_Map = new HashMap<String, String>();
+    private byte playerID;
 
     /*
     TODO:
@@ -61,7 +82,7 @@ public class FullscreenActivity extends Activity {
 
         String color;
         Bundle extras = getIntent().getExtras();
-        if (extras != null) {
+        /*if (extras != null) {
             color = extras.getString("chosen_color");
             if (color != null) {
                 switch (color) {
@@ -80,8 +101,15 @@ public class FullscreenActivity extends Activity {
                     default:
                         break;
                 }
-            }
-        }
+            }*/
+        ID_Name_Map = ((HashMap<String, String>)extras.getSerializable("map"));
+        isHost = extras.getBoolean("host");
+        remoteHostEndpoint = extras.getString("hostEnd");
+        remotePeerEndpoints = Connection.getInstance().getRemotePeerEndpoints();
+        //get the api from the Singleton
+        apiClient = Connection.getInstance().getApiClient();
+        playerID = extras.getByte("color");
+        Connection.getInstance().setFullscreenActivity(this);
 
         // lade Player
         player = new Player(playerID);
@@ -797,7 +825,15 @@ public class FullscreenActivity extends Activity {
         } else {
             Toast.makeText(getApplicationContext(), "You lost buddy", Toast.LENGTH_SHORT).show();
         }
+
+        byte[] byteArr = createNewByteArray(b, i, j);
+        sendMessage(byteArr);
         //updateGameBoard();
+    }
+
+    private void placeStoneOfOtherPlayer(byte[][] b, int i, int j) {
+        gl.placeStone(b, i, j);
+        updateGameBoard();
     }
 
     //Bildschirmbreite
@@ -943,5 +979,144 @@ public class FullscreenActivity extends Activity {
             }
         }
         return false;
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        debugging("onConnected");
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        debugging("connSuspended");
+    }
+
+    @Override
+    public void onConnectionRequest(String s, String s1, String s2, byte[] bytes) {
+        debugging("request");
+    }
+
+    @Override
+    public void onEndpointFound(String s, String s1, String s2, String s3) {
+        debugging("endpoind found");
+    }
+
+    @Override
+    public void onEndpointLost(String s) {
+        debugging("endpoint lost");
+    }
+
+
+    private byte[] createNewByteArray(byte[][] b, int coordy, int coordx){
+        byte[][] newByte = new byte[b.length+1][b.length+1];
+        for(int i = 0; i<b.length; i++){
+            for(int j = 0; j<b.length; j++) {
+                newByte[i][j] = b[i][j];
+            }
+        }
+
+        newByte[b.length][b.length-2] = playerID;
+        newByte[b.length][b.length-1] = (byte) coordx;
+        newByte[b.length][b.length] = (byte) coordy;
+
+        return convertToOneDimension(newByte);
+    }
+
+    private byte[] convertToOneDimension(byte[][] b){
+        int count = 0;
+        byte[] oneDim = new byte[b.length*b.length];
+        for(int i = 0; i<b.length; i++){
+            for(int j = 0; j<b.length; j++) {
+                oneDim[count] = b[i][j];
+                count++;
+            }
+        }
+        return oneDim;
+    }
+
+
+    @Override
+    public void onMessageReceived(String endpointId, byte[] payload, boolean isReliable){
+
+        debugging("action received");
+
+        int stoneDim = (int) Math.sqrt(payload.length)-1;
+        int dim = 0;
+        byte[][] stone = new byte[stoneDim][stoneDim];
+        int counter = 0;
+        for(int i=0; i<payload.length-stoneDim-1; i++) {
+
+            if (dim < stoneDim) {
+                stone[counter][dim] = payload[i];
+                dim++;
+            } else {
+                dim = 0;
+                counter++;
+
+            }
+        }
+        int color = payload[payload.length-3];
+        int idx = payload[payload.length-2];
+        int idy = payload[payload.length-1];
+
+        if(color != playerID){
+            placeStoneOfOtherPlayer(stone, idy, idx);
+        }
+
+        if( isHost ) {
+            //sendMessage(message);
+            debugging("send new player");
+        }
+    }
+
+    public String arrToString(byte[] arr){
+        String s = "";
+        for(int i=0; i<arr.length; i++){
+            s += arr[i]+", ";
+        }
+
+        return s;
+    }
+
+
+
+    private void sendMessage( byte[] mess ) {
+        debugging("sendMessage"+isHost+"..."+remotePeerEndpoints.toString()+"..."+remoteHostEndpoint);
+        if(!remotePeerEndpoints.isEmpty()) {
+            if (isHost) {
+                debugging(arrToString(mess));
+                Nearby.Connections.sendReliableMessage(apiClient, remotePeerEndpoints, mess);
+            }
+        }
+        else {
+            if (remoteHostEndpoint != null) {
+                debugging(arrToString(mess));
+                Nearby.Connections.sendReliableMessage(apiClient, remoteHostEndpoint, mess);
+            }
+        }
+    }
+
+    @Override
+    public void onDisconnected(String s) {
+
+    }
+
+    /**
+     * Called when a view has been clicked.
+     *
+     * @param v The view that was clicked.
+     */
+    @Override
+    public void onClick(View v) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    private void debugging(String debMessage) {
+        Log.d("tobiasho", debMessage);
     }
 }
