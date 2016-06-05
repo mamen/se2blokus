@@ -15,6 +15,7 @@ import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -62,11 +63,22 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     private List<String> remotePeerEndpoints = new ArrayList<>();
     private HashMap<String, String> ID_Name_Map = new HashMap<String, String>();
     private byte playerID;
+    ImageView imgView;
 
+
+
+    private boolean myturn;
+    /*private int plCount;
+    private int turn;
+*/
     /*
     TODO:
         - blockrotation
         - dragged image above finger
+
+        - roundbased game for 4 players, maybe random (also random decision who starts in the case of two players)
+        - better lobby (was already better before)
+        - displaying the count of other players
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,33 +96,15 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         String color;
         Bundle extras = getIntent().getExtras();
 
-        /*if (extras != null) {
-            color = extras.getString("chosen_color");
-            if (color != null) {
-                switch (color) {
-                    case "green":
-                        playerID = 1;
-                        break;
-                    case "red":
-                        playerID = 2;
-                        break;
-                    case "blue":
-                        playerID = 3;
-                        break;
-                    case "yellow":
-                        playerID = 4;
-                        break;
-                    default:
-                        break;
-                }
-            }*/
         ID_Name_Map = ((HashMap<String, String>)extras.getSerializable("map"));
+        //plCount = ID_Name_Map.size();
         isHost = extras.getBoolean("host");
         remoteHostEndpoint = extras.getString("hostEnd");
         remotePeerEndpoints = Connection.getInstance().getRemotePeerEndpoints();
         //get the api from the Singleton
         apiClient = Connection.getInstance().getApiClient();
         Connection.getInstance().setFullscreenActivity(this);
+
 
         playerID = extras.getByte("color");
 
@@ -416,7 +410,32 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                 return true;
             }
         });
+
+        imgView = (ImageView) findViewById(R.id.img_stop);
+
+        //Aktuell beginnt bei 2 Spielern der Host, bei 4 Spielern geht es nach Farb-ID
+        //if(plCount==2) {
+            myturn = isHost;
+        /*}
+        else {
+            turn = 1;
+           if(playerID == turn){
+               myturn = true;
+           }
+           else{
+               myturn = false;
+           }
+        }*/
+
+        if(!myturn) {
+            disableScreenInteraction();
+        }
+        else{
+            enableScreenInteraction();
+        }
+
     }
+
 
     private void initializeBlockDrawer() {
         LinearLayout blockDrawer_parent = (LinearLayout) findViewById(R.id.blockDrawer_parent);
@@ -831,6 +850,9 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
         byte[] byteArr = createNewByteArray(b, i, j);
         sendMessage(byteArr);
+        //plCount++;
+        disableScreenInteraction();
+
         //updateGameBoard();
     }
 
@@ -1063,12 +1085,19 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         int idy = payload[payload.length-1];
 
         if(color != playerID){
+            deb(""+color+"_"+playerID);
             placeStoneOfOtherPlayer(stone, idy, idx);
+            myturn = true;
+
         }
 
         if( isHost ) {
             sendMessage(payload);
             deb("send new action");
+        }
+
+        if(myturn){
+            enableScreenInteraction();
         }
     }
 
@@ -1112,6 +1141,24 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     @Override
     public void onClick(View v) {
 
+    }
+
+
+    public void disableScreenInteraction(){
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+
+        imgView.setVisibility(View.VISIBLE);
+        imgView.setImageResource(R.drawable.wait);
+        imgView.setAlpha(0.4f);
+        myturn = false;
+        deb("should disable and display pic");
+    }
+
+    public void enableScreenInteraction(){
+        deb("should enable");
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        imgView.setVisibility(View.INVISIBLE);
     }
 
     @Override
