@@ -60,7 +60,6 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
     //Graphic fields
     private TextView actStatus;
     private Button connectionButton;
-    private EditText textField;
     private Button disconnectButton;
     private ListView listV;
     private ArrayAdapter<String> messageAdapter;
@@ -368,7 +367,8 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
             if (ID_Name_Map.size() == 2 || ID_Name_Map.size() == 4) {
                 startButton.setVisibility(View.VISIBLE);
                 startButton.setClickable(true);
-                startButton.setBackgroundColor(Color.RED);
+                startButton.setBackgroundColor(Color.BLACK);
+                startButton.setTextColor(Color.WHITE);
             } else {
                 startButton.setVisibility(View.INVISIBLE);
                 startButton.setClickable(false);
@@ -523,7 +523,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
     public void onMessageReceived(String endpointId, byte[] payload, boolean isReliable) {
         //debugging("onMessageReceived");
         if (onlyNum(payload)) {
-            debugging("setStone", 1);
+            deb("setStone");
             FullscreenActivity full = Connection.getInstance().getFullscreenActivity();
             full.onMessageReceived(endpointId, payload, isReliable);
 
@@ -715,6 +715,10 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
         }
         output += " - ANZ:" + ID_Name_Map.size();
         return output;
+    }
+
+    private void deb(String debMessage) {
+        Log.d("asdf", debMessage);
     }
 
 }

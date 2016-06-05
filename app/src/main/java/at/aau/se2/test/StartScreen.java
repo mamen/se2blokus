@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -87,7 +88,24 @@ public class StartScreen extends Activity implements View.OnClickListener {
         builder.setItems(colors, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                intent.putExtra("color", (byte) which);
+                byte extra = -1;
+                which += 1;
+                Log.d("asdf", ""+which);
+                switch(which){
+                    case 1:
+                        extra = 1;
+                        break;
+                    case 2:
+                        extra = 2;
+                        break;
+                    case 3:
+                        extra = 3;
+                        break;
+                    case 4:
+                        extra = 4;
+                        break;
+                }
+                intent.putExtra("color", extra);
                 startActivity(intent);
             }
         });

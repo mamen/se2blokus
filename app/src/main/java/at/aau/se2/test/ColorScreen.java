@@ -298,7 +298,8 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
             if (selectCount == ID_Name_Map.size()) {
                 startButton.setVisibility(View.VISIBLE);
                 startButton.setClickable(true);
-                startButton.setBackgroundColor(Color.RED);
+                startButton.setBackgroundColor(Color.BLACK);
+                startButton.setTextColor(Color.WHITE);
             } else {
                 startButton.setVisibility(View.INVISIBLE);
                 startButton.setClickable(false);

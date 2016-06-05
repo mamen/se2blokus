@@ -53,6 +53,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     private boolean elementFinished;
     private View.DragShadowBuilder shadowBuilder;
     private int transposeCount; //Zähler wie oft der Stein gedreht wurde
+
     private Connection connection;
     private GoogleApiClient apiClient;
     private boolean isHost;
@@ -75,13 +76,14 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         //Initialisierung div. Variablen.
         fullscreenLayout = (RelativeLayout) findViewById(R.id.contentPanel);
 
-        byte playerID = -1;
+        playerID = -1;
         selectedBlockID = -1;
         rememberField = new byte[5][5];
         elementFinished = true;
 
         String color;
         Bundle extras = getIntent().getExtras();
+
         /*if (extras != null) {
             color = extras.getString("chosen_color");
             if (color != null) {
@@ -108,8 +110,9 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         remotePeerEndpoints = Connection.getInstance().getRemotePeerEndpoints();
         //get the api from the Singleton
         apiClient = Connection.getInstance().getApiClient();
-        playerID = extras.getByte("color");
         Connection.getInstance().setFullscreenActivity(this);
+
+        playerID = extras.getByte("color");
 
         // lade Player
         player = new Player(playerID);
@@ -833,7 +836,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
     private void placeStoneOfOtherPlayer(byte[][] b, int i, int j) {
         gl.placeStone(b, i, j);
-        updateGameBoard();
+        updatePartOfGameBoard(i, j, (i + b.length), (j + b.length));
     }
 
     //Bildschirmbreite
@@ -1038,7 +1041,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     @Override
     public void onMessageReceived(String endpointId, byte[] payload, boolean isReliable){
 
-        debugging("action received");
+        deb("action received");
 
         int stoneDim = (int) Math.sqrt(payload.length)-1;
         int dim = 0;
@@ -1064,8 +1067,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         }
 
         if( isHost ) {
-            //sendMessage(message);
-            debugging("send new player");
+            sendMessage(payload);
+            deb("send new action");
         }
     }
 
@@ -1081,16 +1084,16 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
 
     private void sendMessage( byte[] mess ) {
-        debugging("sendMessage"+isHost+"..."+remotePeerEndpoints.toString()+"..."+remoteHostEndpoint);
+        deb("sendMessage"+isHost+"..."+remotePeerEndpoints.toString()+"..."+remoteHostEndpoint);
         if(!remotePeerEndpoints.isEmpty()) {
             if (isHost) {
-                debugging(arrToString(mess));
+                deb(arrToString(mess));
                 Nearby.Connections.sendReliableMessage(apiClient, remotePeerEndpoints, mess);
             }
         }
         else {
             if (remoteHostEndpoint != null) {
-                debugging(arrToString(mess));
+                deb(arrToString(mess));
                 Nearby.Connections.sendReliableMessage(apiClient, remoteHostEndpoint, mess);
             }
         }
@@ -1118,5 +1121,9 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
     private void debugging(String debMessage) {
         Log.d("tobiasho", debMessage);
+    }
+
+    private void deb(String debMessage) {
+        Log.d("asdf", debMessage);
     }
 }
