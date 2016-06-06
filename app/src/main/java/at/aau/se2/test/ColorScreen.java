@@ -299,6 +299,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
                 intent.putExtra("hostEnd", remoteHostEndpoint);
                 intent.putExtra("color", color);
                 intent.putExtra("turn", turn);
+                intent.putExtra("test", true);
                 startActivity(intent);
                 if (isHost) {
                     sendMessage("FULLSCREEN");

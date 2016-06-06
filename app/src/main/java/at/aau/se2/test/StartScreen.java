@@ -106,6 +106,7 @@ public class StartScreen extends Activity implements View.OnClickListener {
                         break;
                 }
                 intent.putExtra("color", extra);
+                intent.putExtra("test", false);
                 startActivity(intent);
             }
         });

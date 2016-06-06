@@ -37,7 +37,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         Connections.ConnectionRequestListener,
         Connections.MessageListener,
         Connections.EndpointDiscoveryListener,
-        View.OnClickListener{
+        View.OnClickListener {
 
     private RelativeLayout fullscreenLayout;
     private GridLayout gameBoardLayout;
@@ -54,6 +54,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     private boolean elementFinished;
     private View.DragShadowBuilder shadowBuilder;
     private int transposeCount; //Zähler wie oft der Stein gedreht wurde
+    private boolean doSettings;
 
     private Connection connection;
     private GoogleApiClient apiClient;
@@ -66,8 +67,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     private ImageView imgView;
     private int myturn;
     private int actTurn;
-
-
 
 
     /*private int plCount;
@@ -97,8 +96,9 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
         String color;
         Bundle extras = getIntent().getExtras();
+        doSettings = extras.getBoolean("test");
 
-        ID_Name_Map = ((HashMap<String, String>)extras.getSerializable("map"));
+        ID_Name_Map = ((HashMap<String, String>) extras.getSerializable("map"));
         //plCount = ID_Name_Map.size();
         isHost = extras.getBoolean("host");
         remoteHostEndpoint = extras.getString("hostEnd");
@@ -108,19 +108,19 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         Connection.getInstance().setFullscreenActivity(this);
 
         playerID = extras.getByte("color");
-        if(ID_Name_Map.size() == 2){
-            if(isHost){
-                myturn = Integer.parseInt(extras.getString("turn").charAt(0) + "");
+        if (doSettings) {
+            if (ID_Name_Map.size() == 2) {
+                if (isHost) {
+                    myturn = Integer.parseInt(extras.getString("turn").charAt(0) + "");
+                } else {
+                    myturn = Integer.parseInt(extras.getString("turn").charAt(1) + "");
+                }
+            } else {
+                myturn = Integer.parseInt(extras.getString("turn").charAt(playerID - 1) + "");
             }
-            else {
-                myturn = Integer.parseInt(extras.getString("turn").charAt(1) + "");
-            }
+            debugging(extras.getString("turn"));
+            debugging(myturn + "");
         }
-        else {
-            myturn = Integer.parseInt(extras.getString("turn").charAt(playerID - 1) + "");
-        }
-        debugging(extras.getString("turn"));
-        debugging(myturn+"");
 
         // lade Player
         player = new Player(playerID);
@@ -426,16 +426,19 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         });
 
         imgView = (ImageView) findViewById(R.id.img_stop);
+        if (doSettings) {
+            imgView.setVisibility(View.INVISIBLE);
+        }
 
         actTurn = 1;
 
-        if(myturn==actTurn){
-            enableScreenInteraction();
+        if (doSettings) {
+            if (myturn == actTurn) {
+                enableScreenInteraction();
+            } else {
+                disableScreenInteraction();
+            }
         }
-        else{
-            disableScreenInteraction();
-        }
-
 
 
     }
@@ -846,16 +849,18 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         Toast.makeText(getApplicationContext(), "Your score is " + player.getScore(), Toast.LENGTH_SHORT).show();
 
 //        if there is another move to make doSomething; right now just for testing, can be used when needed
-        if (areTurnsLeft()) {
+        /*if (areTurnsLeft()) {
             Toast.makeText(getApplicationContext(), "There are turns left, you go", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(getApplicationContext(), "You lost buddy", Toast.LENGTH_SHORT).show();
-        }
+        }*/
 
         byte[] byteArr = createNewByteArray(b, i, j);
-        sendMessage(byteArr);
-        debugging("isit?");
-        isItMyTurn();
+        if (doSettings) {
+            sendMessage(byteArr);
+            debugging("isit?");
+            isItMyTurn();
+        }
 
         //updateGameBoard();
     }
@@ -957,27 +962,36 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                     if (stone != -1) { // Already placed stone
                         int i = tuple.getIndex_j(); // Index_i
                         int j = tuple.getIndex_i(); // Index_j
-                        if (((i - 1) >= 0 && (j - 1) >= 0) || ((i + 1) < SIZE && (j - 1) >= 0) ||
-                                ((i - 1) >= 0 && (j + 1) < SIZE) || ((i + 1) < SIZE && (j + 1) < SIZE)) { // Look only at the corners below your field[i][j]
-                            selectedBlockID = stone + 1; // Test all remaining stones
+                        selectedBlockID = stone + 1; // Test all remaining stones
+                        int help = gl.changeHelp(selectedBlockID);
+                        if (((i - help) >= 0 && (j - help) >= 0) || ((i + help) < SIZE && (j - help) >= 0) ||
+                                ((i - help) >= 0 && (j + help) < SIZE) || ((i + help) < SIZE && (j + help) < SIZE)) { // Look only at the corners below your field[i][j]
                             for (int tr = 0; tr < 4; tr++) {
                                 transposeCount = tr; //Test all four rotations
-                            }
-                            if (((i - 1) >= 0 && (j - 1) >= 0)) { // First corner
-                                if (cornerTesting(i - 1, j - 1, selectionRemember, transposeRemember)) {
-                                    return true;
+                                Log.d("DebugInfo", "i = " + i + ", j = " + j + ", selected = " + selectedBlockID + ", transpose = " + transposeCount);
+                                if (((i - help) >= 0 && (j - help) >= 0)) { // First corner
+                                    Log.d("MoreInfo", "i-help = "+(i-help)+", j-help = "+(j-help));
+                                    if (cornerTesting(i - help, j - help, selectionRemember, transposeRemember)) {
+                                        return true;
+                                    }
                                 }
-                            } else if (((i + 1) < SIZE && (j - 1) >= 0)) { // Another corner
-                                if (cornerTesting(i + 1, j - 1, selectionRemember, transposeRemember)) {
-                                    return true;
+                                if (((i + help) < SIZE && (j - help) >= 0)) { // Another corner
+                                    Log.d("MoreInfo", "i+help = "+(i+help)+", j-help = "+(j-help));
+                                    if (cornerTesting(i + help, j - help, selectionRemember, transposeRemember)) {
+                                        return true;
+                                    }
                                 }
-                            } else if (((i - 1) >= 0 && (j + 1) < SIZE)) { // Another corner
-                                if (cornerTesting(i - 1, j + 1, selectionRemember, transposeRemember)) {
-                                    return true;
+                                if (((i - help) >= 0 && (j + help) < SIZE)) { // Another corner
+                                    Log.d("MoreInfo", "i-help = "+(i-help)+", j+help = "+(j+help));
+                                    if (cornerTesting(i - help, j + help, selectionRemember, transposeRemember)) {
+                                        return true;
+                                    }
                                 }
-                            } else if (((i + 1) < SIZE && (j + 1) < SIZE)) { // Another corner
-                                if (cornerTesting(i + 1, j + 1, selectionRemember, transposeRemember)) {
-                                    return true;
+                                if (((i + help) < SIZE && (j + help) < SIZE)) { // Another corner
+                                    Log.d("MoreInfo", "i+help = "+(i+help)+", j+help = "+(j+help));
+                                    if (cornerTesting(i + help, j + help, selectionRemember, transposeRemember)) {
+                                        return true;
+                                    }
                                 }
                             }
                         }
@@ -991,14 +1005,14 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     /**
      * Watch one corner around your stone, to see if there is at least one more turn
      *
-     * @param i                 - the col to check the placement
-     * @param j                 - the row to check the placement
+     * @param j                 - the col to check the placement
+     * @param i                 - the row to check the placement
      * @param selectionRemember - if one placement is valid, reset selectedBlockID
      * @param transposeRemember - if one placement is valid, reset transposeCount
      * @return true, if there is one more turn
      * false, else
      */
-    public boolean cornerTesting(int i, int j, int selectionRemember, int transposeRemember) {
+    public boolean cornerTesting(int j, int i, int selectionRemember, int transposeRemember) {
         if (drawStone(i, j)) {
             restore(i, j);
             if (isYourPlacementValid(i, j)) {
@@ -1036,26 +1050,26 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     }
 
 
-    private byte[] createNewByteArray(byte[][] b, int coordy, int coordx){
-        byte[][] newByte = new byte[b.length+1][b.length+1];
-        for(int i = 0; i<b.length; i++){
-            for(int j = 0; j<b.length; j++) {
+    private byte[] createNewByteArray(byte[][] b, int coordy, int coordx) {
+        byte[][] newByte = new byte[b.length + 1][b.length + 1];
+        for (int i = 0; i < b.length; i++) {
+            for (int j = 0; j < b.length; j++) {
                 newByte[i][j] = b[i][j];
             }
         }
 
-        newByte[b.length][b.length-2] = playerID;
-        newByte[b.length][b.length-1] = (byte) coordx;
+        newByte[b.length][b.length - 2] = playerID;
+        newByte[b.length][b.length - 1] = (byte) coordx;
         newByte[b.length][b.length] = (byte) coordy;
 
         return convertToOneDimension(newByte);
     }
 
-    private byte[] convertToOneDimension(byte[][] b){
+    private byte[] convertToOneDimension(byte[][] b) {
         int count = 0;
-        byte[] oneDim = new byte[b.length*b.length];
-        for(int i = 0; i<b.length; i++){
-            for(int j = 0; j<b.length; j++) {
+        byte[] oneDim = new byte[b.length * b.length];
+        for (int i = 0; i < b.length; i++) {
+            for (int j = 0; j < b.length; j++) {
                 oneDim[count] = b[i][j];
                 count++;
             }
@@ -1065,15 +1079,15 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
 
     @Override
-    public void onMessageReceived(String endpointId, byte[] payload, boolean isReliable){
+    public void onMessageReceived(String endpointId, byte[] payload, boolean isReliable) {
 
         deb("action received");
 
-        int stoneDim = (int) Math.sqrt(payload.length)-1;
+        int stoneDim = (int) Math.sqrt(payload.length) - 1;
         int dim = 0;
         byte[][] stone = new byte[stoneDim][stoneDim];
         int counter = 0;
-        for(int i=0; i<payload.length-stoneDim-1; i++) {
+        for (int i = 0; i < payload.length - stoneDim - 1; i++) {
 
             if (dim < stoneDim) {
                 stone[counter][dim] = payload[i];
@@ -1084,44 +1098,42 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
             }
         }
-        int color = payload[payload.length-3];
-        int idx = payload[payload.length-2];
-        int idy = payload[payload.length-1];
+        int color = payload[payload.length - 3];
+        int idx = payload[payload.length - 2];
+        int idy = payload[payload.length - 1];
 
-        if(color != playerID){
-            deb(""+color+"_"+playerID);
+        if (color != playerID) {
+            deb("" + color + "_" + playerID);
             placeStoneOfOtherPlayer(stone, idy, idx);
             isItMyTurn();
 
         }
 
-        if( isHost ) {
+        if (isHost) {
             sendMessage(payload);
             deb("send new action");
         }
 
     }
 
-    public String arrToString(byte[] arr){
+    public String arrToString(byte[] arr) {
         String s = "";
-        for(int i=0; i<arr.length; i++){
-            s += arr[i]+", ";
+        for (int i = 0; i < arr.length; i++) {
+            s += arr[i] + ", ";
         }
 
         return s;
     }
 
 
-
-    private void sendMessage( byte[] mess ) {
-        deb("sendMessage"+isHost+"..."+remotePeerEndpoints.toString()+"..."+remoteHostEndpoint);
-        if(!remotePeerEndpoints.isEmpty()) {
+    private void sendMessage(byte[] mess) {
+        deb("sendMessage" + isHost + "..." + remotePeerEndpoints.toString() + "..." + remoteHostEndpoint);
+        if (!remotePeerEndpoints.isEmpty()) {
             if (isHost) {
                 deb(arrToString(mess));
                 Nearby.Connections.sendReliableMessage(apiClient, remotePeerEndpoints, mess);
             }
-        }
-        else {
+        } else {
             if (remoteHostEndpoint != null) {
                 deb(arrToString(mess));
                 Nearby.Connections.sendReliableMessage(apiClient, remoteHostEndpoint, mess);
@@ -1144,34 +1156,31 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
     }
 
-    private void isItMyTurn(){
-        if(ID_Name_Map.size() == 2){
+    private void isItMyTurn() {
+        if (ID_Name_Map.size() == 2) {
             debugging("small");
             actTurn++;
-            if(actTurn == 3){
+            if (actTurn == 3) {
                 actTurn = 1;
             }
-        }
-        else {
+        } else {
             debugging("big");
             actTurn++;
-            if(actTurn == 5){
+            if (actTurn == 5) {
                 actTurn = 1;
             }
         }
-            debugging("actturn"+actTurn + ", " + myturn);
-                if(actTurn == myturn){
-                    enableScreenInteraction();
-                }
-                else {
-                    disableScreenInteraction();
-                }
+        debugging("actturn" + actTurn + ", " + myturn);
+        if (actTurn == myturn) {
+            enableScreenInteraction();
+        } else {
+            disableScreenInteraction();
+        }
 
     }
 
 
-
-    public void disableScreenInteraction(){
+    public void disableScreenInteraction() {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
 
@@ -1181,7 +1190,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         deb("should disable and display pic");
     }
 
-    public void enableScreenInteraction(){
+    public void enableScreenInteraction() {
         deb("should enable");
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
         imgView.setVisibility(View.INVISIBLE);

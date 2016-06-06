@@ -132,7 +132,7 @@ public class Player {
         for (int i = 0; i < bytes.length; i++) {
             for (int j = 0; j < bytes[i].length; j++) {
                 if (bytes[i][j] == p_id) {
-                    saveIndices.add(new IndexTuple(index_i + j, index_j + i));
+                    saveIndices.add(0, new IndexTuple(index_i + j, index_j + i));
                 }
             }
         }
