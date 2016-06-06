@@ -577,6 +577,12 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
                 debugging("remove player");
             }*/
             }
+            else if (message.matches("[1-4][1-4][1-4][1-4]") || message.matches("[1-4][1-4]")) {
+                debugging("startnum");
+                debugging(message);
+                ColorScreen cs = Connection.getInstance().getColorScreen();
+                cs.setTurnString(message);
+            }
             else if (message.startsWith("FULLSCREEN")) {
                 debugging("start it!"+message);
                 ColorScreen cs = Connection.getInstance().getColorScreen();

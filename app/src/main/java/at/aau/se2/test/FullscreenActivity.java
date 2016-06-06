@@ -63,11 +63,13 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     private List<String> remotePeerEndpoints = new ArrayList<>();
     private HashMap<String, String> ID_Name_Map = new HashMap<String, String>();
     private byte playerID;
-    ImageView imgView;
+    private ImageView imgView;
+    private int myturn;
+    private int actTurn;
 
 
 
-    private boolean myturn;
+
     /*private int plCount;
     private int turn;
 */
@@ -105,8 +107,20 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         apiClient = Connection.getInstance().getApiClient();
         Connection.getInstance().setFullscreenActivity(this);
 
-
         playerID = extras.getByte("color");
+        if(ID_Name_Map.size() == 2){
+            if(isHost){
+                myturn = Integer.parseInt(extras.getString("turn").charAt(0) + "");
+            }
+            else {
+                myturn = Integer.parseInt(extras.getString("turn").charAt(1) + "");
+            }
+        }
+        else {
+            myturn = Integer.parseInt(extras.getString("turn").charAt(playerID - 1) + "");
+        }
+        debugging(extras.getString("turn"));
+        debugging(myturn+"");
 
         // lade Player
         player = new Player(playerID);
@@ -413,26 +427,16 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
         imgView = (ImageView) findViewById(R.id.img_stop);
 
-        //Aktuell beginnt bei 2 Spielern der Host, bei 4 Spielern geht es nach Farb-ID
-        //if(plCount==2) {
-            myturn = isHost;
-        /*}
-        else {
-            turn = 1;
-           if(playerID == turn){
-               myturn = true;
-           }
-           else{
-               myturn = false;
-           }
-        }*/
+        actTurn = 1;
 
-        if(!myturn) {
-            disableScreenInteraction();
-        }
-        else{
+        if(myturn==actTurn){
             enableScreenInteraction();
         }
+        else{
+            disableScreenInteraction();
+        }
+
+
 
     }
 
@@ -850,8 +854,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
         byte[] byteArr = createNewByteArray(b, i, j);
         sendMessage(byteArr);
-        //plCount++;
-        disableScreenInteraction();
+        debugging("isit?");
+        isItMyTurn();
 
         //updateGameBoard();
     }
@@ -1087,7 +1091,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         if(color != playerID){
             deb(""+color+"_"+playerID);
             placeStoneOfOtherPlayer(stone, idy, idx);
-            myturn = true;
+            isItMyTurn();
 
         }
 
@@ -1096,9 +1100,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             deb("send new action");
         }
 
-        if(myturn){
-            enableScreenInteraction();
-        }
     }
 
     public String arrToString(byte[] arr){
@@ -1143,6 +1144,32 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
     }
 
+    private void isItMyTurn(){
+        if(ID_Name_Map.size() == 2){
+            debugging("small");
+            actTurn++;
+            if(actTurn == 3){
+                actTurn = 1;
+            }
+        }
+        else {
+            debugging("big");
+            actTurn++;
+            if(actTurn == 5){
+                actTurn = 1;
+            }
+        }
+            debugging("actturn"+actTurn + ", " + myturn);
+                if(actTurn == myturn){
+                    enableScreenInteraction();
+                }
+                else {
+                    disableScreenInteraction();
+                }
+
+    }
+
+
 
     public void disableScreenInteraction(){
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
@@ -1151,7 +1178,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         imgView.setVisibility(View.VISIBLE);
         imgView.setImageResource(R.drawable.wait);
         imgView.setAlpha(0.4f);
-        myturn = false;
         deb("should disable and display pic");
     }
 

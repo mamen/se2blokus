@@ -16,6 +16,8 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.nearby.Nearby;
 import com.google.android.gms.nearby.connection.Connections;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -47,6 +49,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
     private Button startButton;
     private boolean selected = false;
     private int selectCount = 0;
+    private String turn;
 
     private byte color = -1;
 
@@ -56,6 +59,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
         //debugging("onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_colorscreen);
+        Connection.getInstance().setColorScreen(this);
         Bundle extras = getIntent().getExtras();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         ID_Name_Map = ((HashMap<String, String>)extras.getSerializable("map"));
@@ -67,7 +71,11 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
         setupView();
         startButton.setVisibility(View.INVISIBLE);
         startButton.setClickable(false);
-        Connection.getInstance().setColorScreen(this);
+
+        if(isHost){
+            turn = randomStartingLineup(ID_Name_Map.size()==2);
+            sendMessage(turn);
+        }
     }
 
     private void setupView() {
@@ -85,6 +93,10 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
         startButton.setOnClickListener(this);
 
 
+    }
+
+    public void setTurnString(String s){
+        turn = s;
     }
 
     @Override
@@ -156,6 +168,8 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
             selectCount++;
             checkGameStart();
         }
+
+
             /*else if (message.startsWith("COLORREM-")) {
                 debugging("color unchosen");
                 String[] messArray = message.split("-");
@@ -168,6 +182,8 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
                     sendMessage(message);
                     debugging("sendremcolor");
                 }*/
+
+
 
         else if (message.startsWith("FULLSCREEN")){
             if(selected){
@@ -273,7 +289,6 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
                 selectCount++;
                 selected = true;
                 checkGameStart();
-
                 break;
 
             case R.id.button_startgame:
@@ -283,6 +298,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
                 intent.putExtra("host", isHost);
                 intent.putExtra("hostEnd", remoteHostEndpoint);
                 intent.putExtra("color", color);
+                intent.putExtra("turn", turn);
                 startActivity(intent);
                 if (isHost) {
                     sendMessage("FULLSCREEN");
@@ -291,6 +307,23 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
         }
 
 
+    }
+
+    private String randomStartingLineup(boolean twoplayer){
+        Byte[] array;
+        String s;
+        if(twoplayer){
+            array = new Byte[]{1, 2};
+            Collections.shuffle(Arrays.asList(array));
+            s = "" + array[0] + "" + array[1] + "";
+        }
+        else {
+            array = new Byte[]{1, 2, 3, 4};
+            Collections.shuffle(Arrays.asList(array));
+            s = "" + array[0] + "" + array[1] + "" +array[2] + "" + array[3] + "";
+        }
+
+        return s;
     }
 
     private void checkGameStart(){
