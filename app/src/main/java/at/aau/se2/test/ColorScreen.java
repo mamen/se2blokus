@@ -74,7 +74,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
 
         if(isHost){
             turn = randomStartingLineup(ID_Name_Map.size()==2);
-            sendMessage(turn);
+            sendMessage("N-"+turn);
         }
     }
 

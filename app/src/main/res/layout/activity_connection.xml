@@ -1,11 +1,12 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_weight="1"
     tools:context=".ConnectScreen">
 
     <TextView
         android:id="@+id/text_status"
-        android:layout_width="wrap_content"
+        android:layout_width="0pt"
         android:layout_height="wrap_content"
         android:textSize="12sp"
         android:text="Disconnected"
@@ -25,15 +26,6 @@
         android:text="Disconnect"
         android:layout_marginTop="73dp" />
 
-    <ListView
-        android:id="@+id/list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:stackFromBottom="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/button_disconnection"
-        android:layout_above="@+id/button_start" />
-
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -42,6 +34,144 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true" />
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/button_start"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/button_disconnection">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="4pt"
+            android:layout_marginTop="4pt">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="Playername"
+                android:id="@+id/textView"
+                android:background="@drawable/textlines"
+                android:layout_weight="1"
+                android:layout_column="8"
+                android:textAlignment="center"
+                android:layout_marginTop="4pt" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="PlayerID"
+                android:id="@+id/textView2"
+                android:background="@drawable/textlines"
+                android:layout_weight="1"
+                android:textAlignment="center"
+                android:layout_marginTop="4pt" />
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="4pt"
+            android:layout_marginBottom="4pt">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:id="@+id/player1"
+                android:background="@drawable/textlines2"
+                android:layout_weight="1"
+                android:textAlignment="center" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:id="@+id/id1"
+                android:background="@drawable/textlines2"
+                android:layout_weight="1"
+                android:textAlignment="center" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/button_disconnection"
+            android:layout_alignParentEnd="true"
+            android:layout_alignBottom="@+id/text_status"
+            android:layout_marginTop="4pt"
+            android:layout_marginBottom="4pt">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:id="@+id/player2"
+                android:layout_weight="1"
+                android:textAlignment="center" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:id="@+id/id2"
+                android:layout_weight="1"
+                android:textAlignment="center" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="4pt"
+            android:layout_marginBottom="4pt">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:id="@+id/player3"
+                android:layout_weight="1"
+                android:textAlignment="center" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:id="@+id/id3"
+                android:layout_weight="1"
+                android:textAlignment="center" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:id="@+id/player4"
+                android:layout_weight="1"
+                android:layout_marginTop="4pt"
+                android:layout_marginBottom="4pt"
+                android:textAlignment="center" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:id="@+id/id4"
+                android:layout_weight="1"
+                android:layout_marginTop="4pt"
+                android:layout_marginBottom="4pt"
+                android:textAlignment="center" />
+        </TableRow>
+    </TableLayout>
 
 
 </RelativeLayout>
