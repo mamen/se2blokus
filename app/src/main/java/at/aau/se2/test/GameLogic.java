@@ -4,11 +4,9 @@ import android.content.Context;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import java.util.Arrays;
 
 public class GameLogic {
 
@@ -38,12 +36,7 @@ public class GameLogic {
 
 
     private void setupNewGameBoard() {
-        gameBoard = new byte[SIZE][SIZE];
-        for (int i = 0; i < SIZE; i++) {
-            for (int j = 0; j < SIZE; j++) {
-                gameBoard[i][j] = 0;
-            }
-        }
+        gameBoard = new byte[SIZE][SIZE]; //Wird ohnedies mit 0 befüllt.
     }
 
     public byte[][] getGameBoard() {
@@ -217,7 +210,7 @@ public class GameLogic {
                         } else {
                             //Inside field seems fine
                             if (checkSurroundings(board[col + 1][row], board[col][row + 1], board[col - 1][row], board[col][row - 1])) {
-                                vibrate();
+//                                vibrate();
 //                                Toast.makeText(context, ("That's invalid, dude!"), Toast.LENGTH_SHORT).show();
                                 return false;
                             } else if (checkSurroundings(board[col - 1][row - 1], board[col + 1][row - 1], board[col - 1][row + 1], board[col + 1][row + 1])) {
