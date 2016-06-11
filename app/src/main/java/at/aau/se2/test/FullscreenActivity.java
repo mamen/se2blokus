@@ -74,9 +74,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 */
     /*
     TODO:
-        - blockrotation
-        - dragged image above finger
-
         - roundbased game for 4 players, maybe random (also random decision who starts in the case of two players)
         - better lobby (was already better before)
         - displaying the count of other players
@@ -208,7 +205,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                         //Preview erfolgreich gezeichnet?
                         drawn = drawStone(index_i, index_j);
 
-                        //Bei left und up Probleme, das Stein nur richtig gedreht nach oben kann (Nullzeilen und Nullspalten)
+                        //Bei left und up Probleme, das Stein nur richtig gedreht nach oben/links kann (Nullzeilen und Nullspalten)
 
                         // Movement Buttons müssen try-catch, da nicht ersichtlich ist,
                         // ob bei neuem moven, der Accept Button noch da ist
@@ -612,6 +609,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             for (int a = 0; a < transposeCount; a++) {
                 b = gl.rotate(b);
             }
+            // TODO Deform Array
             if (preValidation()) {
                 if (!removed_blockDrawer_children.isEmpty()) {
                     if (gl.checkTheRules(b, x, y)) {
@@ -665,9 +663,13 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     private boolean drawStone(int x, int y) {
         if (selectedBlockID >= 0) {
             byte[][] b = player.getStone(selectedBlockID - 1);
+
             for (int a = 0; a < transposeCount; a++) {
                 b = gl.rotate(b);
             }
+
+            //TODO Deform Array
+
             b = changeToPreview(b, true);
 
             if (gl.placeOverEdge(b, x, y)) {
@@ -682,6 +684,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         updatePartOfGameBoard(x, y, (x + 6 > 20) ? 20 : x + 6, (y + 6 > 20) ? 20 : y + 6);
         return true;
     }
+
 
     /**
      * Changes the color of the stone, to give it the same color (But recognizable as Preview)
@@ -754,6 +757,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         return 0;
     }
 
+
     /**
      * Manipulates the YPlacement, so that you can place it more natural
      * Don't change the BlockOrder, or this won't work properly!!
@@ -798,6 +802,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         v.vibrate(duration);
     }
 
+
     /**
      * Removes the used stone from the View
      */
@@ -838,9 +843,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             player.calculateScore(b);
         }
         player.removeFromArray(selectedBlockID - 1);
-//        player.stonesToLog();
         player.putToSaveIndices(b, i, j);
-//        player.printSaveIndices();
 
         removeFromBlockDrawer();
         updatePartOfGameBoard(i, j, (i + b.length), (j + b.length));
@@ -849,11 +852,11 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         Toast.makeText(getApplicationContext(), "Your score is " + player.getScore(), Toast.LENGTH_SHORT).show();
 
 //        if there is another move to make doSomething; right now just for testing, can be used when needed
-        /*if (areTurnsLeft()) {
+        if (areTurnsLeft()) {
             Toast.makeText(getApplicationContext(), "There are turns left, you go", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(getApplicationContext(), "You lost buddy", Toast.LENGTH_SHORT).show();
-        }*/
+        }
 
         byte[] byteArr = createNewByteArray(b, i, j);
         if (doSettings) {
@@ -952,46 +955,87 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
      * false, else
      */
     public boolean areTurnsLeft() {
-        int selectionRemember = selectedBlockID; // To restore if there is another possible move
+        int selectionRemember = selectedBlockID; // To restore, if there is another possible move
         int transposeRemember = transposeCount; // ---------||---------
         byte[] remainingStones = player.getRemainingStones(); // What stones do you still have (Saved as tags)
+        byte[][] gameboard = gl.getGameBoard();
         ArrayList<IndexTuple> savedTuples = player.getSaveIndices(); // Tuples with the Indices of your placed stones
         if (player.getSaveIndicesSize() < player.MAX_STONES) { // Probably useless, because you should not be able to lay more than MAX_STONES
             for (IndexTuple tuple : savedTuples) { // Look at every IndexTuple (where your stones lay)
                 for (byte stone : remainingStones) { // Look at every stone you still have
                     if (stone != -1) { // Already placed stone
-                        int i = tuple.getIndex_j(); // Index_i
+                        int i = tuple.getIndex_j(); // Index_i, bit confusing with row and col..
                         int j = tuple.getIndex_i(); // Index_j
-                        selectedBlockID = stone + 1; // Test all remaining stones
-                        int help = gl.changeHelp(selectedBlockID);
-                        if (((i - help) >= 0 && (j - help) >= 0) || ((i + help) < SIZE && (j - help) >= 0) ||
-                                ((i - help) >= 0 && (j + help) < SIZE) || ((i + help) < SIZE && (j + help) < SIZE)) { // Look only at the corners below your field[i][j]
-                            for (int tr = 0; tr < 4; tr++) {
-                                transposeCount = tr; //Test all four rotations
-                                Log.d("DebugInfo", "i = " + i + ", j = " + j + ", selected = " + selectedBlockID + ", transpose = " + transposeCount);
-                                if (((i - help) >= 0 && (j - help) >= 0)) { // First corner
-                                    Log.d("MoreInfo", "i-help = "+(i-help)+", j-help = "+(j-help));
-                                    if (cornerTesting(i - help, j - help, selectionRemember, transposeRemember)) {
-                                        return true;
+                        selectedBlockID = stone + 1; // isYourPlacementValid needs selectedBlockID
+                        byte[][] actualStone = player.getStone(selectedBlockID - 1);
+                        int help = actualStone.length;
+//                        Log.d("DebugInfo", "i = " + i + ", j = " + j + ", selected = " + selectedBlockID + ", transpose = " + transposeCount);
+                        int lu = 0, ll = 0, ru = 0, rl = 0;
+                        for (int h1 = help; h1 > 0; h1--) {
+                            for (int h2 = help; h2 > 0; h2--) {
+
+                                if ((i - h1) >= 0 && (j - h2) >= 0 && lu == 0) { //Left upper corner
+                                    if (gameboard[i - 1][j - 1] == 0) { // If that corner is not free, you can stop...
+                                        for (int tr = 0; tr < 4; tr++) { // Test all four transpositions
+                                            transposeCount = tr;
+                                            if (cornerTesting(j - h2, i - h1, selectionRemember, transposeRemember)) {
+//                                                Log.d("Winner is", "Col j-h2: " + (j - h2) + "; Row i-h1: " + (i - h1) + "; Transpose: " + tr + "; Selected: " + selectedBlockID);
+                                                return true;
+                                            }
+                                        }
+                                    } else {
+                                        lu++; // ...and set 1/4 int (needed later)
                                     }
                                 }
-                                if (((i + help) < SIZE && (j - help) >= 0)) { // Another corner
-                                    Log.d("MoreInfo", "i+help = "+(i+help)+", j-help = "+(j-help));
-                                    if (cornerTesting(i + help, j - help, selectionRemember, transposeRemember)) {
-                                        return true;
+
+                                if ((i - h1) >= 0 && (j + h2) < SIZE && ll == 0) { //Right upper corner
+                                    if (gameboard[i - 1][j + 1] == 0) {
+                                        for (int tr = 0; tr < 4; tr++) {
+                                            transposeCount = tr;
+                                            if (cornerTesting(j + h2, i - h1, selectionRemember, transposeRemember)) {
+//                                                Log.d("Winner is", "Col j+h2: " + (j + h2) + "; Row i-h1: " + (i - h1) + "; Transpose: " + tr + "; Selected: " + selectedBlockID);
+                                                return true;
+                                            }
+                                        }
+                                    } else {
+                                        ll++;
                                     }
                                 }
-                                if (((i - help) >= 0 && (j + help) < SIZE)) { // Another corner
-                                    Log.d("MoreInfo", "i-help = "+(i-help)+", j+help = "+(j+help));
-                                    if (cornerTesting(i - help, j + help, selectionRemember, transposeRemember)) {
-                                        return true;
+
+                                if ((i + h1) < SIZE && (j - h2) >= 0 && ru == 0) { //Left lower corner
+                                    if (gameboard[i + 1][j - 1] == 0) {
+                                        for (int tr = 0; tr < 4; tr++) {
+                                            transposeCount = tr;
+                                            if (cornerTesting(j - h2, i + h1, selectionRemember, transposeRemember)) {
+//                                                Log.d("Winner is", "Col j-h2: " + (j - h2) + "; Row i+h1: " + (i + h1) + "; Transpose: " + tr + "; Selected: " + selectedBlockID);
+                                                return true;
+                                            }
+                                        }
+                                    } else {
+                                        ru++;
                                     }
                                 }
-                                if (((i + help) < SIZE && (j + help) < SIZE)) { // Another corner
-                                    Log.d("MoreInfo", "i+help = "+(i+help)+", j+help = "+(j+help));
-                                    if (cornerTesting(i + help, j + help, selectionRemember, transposeRemember)) {
-                                        return true;
+
+                                if ((i + h1) < SIZE && (j + h2) < SIZE && rl == 0) { //Right lower corner
+                                    if (gameboard[i + 1][j + 1] == 0) {
+                                        for (int tr = 0; tr < 4; tr++) {
+                                            transposeCount = tr;
+                                            if (cornerTesting(j + h2, i + h1, selectionRemember, transposeRemember)) {
+//                                                Log.d("Winner is", "Col j+h2: " + (j + h2) + "; Row i+h1: " + (i + h1) + "; Transpose: " + tr + "; Selected: " + selectedBlockID);
+                                                return true;
+                                            }
+                                        }
+                                    } else {
+                                        rl++;
                                     }
+                                }
+
+                                // If there is no free corner for this IndexTuple, you can remove it
+                                // I don't know if this is any useful for the performance
+                                if(lu != 0 && ll != 0 && ru != 0 && rl != 0) {
+                                    savedTuples.remove(new IndexTuple(i, j));
+                                    break;
+
                                 }
                             }
                         }
@@ -1002,23 +1046,26 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         return false;
     }
 
+
     /**
      * Watch one corner around your stone, to see if there is at least one more turn
      *
-     * @param j                 - the col to check the placement
-     * @param i                 - the row to check the placement
+     * @param i                 - the col to check the placement
+     * @param j                 - the row to check the placement
      * @param selectionRemember - if one placement is valid, reset selectedBlockID
      * @param transposeRemember - if one placement is valid, reset transposeCount
      * @return true, if there is one more turn
      * false, else
      */
-    public boolean cornerTesting(int j, int i, int selectionRemember, int transposeRemember) {
-        if (drawStone(i, j)) {
-            restore(i, j);
+    public boolean cornerTesting(int i, int j, int selectionRemember, int transposeRemember) {
+        if (drawStone(i, j)) { // Is needed, to make isYourPlacementValid work
             if (isYourPlacementValid(i, j)) {
                 selectedBlockID = selectionRemember;
                 transposeCount = transposeRemember;
+                restore(i, j);
                 return true;
+            } else {
+                restore(i, j);
             }
         }
         return false;

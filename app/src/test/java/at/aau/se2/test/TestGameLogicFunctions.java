@@ -43,12 +43,12 @@ public class TestGameLogicFunctions {
     }
 
     @Test
-    public void testOverRightEdge() {
+    public void testOverRightSide() {
         Assert.assertTrue(gl.placeOverEdge(someStone, 17, 3));
     }
 
     @Test
-    public void testOverBottomEdge() {
+    public void testOverBottomSide() {
         Assert.assertTrue(gl.placeOverEdge(gl.rotate(someStone), 5, 17));
     }
 

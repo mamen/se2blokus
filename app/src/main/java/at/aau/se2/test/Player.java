@@ -131,7 +131,7 @@ public class Player {
     public void putToSaveIndices(byte[][] bytes, int index_i, int index_j) {
         for (int i = 0; i < bytes.length; i++) {
             for (int j = 0; j < bytes[i].length; j++) {
-                if (bytes[i][j] == p_id) {
+                if (bytes[i][j] == p_id && dontSaveRedundance(bytes, i, j)) {
                     saveIndices.add(0, new IndexTuple(index_i + j, index_j + i));
                 }
             }
@@ -142,5 +142,19 @@ public class Player {
         for (int i = 0; i < saveIndices.size(); i++) {
             Log.d("Indices:", saveIndices.get(i).toString());
         }
+    }
+
+    public boolean dontSaveRedundance(byte[][] b, int i, int j) {
+        if((i-1) >= 0 && (i+1) < b.length) {
+            if(b[i-1][j] == p_id && b[i+1][j] == p_id) {
+                return false;
+            }
+        }
+        if((j-1) >= 0 && (j+1) < b.length) {
+            if(b[i][j-1] == p_id && b[i][j+1] == p_id) {
+                return false;
+            }
+        }
+        return true;
     }
 }
