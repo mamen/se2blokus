@@ -858,7 +858,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             Toast.makeText(getApplicationContext(), "You lost buddy", Toast.LENGTH_SHORT).show();
         }
 
-        byte[] byteArr = createNewByteArray(b, i, j);
+        ByteArrayHelper ba = new ByteArrayHelper();
+        byte[] byteArr = ba.createNewByteArray(b, i, j, playerID);
         if (doSettings) {
             sendMessage(byteArr);
             debugging("isit?");
@@ -1097,57 +1098,18 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     }
 
 
-    private byte[] createNewByteArray(byte[][] b, int coordy, int coordx) {
-        byte[][] newByte = new byte[b.length + 1][b.length + 1];
-        for (int i = 0; i < b.length; i++) {
-            for (int j = 0; j < b.length; j++) {
-                newByte[i][j] = b[i][j];
-            }
-        }
-
-        newByte[b.length][b.length - 2] = playerID;
-        newByte[b.length][b.length - 1] = (byte) coordx;
-        newByte[b.length][b.length] = (byte) coordy;
-
-        return convertToOneDimension(newByte);
-    }
-
-    private byte[] convertToOneDimension(byte[][] b) {
-        int count = 0;
-        byte[] oneDim = new byte[b.length * b.length];
-        for (int i = 0; i < b.length; i++) {
-            for (int j = 0; j < b.length; j++) {
-                oneDim[count] = b[i][j];
-                count++;
-            }
-        }
-        return oneDim;
-    }
-
-
     @Override
     public void onMessageReceived(String endpointId, byte[] payload, boolean isReliable) {
 
         deb("action received");
 
-        int stoneDim = (int) Math.sqrt(payload.length) - 1;
-        int dim = 0;
-        byte[][] stone = new byte[stoneDim][stoneDim];
-        int counter = 0;
-        for (int i = 0; i < payload.length - stoneDim - 1; i++) {
+        ByteArrayHelper b = new ByteArrayHelper();
+        b.fetchInformationFromByteArray(payload);
 
-            if (dim < stoneDim) {
-                stone[counter][dim] = payload[i];
-                dim++;
-            } else {
-                dim = 0;
-                counter++;
-
-            }
-        }
-        int color = payload[payload.length - 3];
-        int idx = payload[payload.length - 2];
-        int idy = payload[payload.length - 1];
+        int color = b.getColor();
+        int idx = b.getIdx();
+        int idy = b.getIdy();
+        byte[][] stone = b.getByteStone();
 
         if (color != playerID) {
             deb("" + color + "_" + playerID);

@@ -249,6 +249,12 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
     }
 
     private void handleButtons(int viewID){
+
+        if(isHost){
+            turn = randomStartingLineup(ID_Name_Map.size()==2);
+            sendMessage("N-"+turn);
+        }
+
         debugging("handle buttons");
         switch( viewID ) {
             case R.id.button_green:
