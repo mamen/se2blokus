@@ -14,16 +14,9 @@ import android.widget.TextView;
 
 public class StartScreen extends Activity implements View.OnClickListener {
 
-    private TextView txt_logo;
-    private TextView txt_hostGame;
-    private TextView txt_joinGame;
-    private TextView txt_settings;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
 
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -53,10 +46,10 @@ public class StartScreen extends Activity implements View.OnClickListener {
     private void initialise() {
         Typeface font = Typeface.createFromAsset(getAssets(), "blocked.ttf");
 
-        txt_logo = (TextView) findViewById(R.id.logo);
-        txt_hostGame = (TextView) findViewById(R.id.hostGame);
-        txt_joinGame = (TextView) findViewById(R.id.joinGame);
-        txt_settings = (TextView) findViewById(R.id.settings);
+        TextView txt_logo = (TextView) findViewById(R.id.logo);
+        TextView txt_hostGame = (TextView) findViewById(R.id.hostGame);
+        TextView txt_joinGame = (TextView) findViewById(R.id.joinGame);
+        TextView txt_settings = (TextView) findViewById(R.id.settings);
 
         txt_logo.setTypeface(font);
         txt_hostGame.setTypeface(font);

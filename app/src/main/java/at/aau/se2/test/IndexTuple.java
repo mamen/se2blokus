@@ -1,8 +1,5 @@
 package at.aau.se2.test;
 
-/**
- * Created by KingSeybro on 02.06.2016.
- */
 public class IndexTuple {
 
     private int index_i;
@@ -18,16 +15,8 @@ public class IndexTuple {
         return index_j;
     }
 
-    public void setIndex_j(int index_j) {
-        this.index_j = index_j;
-    }
-
     public int getIndex_i() {
         return index_i;
-    }
-
-    public void setIndex_i(int index_i) {
-        this.index_i = index_i;
     }
 
     @Override

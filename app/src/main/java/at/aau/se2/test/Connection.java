@@ -1,9 +1,5 @@
 package at.aau.se2.test;
 
-/**
- * Created by Tobias on 28.05.2016.
- */
-
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.util.List;
@@ -20,7 +16,7 @@ public class Connection {
     private static ColorScreen colorScreen;
     private static FullscreenActivity fullscreenActivity;
 
-    private Connection() {    };
+    private Connection(){}
 
     public static Connection getInstance() {
         if (Connection.instance == null) {

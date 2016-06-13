@@ -3,9 +3,6 @@ package at.aau.se2.test;
 import android.graphics.Point;
 import android.view.View;
 
-/**
- * Created by KingSeybro on 25.05.2016.
- */
 public class OwnDragShadowBuilder extends View.DragShadowBuilder {
 
     int touchX, touchY;

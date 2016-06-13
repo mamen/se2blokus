@@ -935,19 +935,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         }, 2000);
     }
 
-    public void boardToLog() {
-        byte[][] b = gl.getGameBoard();
-        String s = "";
-        for (int i = 0; i < b.length; i++) {
-            for (int j = 0; j < b[i].length; j++) {
-                s += b[i][j] + ", ";
-            }
-            s += '\n';
-        }
-        s += '\n';
-        Log.d("Board", s);
-    }
-
 
     /**
      * Not excessively tested, but worked where I wanted it to work :)
@@ -1101,7 +1088,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     @Override
     public void onMessageReceived(String endpointId, byte[] payload, boolean isReliable) {
 
-        deb("action received");
+        debugging("action received");
 
         ByteArrayHelper b = new ByteArrayHelper();
         b.fetchInformationFromByteArray(payload);
@@ -1112,7 +1099,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         byte[][] stone = b.getByteStone();
 
         if (color != playerID) {
-            deb("" + color + "_" + playerID);
+            debugging("" + color + "_" + playerID);
             placeStoneOfOtherPlayer(stone, idy, idx);
             isItMyTurn();
 
@@ -1120,7 +1107,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
         if (isHost) {
             sendMessage(payload);
-            deb("send new action");
+            debugging("send new action");
         }
 
     }
@@ -1136,15 +1123,15 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
 
     private void sendMessage(byte[] mess) {
-        deb("sendMessage" + isHost + "..." + remotePeerEndpoints.toString() + "..." + remoteHostEndpoint);
+        debugging("sendMessage" + isHost + "..." + remotePeerEndpoints.toString() + "..." + remoteHostEndpoint);
         if (!remotePeerEndpoints.isEmpty()) {
             if (isHost) {
-                deb(arrToString(mess));
+                debugging(arrToString(mess));
                 Nearby.Connections.sendReliableMessage(apiClient, remotePeerEndpoints, mess);
             }
         } else {
             if (remoteHostEndpoint != null) {
-                deb(arrToString(mess));
+                debugging(arrToString(mess));
                 Nearby.Connections.sendReliableMessage(apiClient, remoteHostEndpoint, mess);
             }
         }
@@ -1196,11 +1183,11 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         imgView.setVisibility(View.VISIBLE);
         imgView.setImageResource(R.drawable.wait);
         imgView.setAlpha(0.4f);
-        deb("should disable and display pic");
+        debugging("should disable and display pic");
     }
 
     public void enableScreenInteraction() {
-        deb("should enable");
+        debugging("should enable");
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
         imgView.setVisibility(View.INVISIBLE);
     }
@@ -1210,11 +1197,24 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
     }
 
+
+    /* ---DEBUGGING--- */
+
     private void debugging(String debMessage) {
         Log.d("tobiasho", debMessage);
     }
 
-    private void deb(String debMessage) {
-        Log.d("asdf", debMessage);
+    public void boardToLog() {
+        byte[][] b = gl.getGameBoard();
+        String s = "";
+        for (int i = 0; i < b.length; i++) {
+            for (int j = 0; j < b[i].length; j++) {
+                s += b[i][j] + ", ";
+            }
+            s += '\n';
+        }
+        s += '\n';
+        Log.d("Board", s);
     }
+
 }

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -14,7 +15,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -31,9 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by Tobias on 27.04.2016.
- */
 
 
 public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
@@ -45,25 +42,26 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
 
     //Network fields
     private GoogleApiClient apiClient;
-    private Connection connection;
+    //private Connection connection;
     private static final long CONNECTION_TIME_OUT = 10000L;
-    private static int NETWORK_TYPE = ConnectivityManager.TYPE_WIFI;
     private boolean isHost;
     private boolean doHosting;
     private boolean isConnected;
     private String remoteHostEndpoint;
     private List<String> remotePeerEndpoints = new ArrayList<>();
-    private HashMap<String, String> ID_Name_Map = new HashMap<String, String>();
+    private HashMap<String, String> idNameMap = new HashMap<>();
 
     //Graphic fields
     private TextView actStatus;
-    private Button connectionButton;
-    private Button disconnectButton;
-    private Button startButton;
+    private TextView connectionButton;
+    private TextView disconnectButton;
+    private TextView startButton;
 
     private String username = "Guest";
     private String hostName = "Guest";
-    private static int participants = 0;
+    //private static int participants = 0;
+    private static final int fontSizeSmall = 16;
+    private static final int fontSizeLarge = 19;
 
     //TableView
     private TextView player1;
@@ -85,13 +83,20 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
     /**
      * oncreate Function called after the activity is launched.
      *
-     * @param savedInstanceState
+     * @param savedInstanceState the saved instance
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //debugging("onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connection);
+
+        // Hide the status bar.
+        View decorView = getWindow().getDecorView();
+        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+        decorView.setSystemUiVisibility(uiOptions);
+
+
         Intent i = getIntent();
         doHosting = Boolean.valueOf(i.getStringExtra("host"));
         apiClient = new GoogleApiClient.Builder(this)
@@ -102,10 +107,10 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
         //debugging("api erstellt");
         setupView();
 
-        if (doHosting == true) {
-            connectionButton.setText("Advertise connection");
+        if (doHosting) {
+            connectionButton.setText(R.string.connection_advertise_connection);
         } else {
-            connectionButton.setText("Search for an existing game");
+            connectionButton.setText(R.string.connection_search_existing_game);
         }
     }
 
@@ -124,7 +129,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setCancelable(false);
         name.setInputType(InputType.TYPE_CLASS_TEXT);
-        builder.setTitle("Username auswählen");
+        builder.setTitle(R.string.connection_select_username);
         builder.setView(name);
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
@@ -163,10 +168,11 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
      */
     private void setupView() {
         actStatus = (TextView) findViewById(R.id.text_status);
-        connectionButton = (Button) findViewById(R.id.button_connection);
-        disconnectButton = (Button) findViewById(R.id.button_disconnection);
-        startButton = (Button) findViewById(R.id.button_start);
-        startButton.setVisibility(View.INVISIBLE);
+        connectionButton = (TextView) findViewById(R.id.button_connection);
+        disconnectButton = (TextView) findViewById(R.id.button_disconnection);
+        startButton = (TextView) findViewById(R.id.button_start);
+        startButton.setVisibility(View.GONE);
+
         player1 = (TextView) findViewById(R.id.player1);
         id1 = (TextView) findViewById(R.id.id1);
         player2 = (TextView) findViewById(R.id.player2);
@@ -175,6 +181,49 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
         id3 = (TextView) findViewById(R.id.id3);
         player4 = (TextView) findViewById(R.id.player4);
         id4 = (TextView) findViewById(R.id.id4);
+
+
+        TextView playerName = (TextView) findViewById(R.id.button_playername);
+        TextView playerId = (TextView) findViewById(R.id.button_playerid);
+        TextView logo = (TextView) findViewById(R.id.logo);
+
+        Typeface font = Typeface.createFromAsset(getAssets(), "blocked.ttf");
+
+        connectionButton.setTypeface(font);
+        connectionButton.setTypeface(font);
+        disconnectButton.setTypeface(font);
+        startButton.setTypeface(font);
+        player1.setTypeface(font);
+        id1.setTypeface(font);
+        player2.setTypeface(font);
+        id2.setTypeface(font);
+        player3.setTypeface(font);
+        id3.setTypeface(font);
+        player4.setTypeface(font);
+        id4.setTypeface(font);
+        playerName.setTypeface(font);
+        playerId.setTypeface(font);
+        logo.setTypeface(font);
+
+
+
+        connectionButton.setTextSize(fontSizeLarge);
+        connectionButton.setTextSize(fontSizeLarge);
+        disconnectButton.setTextSize(fontSizeLarge);
+        startButton.setTextSize(fontSizeLarge);
+        playerName.setTextSize(fontSizeLarge);
+        playerId.setTextSize(fontSizeLarge);
+
+        logo.setTextSize(60);
+
+        player1.setTextSize(fontSizeSmall);
+        id1.setTextSize(fontSizeSmall);
+        player2.setTextSize(fontSizeSmall);
+        id2.setTextSize(fontSizeSmall);
+        player3.setTextSize(fontSizeSmall);
+        id3.setTextSize(fontSizeSmall);
+        player4.setTextSize(fontSizeSmall);
+        id4.setTextSize(fontSizeSmall);
 
 
         disconnectButton.setAlpha(.5f);
@@ -201,7 +250,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
         //debugging("isConnectedToNetwork");
         ConnectivityManager connManager =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo info = connManager.getNetworkInfo(NETWORK_TYPE);
+        NetworkInfo info = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
         if (info != null && info.isConnectedOrConnecting()) {
             //debugging("mit netzwerk verbunden");
             return true;
@@ -216,37 +265,37 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
      */
     private void disconnect() {
         debugging("disconnect");
-        if (!isConnectedToNetwork() || isConnected == false)
+        if (!isConnectedToNetwork() || !isConnected)
             return;
         //debugging("ishost? "+isHost);
         if (isHost) {
-            ID_Name_Map.clear();
+            idNameMap.clear();
             sendMessage("Shutting down host");
             Nearby.Connections.stopAdvertising(apiClient);
             Nearby.Connections.stopAllEndpoints(apiClient);
-            actStatus.setText("Not connected");
+            actStatus.setText(R.string.status_not_connected);
             remotePeerEndpoints.clear();
             //participants = 0;
             finalizeDisconnection();
             clearTableView();
             //isHost = false;
 
-            //debugging("Shutting down NR: "+ID_Name_Map.size());
+            //debugging("Shutting down NR: "+idNameMap.size());
         } else {
-            if (!isConnected || TextUtils.isEmpty(remoteHostEndpoint)) {
+            if (TextUtils.isEmpty(remoteHostEndpoint)) {
                 Nearby.Connections.stopDiscovery(apiClient, getString(R.string.service_id));
                 return;
             }
             //debugging("komme ich hier her?");
-            //ID_Name_Map.remove(Nearby.Connections.getLocalDeviceId(apiClient));
-            ID_Name_Map.clear();
+            //idNameMap.remove(Nearby.Connections.getLocalDeviceId(apiClient));
+            idNameMap.clear();
 
             sendMessage("Disconnecting");
             Nearby.Connections.disconnectFromEndpoint(apiClient, remoteHostEndpoint);
             remoteHostEndpoint = null;
             //participants--;
-            //debugging("Disconnect NR: "+ID_Name_Map.size());
-            actStatus.setText("Disconnected");
+            //debugging("Disconnect NR: "+idNameMap.size());
+            actStatus.setText(R.string.status_disconnected);
             finalizeDisconnection();
             clearTableView();
         }
@@ -261,7 +310,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
         //debugging("advertise");
         if (!isConnectedToNetwork()) {
             //debugging("not connected to wifi");
-            actStatus.setText("Please connect the device to WiFi!");
+            actStatus.setText(R.string.status_please_connect_to_wifi);
             disconnectButton.setAlpha(0.5f);
             disconnectButton.setClickable(false);
             connectionButton.setAlpha(1f);
@@ -269,7 +318,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
             return;
         }
 
-        ID_Name_Map.put(Nearby.Connections.getLocalDeviceId(apiClient), username);
+        idNameMap.put(Nearby.Connections.getLocalDeviceId(apiClient), username);
         String name = "Nearby Advertising";
 
 
@@ -277,8 +326,8 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
             @Override
             public void onResult(Connections.StartAdvertisingResult result) {
                 if (result.getStatus().isSuccess()) {
-                    actStatus.setText("Advertising");
-                    ID_Name_Map.put(Nearby.Connections.getLocalDeviceId(apiClient), username);
+                    actStatus.setText(R.string.status_advertising);
+                    idNameMap.put(Nearby.Connections.getLocalDeviceId(apiClient), username);
 
 
                     //participants++;
@@ -306,7 +355,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
             @Override
             public void onResult(Status status) {
                 if (status.isSuccess()) {
-                    actStatus.setText("Discovering");
+                    actStatus.setText(R.string.status_discovering);
                 }
             }
         });
@@ -319,11 +368,11 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
 
     private void setUpTableView(){
         if(isHost){
-            ID_Name_Map.put(Nearby.Connections.getLocalDeviceId(apiClient), username);
+            idNameMap.put(Nearby.Connections.getLocalDeviceId(apiClient), username);
             id1.setText(Nearby.Connections.getLocalDeviceId(apiClient));
             player1.setText(username);
             int i = 2;
-            for (Map.Entry<String, String> entry : ID_Name_Map.entrySet())
+            for (Map.Entry<String, String> entry : idNameMap.entrySet())
             {
                 if(!entry.getValue().equals(username)) {
                     String textViewID = "id" + i;
@@ -341,9 +390,9 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
             String[] rem = remoteHostEndpoint.split(":");
             String remoteHost = rem[0];
             id1.setText(remoteHost);
-            player1.setText(ID_Name_Map.get(remoteHost));
+            player1.setText(idNameMap.get(remoteHost));
             int i = 2;
-            for (Map.Entry<String, String> entry : ID_Name_Map.entrySet())
+            for (Map.Entry<String, String> entry : idNameMap.entrySet())
             {
                 if(!entry.getKey().equals(remoteHost)) {
                     String textViewID = "id" + i;
@@ -403,13 +452,13 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
                         String user = new String(payload, StandardCharsets.UTF_8);
                         //debugging("user: "+user);
                         debugging("name of partner" + remoteEndpointId);
-                        ID_Name_Map.put(remoteDeviceId, user);
+                        idNameMap.put(remoteDeviceId, user);
                         //debugging("INFORMATION: "+ remoteEndpointId + ", "+ remoteDeviceId+", "+ remoteEndpointName);
                         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                         sendMessage("NEWPLAYER-" + Nearby.Connections.getLocalDeviceId(apiClient) + "-" + username);
                         //sendMessage(username + " connected!");
                         //participants++;
-                        //debugging("Request accepted NR: "+ ID_Name_Map.size());
+                        //debugging("Request accepted NR: "+ idNameMap.size());
                         setUpTableView();
                         checkStartGame();
 
@@ -426,13 +475,13 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
         //debugging("found that!");
         setupParticipantList();
         if (isHost) {
-            if (ID_Name_Map.size() == 2 || ID_Name_Map.size() == 4) {
+            if (idNameMap.size() == 2 || idNameMap.size() == 4) {
                 startButton.setVisibility(View.VISIBLE);
                 startButton.setClickable(true);
                 startButton.setBackgroundColor(Color.BLACK);
                 startButton.setTextColor(Color.WHITE);
             } else {
-                startButton.setVisibility(View.INVISIBLE);
+                startButton.setVisibility(View.GONE);
                 startButton.setClickable(false);
             }
         }
@@ -443,11 +492,9 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
     }
 
     private void finalizeConnection() {
-        if (isConnected == false) {
+        if (!isConnected) {
             isConnected = true;
             //debugging("Device "+Nearby.Connections.getLocalDeviceId(apiClient)+ " connected");
-        } else {
-            //debugging("finalize connect falsch aufgerufen");
         }
 
         String partString = listCurrentParticipants();
@@ -457,11 +504,9 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
     }
 
     private void finalizeDisconnection() {
-        if (isConnected == true) {
+        if (isConnected) {
             isConnected = false;
             //debugging("Device "+Nearby.Connections.getLocalDeviceId(apiClient)+ " disconnected");
-        } else {
-            //debugging("finalize disconnect falsch aufgerufen");
         }
         String partString = listCurrentParticipants();
         sendMessage(partString);
@@ -471,7 +516,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
 
     private String listCurrentParticipants() {
         String particip = "";
-        for (Map.Entry<String, String> entry : ID_Name_Map.entrySet()) {
+        for (Map.Entry<String, String> entry : idNameMap.entrySet()) {
             particip += entry.getValue() + " (" + entry.getKey() + ")\n";
         }
         sendMessage(particip);
@@ -522,8 +567,9 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
             @Override
             public void onConnectionResponse(String s, Status status, byte[] bytes) {
                 if (status.isSuccess()) {
-                    ID_Name_Map.put(Nearby.Connections.getLocalDeviceId(apiClient), username);
-                    actStatus.setText("Connected to: " + hostName);
+                    idNameMap.put(Nearby.Connections.getLocalDeviceId(apiClient), username);
+                    String text = R.string.status_connected_to + " " + hostName;
+                    actStatus.setText(text);
                     Nearby.Connections.stopDiscovery(apiClient, serviceId);
                     remoteHostEndpoint = s;
                     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -531,7 +577,8 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
                     setUpTableView();
 
                 } else {
-                    actStatus.setText("Connection to " + hostName + " failed");
+                    String text = R.string.status_connection_to + hostName + R.string.status_connection_to_failed;
+                    actStatus.setText(text);
                 }
             }
         }, this);
@@ -554,22 +601,18 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
     /**
      * Normalerweise nur niedrige Zahlen + Koordinaten (max 20) im Array und durch fehlende Konvertierung (zB von String auf byte[] bleibt das auch so
      *
-     * @param b
-     * @return
+     * @param b block-byte-array
+     * @return true/false
      */
     private boolean onlyNum(byte[] b) {
 
-        boolean isStone = true;
-
-        for (int i = 0; i < b.length; i++) {
-            if (b[i] > 20) {
-                isStone = false;
-                return isStone;
+        for (byte x : b) {
+            if (x > 20) {
+                return false;
             }
-
         }
 
-        return isStone;
+        return true;
     }
 
 
@@ -597,7 +640,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
                 if (messArray.length == 3) {
                     String playerID = messArray[1];
                     String playerName = messArray[2];
-                    ID_Name_Map.put(playerID, playerName);
+                    idNameMap.put(playerID, playerName);
                     setUpTableView();
                 } else {
                     debugging("message array has wrong format");
@@ -611,7 +654,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
                 String[] messArray = message.split("-");
                 if (messArray.length == 2) {
                     String playerID = messArray[1];
-                    ID_Name_Map.remove(playerID);
+                    idNameMap.remove(playerID);
                     setUpTableView();
                 } else {
                     debugging("message array has wrong format");
@@ -630,7 +673,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
             /*String[] messArray = message.split("-");
             if(messArray.length == 2) {
                 String playerID = messArray[1];
-                ID_Name_Map.remove(playerID);
+                idNameMap.remove(playerID);
             }
             else {
                 debugging("message array has wrong format");
@@ -678,7 +721,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
             if (s.contains(":")) {
                 String[] idArr = s.split(":");
                 id = idArr[0];
-                ID_Name_Map.remove(id);
+                idNameMap.remove(id);
             }
             sendMessage("REMOVE-" + id);
             checkStartGame();
@@ -727,11 +770,11 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
                 if (doHosting) {
                     isHost = true;
                     advertise();
-                    actStatus.setText("Advertising .. " + username);
+                    actStatus.setText(R.string.status_advertising + " " + username);
                 } else {
                     isHost = false;
                     discover();
-                    actStatus.setText("Searching .. " + username);
+                    actStatus.setText(R.string.status_searching + " " + username);
                 }
                 break;
 
@@ -744,7 +787,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
                 disconnectButton.setClickable(false);
                 connectionButton.setAlpha(1f);
                 connectionButton.setClickable(true);
-                actStatus.setText("Disconnected ");
+                actStatus.setText(R.string.status_disconnected);
                 break;
 
 
@@ -758,7 +801,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
                 Connection.getInstance().setRemotePeerEndpoints(remotePeerEndpoints);
                 //chooseStoneColor();
                 final Intent intent = new Intent("at.aau.se2.test.COLORSCREEN");
-                intent.putExtra("map", ID_Name_Map);
+                intent.putExtra("map", idNameMap);
                 intent.putExtra("host", isHost);
                 intent.putExtra("hostEnd", remoteHostEndpoint);
                 startActivity(intent);
@@ -781,10 +824,10 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
 
     private String output() {
         String output = "";
-        for (String key : ID_Name_Map.keySet()) {
-            output += (key + " " + ID_Name_Map.get(key)) + " ";
+        for (String key : idNameMap.keySet()) {
+            output += (key + " " + idNameMap.get(key)) + " ";
         }
-        output += " - ANZ:" + ID_Name_Map.size();
+        output += " - ANZ:" + idNameMap.size();
         return output;
     }
 

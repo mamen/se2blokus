@@ -1,8 +1,5 @@
 package at.aau.se2.test;
 
-/**
- * Created by Tobias on 12.06.2016.
- */
 public class ByteArrayHelper {
 
     private int color;

@@ -110,16 +110,6 @@ public class Player {
         return remainingStones;
     }
 
-    public void stonesToLog() {
-        String s = "";
-        for (int i = 0; i < remainingStones.length; i++) {
-            if (remainingStones[i] != -1) {
-                s += remainingStones[i] + ", ";
-            }
-        }
-        Log.d("Remaining Stones", s);
-    }
-
     public ArrayList<IndexTuple> getSaveIndices() {
         return saveIndices;
     }
@@ -138,12 +128,6 @@ public class Player {
         }
     }
 
-    public void printSaveIndices() {
-        for (int i = 0; i < saveIndices.size(); i++) {
-            Log.d("Indices:", saveIndices.get(i).toString());
-        }
-    }
-
     public boolean dontSaveRedundance(byte[][] b, int i, int j) {
         if((i-1) >= 0 && (i+1) < b.length) {
             if(b[i-1][j] == p_id && b[i+1][j] == p_id) {
@@ -156,5 +140,23 @@ public class Player {
             }
         }
         return true;
+    }
+
+    /* ---DEBUGGING--- */
+
+    public void stonesToLog() {
+        String s = "";
+        for (int i = 0; i < remainingStones.length; i++) {
+            if (remainingStones[i] != -1) {
+                s += remainingStones[i] + ", ";
+            }
+        }
+        Log.d("Remaining Stones", s);
+    }
+
+    public void printSaveIndices() {
+        for (int i = 0; i < saveIndices.size(); i++) {
+            Log.d("Indices:", saveIndices.get(i).toString());
+        }
     }
 }

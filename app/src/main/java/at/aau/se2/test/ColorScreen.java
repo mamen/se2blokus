@@ -23,9 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Created by Tobias on 31.05.2016.
- */
 public class ColorScreen extends Activity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         Connections.ConnectionRequestListener,
@@ -203,6 +200,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
     }
 
     public void setButtonSelected(String endpointId, Button b){
+        //TODO: Methode disabled den button, und macht sonst nichts
         disableButton(b);
         String buttontext = b.getText().toString();
         String selector = ID_Name_Map.get(endpointId);
@@ -223,6 +221,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
     }
 
     public void enableButton(Button b){
+        //TODO: Methode wird niemals verwendet
         b.setAlpha(1);
         b.setClickable(true);
     }
@@ -245,6 +244,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
     }
 
     public void resetButton(Button b){
+        //TODO: Methode wird niemals verwendet
         b.setBackgroundResource(android.R.drawable.btn_default);
     }
 

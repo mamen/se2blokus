@@ -1,8 +1,6 @@
 package at.aau.se2.test;
 
 import android.content.Context;
-import android.os.Vibrator;
-import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -36,7 +34,7 @@ public class GameLogic {
 
 
     private void setupNewGameBoard() {
-        gameBoard = new byte[SIZE][SIZE]; //Wird ohnedies mit 0 befüllt.
+        gameBoard = new byte[SIZE][SIZE];
     }
 
     public byte[][] getGameBoard() {
@@ -258,9 +256,7 @@ public class GameLogic {
         byte[][] help = getGameBoard();
         for (int x = 0; x < b.length; x++) {
             for (int y = 0; y < b.length; y++) {
-                if ((i + y) >= SIZE || (j + x) >= SIZE) {
-
-                } else {
+                if (!((i + y) >= SIZE || (j + x) >= SIZE)) {
                     retArr[x][y] = help[i + y][j + x];
                 }
             }
@@ -279,9 +275,7 @@ public class GameLogic {
     public void restoreField(byte[][] b, int i, int j) {
         for (int x = 0; x < b.length; x++) {
             for (int y = 0; y < b[x].length; y++) {
-                if ((i + y) >= SIZE || (j + x) >= SIZE) {
-
-                } else {
+                if (!((i + y) >= SIZE || (j + x) >= SIZE)) {
                     gameBoard[i + y][j + x] = b[x][y];
                 }
             }
@@ -301,13 +295,6 @@ public class GameLogic {
             if (check == player.getPlayerId()) return true;
         }
         return false;
-    }
-
-
-    private void vibrate() {
-        Vibrator v = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-        // Vibrate for 500 milliseconds
-        v.vibrate(500);
     }
 
     /**
