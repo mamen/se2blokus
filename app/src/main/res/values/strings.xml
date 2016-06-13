@@ -17,6 +17,10 @@
     <string name="connection_type_host">Host</string>
     <string name="connection_type_client">Client</string>
 
+    <string name="splash_nowificonnection">Do you want to connect to a network now? (If not, the App will exit)</string>
+    <string name="splash_yes">Yes</string>
+    <string name="splash_no">No</string>
+
 
     <string name="status_not_connected">Not connected</string>
     <string name="status_disconnected">Disconnected</string>
