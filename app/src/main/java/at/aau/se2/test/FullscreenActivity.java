@@ -45,8 +45,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     private GameLogic gl;
     private static final int SIZE = 20;
     private int selectedBlockID;
-    private List<ImageView> blockDrawer_children;
-    private List<ImageView> removed_blockDrawer_children;
+    private List<ImageView> blockDrawerChildren;
+    private List<ImageView> removedBlockDrawerChildren;
     private Player player;
     private boolean doubleBackToExitPressedOnce = false;
     private ImageView testView;
@@ -56,13 +56,13 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     private int transposeCount; //Zähler wie oft der Stein gedreht wurde
     private boolean doSettings;
 
-    private Connection connection;
+    //private Connection connection;
     private GoogleApiClient apiClient;
     private boolean isHost;
-    private boolean isConnected = true;
+    //private boolean isConnected = true;
     private String remoteHostEndpoint;
     private List<String> remotePeerEndpoints = new ArrayList<>();
-    private HashMap<String, String> ID_Name_Map = new HashMap<String, String>();
+    private HashMap<String, String> idNameMap = new HashMap<>();
     private byte playerID;
     private ImageView imgView;
     private int myturn;
@@ -91,12 +91,10 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         rememberField = new byte[5][5];
         elementFinished = true;
 
-        String color;
         Bundle extras = getIntent().getExtras();
         doSettings = extras.getBoolean("test");
 
-        ID_Name_Map = ((HashMap<String, String>) extras.getSerializable("map"));
-        //plCount = ID_Name_Map.size();
+        idNameMap = (HashMap<String, String>) extras.getSerializable("map");
         isHost = extras.getBoolean("host");
         remoteHostEndpoint = extras.getString("hostEnd");
         remotePeerEndpoints = Connection.getInstance().getRemotePeerEndpoints();
@@ -106,7 +104,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
         playerID = extras.getByte("color");
         if (doSettings) {
-            if (ID_Name_Map.size() == 2) {
+            if (idNameMap.size() == 2) {
                 if (isHost) {
                     myturn = Integer.parseInt(extras.getString("turn").charAt(0) + "");
                 } else {
@@ -116,7 +114,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                 myturn = Integer.parseInt(extras.getString("turn").charAt(playerID - 1) + "");
             }
             debugging(extras.getString("turn"));
-            debugging(myturn + "");
+            debugging(Integer.toString(myturn));
         }
 
         // lade Player
@@ -225,7 +223,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                             fullscreenLayout.removeView(accept);
                                         }
                                     } catch (IllegalStateException e) {
-                                        e.printStackTrace();
+                                        Log.e("Error",e.getMessage());
+                                        throw new IllegalStateException();
                                     }
                                 } else {
                                     restore(index_i, index_j);
@@ -249,7 +248,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                             fullscreenLayout.removeView(accept);
                                         }
                                     } catch (IllegalStateException e) {
-                                        e.printStackTrace();
+                                        Log.e("Error",e.getMessage());
+                                        throw new IllegalStateException();
                                     }
                                 } else {
                                     restore(index_i, --index_j);
@@ -273,7 +273,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                             fullscreenLayout.removeView(accept);
                                         }
                                     } catch (IllegalStateException e) {
-                                        e.printStackTrace();
+                                        Log.e("Error",e.getMessage());
                                     }
                                 } else {
                                     restore(--index_i, index_j);
@@ -298,7 +298,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                             fullscreenLayout.removeView(accept);
                                         }
                                     } catch (IllegalStateException e) {
-                                        e.printStackTrace();
+                                        Log.e("Error",e.getMessage());
+                                        throw new IllegalStateException();
                                     }
                                 } else {
                                     restore(--index_i, index_j);
@@ -308,29 +309,29 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                         });
 
 
-                        RelativeLayout.LayoutParams params_move_up = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-                        RelativeLayout.LayoutParams params_move_right = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-                        RelativeLayout.LayoutParams params_move_down = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-                        RelativeLayout.LayoutParams params_move_left = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                        RelativeLayout.LayoutParams paramsMoveUp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                        RelativeLayout.LayoutParams paramsMoveRight = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                        RelativeLayout.LayoutParams paramsMoveDown = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                        RelativeLayout.LayoutParams paramsMoveLeft = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
 
                         //TODO: Berechnungen falsch, momentan einfach wird einfach irgendetwas gerechnet ;)
-                        params_move_up.setMargins((int) Math.floor(gameBoardLayout.getHeight() / 2), 0, 0, 0);
-                        params_move_right.setMargins((int) Math.floor(gameBoardLayout.getHeight() / 4) * 3, (int) Math.floor(gameBoardLayout.getHeight() / 2), 0, 0);
-                        params_move_down.setMargins((int) Math.floor(gameBoardLayout.getHeight() / 2), (int) Math.floor(gameBoardLayout.getHeight() / 4) * 3, 0, 0);
-                        params_move_left.setMargins(0, (int) Math.floor(gameBoardLayout.getHeight() / 2), 0, 0);
+                        paramsMoveUp.setMargins((int) Math.floor(gameBoardLayout.getHeight() / 2), 0, 0, 0);
+                        paramsMoveRight.setMargins((int) Math.floor(gameBoardLayout.getHeight() / 4) * 3, (int) Math.floor(gameBoardLayout.getHeight() / 2), 0, 0);
+                        paramsMoveDown.setMargins((int) Math.floor(gameBoardLayout.getHeight() / 2), (int) Math.floor(gameBoardLayout.getHeight() / 4) * 3, 0, 0);
+                        paramsMoveLeft.setMargins(0, (int) Math.floor(gameBoardLayout.getHeight() / 2), 0, 0);
 
-                        move_up.setLayoutParams(params_move_up);
-                        move_right.setLayoutParams(params_move_right);
-                        move_down.setLayoutParams(params_move_down);
-                        move_left.setLayoutParams(params_move_left);
+                        move_up.setLayoutParams(paramsMoveUp);
+                        move_right.setLayoutParams(paramsMoveRight);
+                        move_down.setLayoutParams(paramsMoveDown);
+                        move_left.setLayoutParams(paramsMoveLeft);
 
                         // Accept-Button
                         if (drawn) {
-                            RelativeLayout.LayoutParams params_accept = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                            RelativeLayout.LayoutParams paramsAccept = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
                             accept = new ImageButton(getApplicationContext());
                             accept.setImageResource(R.drawable.checkmark);
-                            params_accept.setMargins(0, v.getHeight() + accept.getHeight(), 0, 0);
-                            accept.setLayoutParams(params_accept);
+                            paramsAccept.setMargins(0, v.getHeight() + accept.getHeight(), 0, 0);
+                            accept.setLayoutParams(paramsAccept);
 
                             accept.setOnClickListener(new View.OnClickListener() {
                                 @Override
@@ -354,11 +355,11 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
 
                             // Cancel-Button
-                            RelativeLayout.LayoutParams params_cancel = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                            RelativeLayout.LayoutParams paramsCancel = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
                             cancel = new ImageButton(getApplicationContext());
                             cancel.setImageResource(R.drawable.cancel);
-                            params_cancel.setMargins(Math.round(v.getWidth() / 3), v.getHeight() + cancel.getHeight(), 0, 0);
-                            cancel.setLayoutParams(params_cancel);
+                            paramsCancel.setMargins(Math.round(v.getWidth() / 3), v.getHeight() + cancel.getHeight(), 0, 0);
+                            cancel.setLayoutParams(paramsCancel);
 
                             cancel.setOnClickListener(new View.OnClickListener() {
                                 @Override
@@ -367,15 +368,15 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                     testView.setVisibility(View.VISIBLE);
                                     elementFinished = true;
                                     restore(index_i, index_j);
-//                                        boardToLog();
+                                    //boardToLog();
                                 }
                             });
 
-                            RelativeLayout.LayoutParams params_transpose = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                            RelativeLayout.LayoutParams paramsTranspose = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
                             transpose = new ImageButton(getApplicationContext());
                             transpose.setImageResource(R.drawable.transpose);
-                            params_transpose.setMargins(Math.round((2 * v.getWidth()) / 3), v.getHeight() + transpose.getHeight(), 0, 0);
-                            transpose.setLayoutParams(params_transpose);
+                            paramsTranspose.setMargins(Math.round((2 * v.getWidth()) / 3), v.getHeight() + transpose.getHeight(), 0, 0);
+                            transpose.setLayoutParams(paramsTranspose);
 
                             //Board wiederherstellen, Stein drehen und neue Preview zeichnen, Accept Button nur bei gültigem Zug anzeigen
                             //Try-Catch, da ich Accept nicht zweimal adden darf
@@ -392,7 +393,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                             try {
                                                 fullscreenLayout.addView(accept);
                                             } catch (IllegalStateException e) {
-
+                                                Log.e("Error",e.getMessage());
+                                                throw new IllegalStateException();
                                             }
                                         }
                                     } else {
@@ -442,16 +444,16 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
 
     private void initializeBlockDrawer() {
-        LinearLayout blockDrawer_parent = (LinearLayout) findViewById(R.id.blockDrawer_parent);
-        ViewGroup.LayoutParams params = blockDrawer_parent.getLayoutParams();
+        LinearLayout blockDrawerParent = (LinearLayout) findViewById(R.id.blockDrawer_parent);
+        ViewGroup.LayoutParams params = blockDrawerParent.getLayoutParams();
 
         params.height = getScreenHeight() - (getScreenWidth());
-        blockDrawer_parent.setLayoutParams(params);
+        blockDrawerParent.setLayoutParams(params);
 
         blockDrawer = (LinearLayout) findViewById(R.id.blockDrawer);
 
-        blockDrawer_children = new ArrayList<>();
-        removed_blockDrawer_children = new ArrayList<>();
+        blockDrawerChildren = new ArrayList<>();
+        removedBlockDrawerChildren = new ArrayList<>();
 
         String color = player.getPlayerColor();
 
@@ -466,7 +468,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             param.setGravity(Gravity.CENTER);
             oImageView.setLayoutParams(param);
             blockDrawer.addView(oImageView);
-            blockDrawer_children.add(oImageView);
+            blockDrawerChildren.add(oImageView);
 
             //Touch-Eventhandler initialisieren
             oImageView.setOnLongClickListener(new View.OnLongClickListener() {
@@ -479,7 +481,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                         shadowBuilder = new OwnDragShadowBuilder(v, v.getWidth() / 2, v.getHeight() / 2);
                         v.startDrag(data, shadowBuilder, v, 0);
 
-                        for (ImageView bdc : blockDrawer_children) {
+                        for (ImageView bdc : blockDrawerChildren) {
                             if (bdc.equals(v)) {
                                 selectedBlockID = (int) bdc.getTag(); //Gewählter Spielstein
                             }
@@ -583,6 +585,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                     case 9:
                         oImageView.setImageResource(R.drawable.yellow_s_1_preview);
                         break;
+                    default:
+                        throw new ExceptionInInitializerError("Draw color on GameBoard failed");
                 }
                 int index = i * 20 + j;
                 oImageView.setLayoutParams(param);
@@ -611,16 +615,12 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             }
             // TODO Deform Array
             if (preValidation()) {
-                if (!removed_blockDrawer_children.isEmpty()) {
-                    if (gl.checkTheRules(b, x, y)) {
-
-                    } else {
+                if (!removedBlockDrawerChildren.isEmpty()) {
+                    if (!gl.checkTheRules(b, x, y)) {
                         return false;
                     }
                 } else {
-                    if (gl.hitTheCorner(b, x, y)) {
-
-                    } else {
+                    if (!gl.hitTheCorner(b, x, y)) {
                         vibrate(500);
                         return false;
                     }
@@ -729,7 +729,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
      * @param selectedBlock The tag of your stone
      * @return an Integer, to change the placement in X-direction
      */
-    private int manipulateX(int selectedBlock) {
+    private static int manipulateX(int selectedBlock) {
         switch (selectedBlock) {
             case 0:
             case 1:
@@ -753,8 +753,9 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             case 18:
             case 19:
                 return 1;
+            default:
+                throw new ExceptionInInitializerError("manipulateX failed");
         }
-        return 0;
     }
 
 
@@ -765,7 +766,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
      * @param selectedBlock The tag of your stone
      * @return an Integer, to change the placement in Y-direction
      */
-    private int manipulateY(int selectedBlock) {
+    private static int manipulateY(int selectedBlock) {
         switch (selectedBlock) {
             case 0:
             case 1:
@@ -790,9 +791,9 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                 return 1;
             case 14:
                 return 2;
-
+            default:
+                throw new ExceptionInInitializerError("manipulateY failed");
         }
-        return 0;
     }
 
 
@@ -808,20 +809,20 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
      */
     private void removeFromBlockDrawer() {
         int count = 0;
-        if (!removed_blockDrawer_children.isEmpty()) {
-            for (ImageView t : removed_blockDrawer_children) {
+        if (!removedBlockDrawerChildren.isEmpty()) {
+            for (ImageView t : removedBlockDrawerChildren) {
                 if ((int) t.getTag() < selectedBlockID) {
                     count++;
                 }
             }
         }
 
-        int rm_index = Math.max(0, (selectedBlockID) - count);
-        ImageView rm = (ImageView) blockDrawer.getChildAt(rm_index);
+        int rmIndex = Math.max(0, (selectedBlockID) - count);
+        ImageView rm = (ImageView) blockDrawer.getChildAt(rmIndex);
         //Toast.makeText(getApplicationContext(), (selectedBlockID) + " / " + rm_index + " / " + (22 - blockDrawer.getChildCount()), Toast.LENGTH_SHORT).show();
         blockDrawer.removeView(rm);
-        blockDrawer_children.remove(rm);
-        removed_blockDrawer_children.add(rm);
+        blockDrawerChildren.remove(rm);
+        removedBlockDrawerChildren.add(rm);
         selectedBlockID = -1;
     }
 
@@ -1112,7 +1113,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         byte[][] stone = b.getByteStone();
 
         if (color != playerID) {
-            debugging("" + color + "_" + playerID);
+            debugging("" + Integer.toString(color) + "_" + Integer.toString(playerID));
             placeStoneOfOtherPlayer(stone, idy, idx);
             isItMyTurn();
 
@@ -1152,7 +1153,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
     @Override
     public void onDisconnected(String s) {
-
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -1162,11 +1163,11 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
      */
     @Override
     public void onClick(View v) {
-
+        throw new UnsupportedOperationException();
     }
 
     private void isItMyTurn() {
-        if (ID_Name_Map.size() == 2) {
+        if (idNameMap.size() == 2) {
             debugging("small");
             actTurn++;
             if (actTurn == 3) {
@@ -1207,7 +1208,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+        throw new UnsupportedOperationException();
     }
 
 
@@ -1224,9 +1225,9 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             for (int j = 0; j < b[i].length; j++) {
                 s += b[i][j] + ", ";
             }
-            s += '\n';
+            s += Character.toString('\n');
         }
-        s += '\n';
+        s += Character.toString('\n');
         Log.d("Board", s);
     }
 

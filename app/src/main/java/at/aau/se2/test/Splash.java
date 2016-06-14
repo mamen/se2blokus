@@ -12,7 +12,10 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
+<<<<<<< HEAD
 import android.view.Display;
+=======
+>>>>>>> origin/development
 import android.view.View;
 import android.widget.TextView;
 
@@ -44,7 +47,6 @@ public class Splash extends Activity {
         } else {
             txt_logo.setTextSize(120);
         }
-        Log.d("display width", "width = " + getScreenWidth());
 
         Thread checkWiFiThread = new Thread() {
             @Override
@@ -56,7 +58,8 @@ public class Splash extends Activity {
                     }
                     sleep(1000);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.e("Error",e.getMessage());
+                    throw new IllegalStateException();
                 } finally {
                     Intent openStart = new Intent("at.aau.se2.test.STARTSCREEN");
                     startActivity(openStart);

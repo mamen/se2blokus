@@ -6,9 +6,6 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-/**
- * Created by Tobias on 12.06.2016.
- */
 public class TestByteArrayCommunication {
 
     static byte id;
@@ -49,6 +46,15 @@ public class TestByteArrayCommunication {
         helper.fetchInformationFromByteArray(calcByte);
         byte[][] arr = helper.getByteStone();
         Assert.assertTrue(Arrays.deepEquals(arr, someStone));
+    }
+
+    @Test
+    public void testConversionAndReconversion(){
+        byte[] temp = helper.createNewByteArray(someStone, coordx, coordy, id);
+        helper.fetchInformationFromByteArray(temp);
+        byte[][] original = helper.getByteStone();
+        Assert.assertTrue(Arrays.deepEquals(original, someStone));
+
     }
 
 }

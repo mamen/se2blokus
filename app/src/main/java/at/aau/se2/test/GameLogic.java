@@ -33,7 +33,7 @@ public class GameLogic {
     }
 
 
-    private void setupNewGameBoard() {
+    private static void setupNewGameBoard() {
         gameBoard = new byte[SIZE][SIZE];
     }
 
@@ -110,7 +110,7 @@ public class GameLogic {
             }
             return false;
         } else {
-            Toast.makeText(context, ("Why does this fail?"), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Why does this fail?", Toast.LENGTH_SHORT).show();
         }
         return false;
     }
@@ -232,7 +232,7 @@ public class GameLogic {
      * @param i - the col where you want to place it
      * @param j - the row where you want to place it
      */
-    public void placeStone(byte[][] b, int i, int j) {
+    public static void placeStone(byte[][] b, int i, int j) {
         for (int x = 0; x < b.length; x++) {
             for (int y = 0; y < b[x].length; y++) {
                 if (b[x][y] != 0) {
@@ -272,7 +272,7 @@ public class GameLogic {
      * @param i - the col where you want to restore it
      * @param j - the row where you want to restore it
      */
-    public void restoreField(byte[][] b, int i, int j) {
+    public static void restoreField(byte[][] b, int i, int j) {
         for (int x = 0; x < b.length; x++) {
             for (int y = 0; y < b[x].length; y++) {
                 if (!((i + y) >= SIZE || (j + x) >= SIZE)) {

@@ -37,6 +37,8 @@ public class StartScreen extends Activity implements View.OnClickListener {
             case R.id.settings:
                 doHosting();
                 break;
+            default:
+                throw new ExceptionInInitializerError("Failed to register ClickEvent");
         }
     }
 
@@ -46,25 +48,25 @@ public class StartScreen extends Activity implements View.OnClickListener {
     private void initialise() {
         Typeface font = Typeface.createFromAsset(getAssets(), "blocked.ttf");
 
-        TextView txt_logo = (TextView) findViewById(R.id.logo);
-        TextView txt_hostGame = (TextView) findViewById(R.id.hostGame);
-        TextView txt_joinGame = (TextView) findViewById(R.id.joinGame);
-        TextView txt_settings = (TextView) findViewById(R.id.settings);
+        TextView txtLogo = (TextView) findViewById(R.id.logo);
+        TextView txtHostGame = (TextView) findViewById(R.id.hostGame);
+        TextView txtJoinGame = (TextView) findViewById(R.id.joinGame);
+        TextView txtSettings = (TextView) findViewById(R.id.settings);
 
-        txt_logo.setTypeface(font);
-        txt_hostGame.setTypeface(font);
-        txt_joinGame.setTypeface(font);
-        txt_settings.setTypeface(font);
+        txtLogo.setTypeface(font);
+        txtHostGame.setTypeface(font);
+        txtJoinGame.setTypeface(font);
+        txtSettings.setTypeface(font);
 
-        txt_logo.setTextSize(60);
-        txt_hostGame.setTextSize(40);
-        txt_joinGame.setTextSize(40);
-        txt_settings.setTextSize(40);
+        txtLogo.setTextSize(60);
+        txtHostGame.setTextSize(40);
+        txtJoinGame.setTextSize(40);
+        txtSettings.setTextSize(40);
 
-        txt_logo.setOnClickListener(this);
-        txt_hostGame.setOnClickListener(this);
-        txt_joinGame.setOnClickListener(this);
-        txt_settings.setOnClickListener(this);
+        txtLogo.setOnClickListener(this);
+        txtHostGame.setOnClickListener(this);
+        txtJoinGame.setOnClickListener(this);
+        txtSettings.setOnClickListener(this);
     }
 
 
@@ -74,17 +76,18 @@ public class StartScreen extends Activity implements View.OnClickListener {
     * When one color is clicked, new Intent with game starts
     * */
     private void doHosting() {
-        final CharSequence colors[] = new CharSequence[]{"green", "red", "blue", "yellow"};
+        final CharSequence[] colors = new CharSequence[]{"green", "red", "blue", "yellow"};
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         final Intent intent = new Intent("at.aau.se2.test.FULLSCREENACTIVITY");
         builder.setTitle("Pick a color");
         builder.setItems(colors, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                byte extra = -1;
+                byte extra;
                 which += 1;
-                Log.d("asdf", "" + which);
-                switch (which) {
+
+                Log.d("asdf", Integer.toString(which));
+                switch(which){
                     case 1:
                         extra = 1;
                         break;
@@ -97,6 +100,8 @@ public class StartScreen extends Activity implements View.OnClickListener {
                     case 4:
                         extra = 4;
                         break;
+                    default:
+                        throw new ExceptionInInitializerError("Failed to doHosting");
                 }
                 intent.putExtra("color", extra);
                 intent.putExtra("test", false);
