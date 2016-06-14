@@ -827,7 +827,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
 
     private String output() {
         String output = "";
-        for (String key : idNameMap.keySet()) {
+        for (Map.Entry key : idNameMap.entrySet()) {
             output += (key + " " + idNameMap.get(key)) + " ";
         }
         output += " - ANZ:" + idNameMap.size();
