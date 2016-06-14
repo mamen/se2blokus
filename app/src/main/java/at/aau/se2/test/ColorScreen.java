@@ -69,10 +69,6 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
         startButton.setVisibility(View.INVISIBLE);
         startButton.setClickable(false);
 
-        if(isHost){
-            turn = randomStartingLineup(ID_Name_Map.size()==2);
-            sendMessage("N-"+turn);
-        }
     }
 
     private void setupView() {
