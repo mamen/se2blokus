@@ -19,7 +19,7 @@ public class TestGameLogicFunctions3 {
     byte[][] initialGameBoard = gl.getGameBoard();
 
     @BeforeClass
-    public static void initialise() {
+    public void initialise() {
         firstTestStone = new byte[][]{
                 {playerId, playerId, playerId, playerId},
                 {0, 0, 0, 0},
