@@ -10,6 +10,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -27,9 +28,9 @@ public class Splash extends Activity {
 
         Typeface font = Typeface.createFromAsset(getAssets(), "blocked.ttf");
 
-        TextView txt_logo = (TextView) findViewById(R.id.logo);
-        txt_logo.setTypeface(font);
-        txt_logo.setTextSize(90);
+        TextView txtLogo = (TextView) findViewById(R.id.logo);
+        txtLogo.setTypeface(font);
+        txtLogo.setTextSize(90);
 
         Thread checkWiFiThread = new Thread() {
             @Override
@@ -41,7 +42,7 @@ public class Splash extends Activity {
                     }
                     sleep(1000);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.e("Error",e.getMessage());
                 } finally {
                     Intent openStart = new Intent("at.aau.se2.test.STARTSCREEN");
                     startActivity(openStart);

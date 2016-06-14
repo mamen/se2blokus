@@ -3,22 +3,23 @@ package at.aau.se2.test;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Player {
-    private byte p_id;
+    private byte playerID;
     private Blocks blocks;
 
     private int score;
     private byte[] remainingStones;
 
     private ArrayList<IndexTuple> saveIndices;
-    public final int MAX_STONES = 89;
+    public static final int MAX_STONES = 89;
 
-    public Player(byte p_id) {
-        this.p_id = p_id;
+    public Player(byte id) {
+        this.playerID = id;
 
         // create blocks-object for player
-        this.blocks = new Blocks(p_id);
+        this.blocks = new Blocks(id);
         // Player score and remaining Stones (By the tag)
         score = 0;
 
@@ -29,7 +30,7 @@ public class Player {
     }
 
     public byte getPlayerId() {
-        return p_id;
+        return playerID;
     }
 
     public byte[][] getStone(int num) {
@@ -37,7 +38,7 @@ public class Player {
     }
 
     public String getPlayerColor() {
-        switch (this.p_id) {
+        switch (this.playerID) {
             case 1:
                 return "green";
             case 2:
@@ -46,8 +47,9 @@ public class Player {
                 return "blue";
             case 4:
                 return "yellow";
+            default:
+                throw new ExceptionInInitializerError("Failed to initialise player-color");
         }
-        return null;
     }
 
     /**
@@ -110,7 +112,7 @@ public class Player {
         return remainingStones;
     }
 
-    public ArrayList<IndexTuple> getSaveIndices() {
+    public List<IndexTuple> getSaveIndices() {
         return saveIndices;
     }
 
@@ -121,7 +123,7 @@ public class Player {
     public void putToSaveIndices(byte[][] bytes, int index_i, int index_j) {
         for (int i = 0; i < bytes.length; i++) {
             for (int j = 0; j < bytes[i].length; j++) {
-                if (bytes[i][j] == p_id && dontSaveRedundance(bytes, i, j)) {
+                if (bytes[i][j] == playerID && dontSaveRedundance(bytes, i, j)) {
                     saveIndices.add(0, new IndexTuple(index_i + j, index_j + i));
                 }
             }
@@ -130,12 +132,12 @@ public class Player {
 
     public boolean dontSaveRedundance(byte[][] b, int i, int j) {
         if((i-1) >= 0 && (i+1) < b.length) {
-            if(b[i-1][j] == p_id && b[i+1][j] == p_id) {
+            if(b[i-1][j] == playerID && b[i+1][j] == playerID) {
                 return false;
             }
         }
         if((j-1) >= 0 && (j+1) < b.length) {
-            if(b[i][j-1] == p_id && b[i][j+1] == p_id) {
+            if(b[i][j-1] == playerID && b[i][j+1] == playerID) {
                 return false;
             }
         }

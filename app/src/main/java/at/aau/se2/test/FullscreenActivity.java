@@ -223,7 +223,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                             fullscreenLayout.removeView(accept);
                                         }
                                     } catch (IllegalStateException e) {
-                                        e.printStackTrace();
+                                        Log.e("Error",e.getMessage());
                                     }
                                 } else {
                                     restore(index_i, index_j);
@@ -247,7 +247,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                             fullscreenLayout.removeView(accept);
                                         }
                                     } catch (IllegalStateException e) {
-                                        e.printStackTrace();
+                                        Log.e("Error",e.getMessage());
                                     }
                                 } else {
                                     restore(index_i, --index_j);
@@ -296,7 +296,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                             fullscreenLayout.removeView(accept);
                                         }
                                     } catch (IllegalStateException e) {
-                                        e.printStackTrace();
+                                        Log.e("Error",e.getMessage());
                                     }
                                 } else {
                                     restore(--index_i, index_j);
@@ -365,7 +365,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                     testView.setVisibility(View.VISIBLE);
                                     elementFinished = true;
                                     restore(index_i, index_j);
-//                                        boardToLog();
+                                    //boardToLog();
                                 }
                             });
 
@@ -390,7 +390,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                             try {
                                                 fullscreenLayout.addView(accept);
                                             } catch (IllegalStateException e) {
-
+                                                Log.e("Error",e.getMessage());
                                             }
                                         }
                                     } else {
