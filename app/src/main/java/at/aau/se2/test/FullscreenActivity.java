@@ -224,7 +224,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                         }
                                     } catch (IllegalStateException e) {
                                         Log.e("Error",e.getMessage());
-                                        throw new IllegalStateException();
+//                                        throw new IllegalStateException();
                                     }
                                 } else {
                                     restore(index_i, index_j);
@@ -249,7 +249,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                         }
                                     } catch (IllegalStateException e) {
                                         Log.e("Error",e.getMessage());
-                                        throw new IllegalStateException();
+//                                        throw new IllegalStateException();
                                     }
                                 } else {
                                     restore(index_i, --index_j);
@@ -299,7 +299,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                         }
                                     } catch (IllegalStateException e) {
                                         Log.e("Error",e.getMessage());
-                                        throw new IllegalStateException();
+//                                        throw new IllegalStateException();
                                     }
                                 } else {
                                     restore(--index_i, index_j);
@@ -394,7 +394,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                                 fullscreenLayout.addView(accept);
                                             } catch (IllegalStateException e) {
                                                 Log.e("Error",e.getMessage());
-                                                throw new IllegalStateException();
+//                                                throw new IllegalStateException();
                                             }
                                         }
                                     } else {
@@ -752,6 +752,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             case 16:
             case 18:
             case 19:
+            case 20:
                 return 1;
             default:
                 throw new ExceptionInInitializerError("manipulateX failed");
@@ -788,6 +789,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             case 17:
             case 18:
             case 19:
+            case 20:
                 return 1;
             case 14:
                 return 2;
