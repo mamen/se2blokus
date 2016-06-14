@@ -70,11 +70,6 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
         setupView();
         startButton.setVisibility(View.INVISIBLE);
         startButton.setClickable(false);
-
-        if(isHost){
-            turn = randomStartingLineup(IdNameMap.size()==2);
-            sendMessage(messageCodes[2]+turn);
-        }
     }
 
     private void setupView() {
@@ -154,6 +149,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
                 String[] messArray = message.split("-");
                 if (messArray.length == 2) {
                     int id = Integer.parseInt(messArray[1]);
+                    //TODO: endpointId hier (ist länger) != endpointId in der Map
                     setButtonSelected(endpointId, (Button) findViewById(id));
 
                 } else {
