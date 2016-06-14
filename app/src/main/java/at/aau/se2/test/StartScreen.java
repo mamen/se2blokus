@@ -83,8 +83,8 @@ public class StartScreen extends Activity implements View.OnClickListener {
             public void onClick(DialogInterface dialog, int which) {
                 byte extra = -1;
                 which += 1;
-                Log.d("asdf", ""+which);
-                switch(which){
+                Log.d("asdf", "" + which);
+                switch (which) {
                     case 1:
                         extra = 1;
                         break;
@@ -107,11 +107,9 @@ public class StartScreen extends Activity implements View.OnClickListener {
     }
 
 
-
-
-    private void goOn(final Boolean host){
+    private void goOn(final Boolean host) {
         final Intent intent = new Intent("at.aau.se2.test.CONNECTSCREEN");
-        intent.putExtra("host",""+host);
+        intent.putExtra("host", "" + host);
         startActivity(intent);
     }
 }

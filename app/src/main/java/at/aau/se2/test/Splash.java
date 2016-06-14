@@ -5,11 +5,14 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Point;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.widget.TextView;
 
@@ -29,7 +32,19 @@ public class Splash extends Activity {
 
         TextView txt_logo = (TextView) findViewById(R.id.logo);
         txt_logo.setTypeface(font);
-        txt_logo.setTextSize(90);
+        int help = getScreenWidth();
+        if (help < 500) {
+            txt_logo.setTextSize(80);
+        } else if (help >= 500 && help < 700) {
+            txt_logo.setTextSize(90);
+        } else if (help >= 700 && help < 1000) {
+            txt_logo.setTextSize(100);
+        } else if (help >= 1000 && help < 1300) {
+            txt_logo.setTextSize(110);
+        } else {
+            txt_logo.setTextSize(120);
+        }
+        Log.d("display width", "width = " + getScreenWidth());
 
         Thread checkWiFiThread = new Thread() {
             @Override
@@ -50,13 +65,13 @@ public class Splash extends Activity {
         };
 
         checkWiFiThread.start();
-        if(!isConnectedToNetwork()){
+        if (!isConnectedToNetwork()) {
             showWiFiDialog();
         }
 
     }
 
-    private void showWiFiDialog(){
+    private void showWiFiDialog() {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(Splash.this);
 
         // set title
@@ -66,15 +81,15 @@ public class Splash extends Activity {
         alertDialogBuilder
                 .setMessage(R.string.splash_nowificonnection)
                 .setCancelable(false)
-                .setPositiveButton(R.string.splash_yes,new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog,int id) {
+                .setPositiveButton(R.string.splash_yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
                         //enable wifi
-                        WifiManager wifiManager = (WifiManager)getApplication().getSystemService(Context.WIFI_SERVICE);
+                        WifiManager wifiManager = (WifiManager) getApplication().getSystemService(Context.WIFI_SERVICE);
                         wifiManager.setWifiEnabled(true);
                     }
                 })
-                .setNegativeButton(R.string.splash_no,new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog,int id) {
+                .setNegativeButton(R.string.splash_no, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
                         //disable wifi
                         System.exit(0);
                     }
@@ -92,6 +107,13 @@ public class Splash extends Activity {
         NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
         return mWifi.isConnected();
+    }
+
+    private int getScreenWidth() {
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        return size.x;
     }
 
 }
