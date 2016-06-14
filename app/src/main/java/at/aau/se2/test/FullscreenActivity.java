@@ -45,8 +45,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     private GameLogic gl;
     private static final int SIZE = 20;
     private int selectedBlockID;
-    private List<ImageView> blockDrawer_children;
-    private List<ImageView> removed_blockDrawer_children;
+    private List<ImageView> blockDrawerChildren;
+    private List<ImageView> removedBlockDrawerChildren;
     private Player player;
     private boolean doubleBackToExitPressedOnce = false;
     private ImageView testView;
@@ -62,7 +62,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     private boolean isConnected = true;
     private String remoteHostEndpoint;
     private List<String> remotePeerEndpoints = new ArrayList<>();
-    private HashMap<String, String> ID_Name_Map = new HashMap<String, String>();
+    private HashMap<String, String> idNameMap = new HashMap<>();
     private byte playerID;
     private ImageView imgView;
     private int myturn;
@@ -95,8 +95,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         Bundle extras = getIntent().getExtras();
         doSettings = extras.getBoolean("test");
 
-        ID_Name_Map = ((HashMap<String, String>) extras.getSerializable("map"));
-        //plCount = ID_Name_Map.size();
+        idNameMap = ((HashMap<String, String>) extras.getSerializable("map"));
         isHost = extras.getBoolean("host");
         remoteHostEndpoint = extras.getString("hostEnd");
         remotePeerEndpoints = Connection.getInstance().getRemotePeerEndpoints();
@@ -106,7 +105,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
         playerID = extras.getByte("color");
         if (doSettings) {
-            if (ID_Name_Map.size() == 2) {
+            if (idNameMap.size() == 2) {
                 if (isHost) {
                     myturn = Integer.parseInt(extras.getString("turn").charAt(0) + "");
                 } else {
@@ -450,8 +449,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
         blockDrawer = (LinearLayout) findViewById(R.id.blockDrawer);
 
-        blockDrawer_children = new ArrayList<>();
-        removed_blockDrawer_children = new ArrayList<>();
+        blockDrawerChildren = new ArrayList<>();
+        removedBlockDrawerChildren = new ArrayList<>();
 
         String color = player.getPlayerColor();
 
@@ -466,7 +465,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             param.setGravity(Gravity.CENTER);
             oImageView.setLayoutParams(param);
             blockDrawer.addView(oImageView);
-            blockDrawer_children.add(oImageView);
+            blockDrawerChildren.add(oImageView);
 
             //Touch-Eventhandler initialisieren
             oImageView.setOnLongClickListener(new View.OnLongClickListener() {
@@ -479,7 +478,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                         shadowBuilder = new OwnDragShadowBuilder(v, v.getWidth() / 2, v.getHeight() / 2);
                         v.startDrag(data, shadowBuilder, v, 0);
 
-                        for (ImageView bdc : blockDrawer_children) {
+                        for (ImageView bdc : blockDrawerChildren) {
                             if (bdc.equals(v)) {
                                 selectedBlockID = (int) bdc.getTag(); //Gewählter Spielstein
                             }
@@ -611,7 +610,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             }
             // TODO Deform Array
             if (preValidation()) {
-                if (!removed_blockDrawer_children.isEmpty()) {
+                if (!removedBlockDrawerChildren.isEmpty()) {
                     if (gl.checkTheRules(b, x, y)) {
 
                     } else {
@@ -808,8 +807,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
      */
     private void removeFromBlockDrawer() {
         int count = 0;
-        if (!removed_blockDrawer_children.isEmpty()) {
-            for (ImageView t : removed_blockDrawer_children) {
+        if (!removedBlockDrawerChildren.isEmpty()) {
+            for (ImageView t : removedBlockDrawerChildren) {
                 if ((int) t.getTag() < selectedBlockID) {
                     count++;
                 }
@@ -820,8 +819,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         ImageView rm = (ImageView) blockDrawer.getChildAt(rm_index);
         //Toast.makeText(getApplicationContext(), (selectedBlockID) + " / " + rm_index + " / " + (22 - blockDrawer.getChildCount()), Toast.LENGTH_SHORT).show();
         blockDrawer.removeView(rm);
-        blockDrawer_children.remove(rm);
-        removed_blockDrawer_children.add(rm);
+        blockDrawerChildren.remove(rm);
+        removedBlockDrawerChildren.add(rm);
         selectedBlockID = -1;
     }
 
@@ -1153,7 +1152,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     }
 
     private void isItMyTurn() {
-        if (ID_Name_Map.size() == 2) {
+        if (idNameMap.size() == 2) {
             debugging("small");
             actTurn++;
             if (actTurn == 3) {

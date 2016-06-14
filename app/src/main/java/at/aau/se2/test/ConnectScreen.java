@@ -376,15 +376,11 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
             player1.setText(username);
             int i = 2;
 
-            //Because Sonar-Cube, that's why -.-
-            String id = "id";
-            String player = "player";
-
             for (Map.Entry<String, String> entry : idNameMap.entrySet())
             {
                 if(!entry.getValue().equals(username)) {
-                    String textViewID = id + i;
-                    String textViewPlayer = player + i;
+                    String textViewID = "id" + i;
+                    String textViewPlayer = "player" + i;
                     int resID = getResources().getIdentifier(textViewID, "id", getPackageName());
                     int resPlayer = getResources().getIdentifier(textViewPlayer, "id", getPackageName());
                     ((TextView) findViewById(resID)).setText(entry.getKey());

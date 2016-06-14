@@ -36,7 +36,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
     //private boolean isConnected = true;
     private String remoteHostEndpoint;
     private List<String> remotePeerEndpoints;
-    private HashMap<String, String> IdNameMap = new HashMap<>();
+    private HashMap<String, String> idNameMap = new HashMap<>();
     //private byte playerID;
 
     private Button buttonGreen;
@@ -61,7 +61,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
         Connection.getInstance().setColorScreen(this);
         Bundle extras = getIntent().getExtras();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        IdNameMap = (HashMap<String, String>)extras.getSerializable("map");
+        idNameMap = (HashMap<String, String>)extras.getSerializable("map");
         isHost = extras.getBoolean("host");
         remoteHostEndpoint = extras.getString("hostEnd");
         //get the api from the Singleton
@@ -199,7 +199,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
     public void setButtonSelected(String endpointId, Button b){
         disableButton(b);
         String buttonText = b.getText().toString();
-        String selector = IdNameMap.get(endpointId);
+        String selector = idNameMap.get(endpointId);
         buttonText += " selected by "+ selector;
         b.setText(buttonText);
     }
@@ -250,7 +250,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
     private void handleButtons(int viewID){
 
         if(isHost){
-            turn = randomStartingLineup(IdNameMap.size()==2);
+            turn = randomStartingLineup(idNameMap.size()==2);
             sendMessage(messageCodes[2]+turn);
         }
 
@@ -299,7 +299,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
             case R.id.button_startgame:
                 debugging("want to start that now");
                 final Intent intent = new Intent("at.aau.se2.test.FULLSCREENACTIVITY");
-                intent.putExtra("map", IdNameMap);
+                intent.putExtra("map", idNameMap);
                 intent.putExtra("host", isHost);
                 intent.putExtra("hostEnd", remoteHostEndpoint);
                 intent.putExtra("color", color);
@@ -337,7 +337,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
 
     private void checkGameStart(){
         if(isHost) {
-            if (selectCount == IdNameMap.size()) {
+            if (selectCount == idNameMap.size()) {
                 startButton.setVisibility(View.VISIBLE);
                 startButton.setClickable(true);
                 startButton.setBackgroundColor(Color.BLACK);
