@@ -12,10 +12,7 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
-<<<<<<< HEAD
 import android.view.Display;
-=======
->>>>>>> origin/development
 import android.view.View;
 import android.widget.TextView;
 
