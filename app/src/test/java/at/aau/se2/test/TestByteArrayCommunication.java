@@ -6,9 +6,6 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-/**
- * Created by Tobias on 12.06.2016.
- */
 public class TestByteArrayCommunication {
 
     static byte id;
@@ -19,7 +16,7 @@ public class TestByteArrayCommunication {
     static byte[] calcByte;
 
     @Before
-    public void initialise() {
+    public static void initialise() {
         id = 2;
         someStone = new byte[][]{{id, id, id, id}, {id, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}};
         coordx = 4;
@@ -29,7 +26,7 @@ public class TestByteArrayCommunication {
 
 
     @Test
-    public void testCreateOneDimensionMessageByteArray() {
+    public static void testCreateOneDimensionMessageByteArray() {
         byte[] bt = new byte[]{id, id, id, id, 0, id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, id, (byte) coordx, (byte) coordy};
         calcByte = helper.createNewByteArray(someStone, coordx, coordy, id);
         Assert.assertTrue(Arrays.equals(bt, calcByte));

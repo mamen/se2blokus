@@ -3,7 +3,6 @@ package at.aau.se2.test;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class Player {
     private byte playerID;

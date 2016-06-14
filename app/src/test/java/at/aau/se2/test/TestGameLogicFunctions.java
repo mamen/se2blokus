@@ -8,22 +8,18 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-/**
- * Created by KingSeybro on 07.06.2016.
- */
 public class TestGameLogicFunctions {
 
-    static final byte player_id = 2;
-    static Player player = new Player(player_id);
+    static final byte playerId = 2;
+    static Player player = new Player(playerId);
     static Context context;
     static GameLogic gl = GameLogic.getInstance(player, context);
     static byte[][] someStone;
     static byte[][] testGameBoard;
-    byte[][] initialGameBoard = gl.getGameBoard();
 
     @BeforeClass
     public static void initialise() {
-        someStone = new byte[][]{{player_id, player_id, player_id, player_id}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}};
+        someStone = new byte[][]{{playerId, playerId, playerId, playerId}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}};
         testGameBoard = new byte[20][20];
     }
 
@@ -33,11 +29,11 @@ public class TestGameLogicFunctions {
     }*/
 
     @Test
-    public void testPlacingAndGetGameBoard() {
-        testGameBoard[16][0] = player_id;
-        testGameBoard[17][0] = player_id;
-        testGameBoard[18][0] = player_id;
-        testGameBoard[19][0] = player_id;
+    public static void testPlacingAndGetGameBoard() {
+        testGameBoard[16][0] = playerId;
+        testGameBoard[17][0] = playerId;
+        testGameBoard[18][0] = playerId;
+        testGameBoard[19][0] = playerId;
         gl.placeStone(someStone, 16, 0);
         Assert.assertTrue(Arrays.deepEquals(testGameBoard, gl.getGameBoard()));
     }

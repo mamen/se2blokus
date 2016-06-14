@@ -83,7 +83,7 @@ public class StartScreen extends Activity implements View.OnClickListener {
         builder.setItems(colors, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                byte extra = -1;
+                byte extra;
                 which += 1;
                 Log.d("asdf", Integer.toString(which));
                 switch(which){

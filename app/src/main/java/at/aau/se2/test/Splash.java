@@ -43,6 +43,7 @@ public class Splash extends Activity {
                     sleep(1000);
                 } catch (Exception e) {
                     Log.e("Error",e.getMessage());
+                    throw new IllegalStateException();
                 } finally {
                     Intent openStart = new Intent("at.aau.se2.test.STARTSCREEN");
                     startActivity(openStart);

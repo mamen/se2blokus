@@ -224,6 +224,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                         }
                                     } catch (IllegalStateException e) {
                                         Log.e("Error",e.getMessage());
+                                        throw new IllegalStateException();
                                     }
                                 } else {
                                     restore(index_i, index_j);
@@ -248,6 +249,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                         }
                                     } catch (IllegalStateException e) {
                                         Log.e("Error",e.getMessage());
+                                        throw new IllegalStateException();
                                     }
                                 } else {
                                     restore(index_i, --index_j);
@@ -297,6 +299,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                         }
                                     } catch (IllegalStateException e) {
                                         Log.e("Error",e.getMessage());
+                                        throw new IllegalStateException();
                                     }
                                 } else {
                                     restore(--index_i, index_j);
@@ -391,6 +394,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                                 fullscreenLayout.addView(accept);
                                             } catch (IllegalStateException e) {
                                                 Log.e("Error",e.getMessage());
+                                                throw new IllegalStateException();
                                             }
                                         }
                                     } else {
