@@ -18,7 +18,7 @@ public class TestGameLogicFunctions {
     static byte[][] testGameBoard;
 
     @BeforeClass
-    public static void initialise() {
+    public void initialise() {
         someStone = new byte[][]{{playerId, playerId, playerId, playerId}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}};
         testGameBoard = new byte[20][20];
     }
@@ -29,7 +29,7 @@ public class TestGameLogicFunctions {
     }*/
 
     @Test
-    public static void testPlacingAndGetGameBoard() {
+    public void testPlacingAndGetGameBoard() {
         testGameBoard[16][0] = playerId;
         testGameBoard[17][0] = playerId;
         testGameBoard[18][0] = playerId;

@@ -16,7 +16,7 @@ public class TestByteArrayCommunication {
     static byte[] calcByte;
 
     @Before
-    public static void initialise() {
+    public void initialise() {
         id = 2;
         someStone = new byte[][]{{id, id, id, id}, {id, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}};
         coordx = 4;
@@ -26,7 +26,7 @@ public class TestByteArrayCommunication {
 
 
     @Test
-    public static void testCreateOneDimensionMessageByteArray() {
+    public void testCreateOneDimensionMessageByteArray() {
         byte[] bt = new byte[]{id, id, id, id, 0, id, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, id, (byte) coordx, (byte) coordy};
         calcByte = helper.createNewByteArray(someStone, coordx, coordy, id);
         Assert.assertTrue(Arrays.equals(bt, calcByte));
