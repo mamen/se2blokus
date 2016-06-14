@@ -33,11 +33,11 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
 
     private GoogleApiClient apiClient;
     private boolean isHost;
-    private boolean isConnected = true;
+    //private boolean isConnected = true;
     private String remoteHostEndpoint;
     private List<String> remotePeerEndpoints;
-    private HashMap<String, String> ID_Name_Map = new HashMap<String, String>();
-    private byte playerID;
+    private HashMap<String, String> IdNameMap = new HashMap<>();
+    //private byte playerID;
 
     private Button buttonGreen;
     private Button buttonRed;
@@ -47,6 +47,8 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
     private boolean selected = false;
     private int selectCount = 0;
     private String turn;
+
+    private static final String[] messageCodes = {"COLOROK-","FULLSCREEN","N-"};
 
     private byte color = -1;
 
@@ -59,7 +61,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
         Connection.getInstance().setColorScreen(this);
         Bundle extras = getIntent().getExtras();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        ID_Name_Map = ((HashMap<String, String>)extras.getSerializable("map"));
+        IdNameMap = (HashMap<String, String>)extras.getSerializable("map");
         isHost = extras.getBoolean("host");
         remoteHostEndpoint = extras.getString("hostEnd");
         //get the api from the Singleton
@@ -70,8 +72,8 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
         startButton.setClickable(false);
 
         if(isHost){
-            turn = randomStartingLineup(ID_Name_Map.size()==2);
-            sendMessage("N-"+turn);
+            turn = randomStartingLineup(IdNameMap.size()==2);
+            sendMessage(messageCodes[2]+turn);
         }
     }
 
@@ -97,8 +99,8 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
     }
 
     @Override
-    public void onConnected(@Nullable Bundle bundle) {
-
+    public void onConnected(@Nullable Bundle bundle){
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -108,17 +110,17 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
 
     @Override
     public void onConnectionRequest(String s, String s1, String s2, byte[] bytes) {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void onEndpointFound(String s, String s1, String s2, String s3) {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void onEndpointLost(String s) {
-
+        throw new UnsupportedOperationException();
     }
 
     private void sendMessage( String message ) {
@@ -146,7 +148,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
         String message = new String( payload );
 
 
-        if (message.startsWith("COLOROK-")) {
+        if (message.startsWith(messageCodes[0])) {
             if (!selected) {
                 debugging("color chosen");
                 String[] messArray = message.split("-");
@@ -182,7 +184,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
 
 
 
-        else if (message.startsWith("FULLSCREEN")){
+        else if (message.startsWith(messageCodes[1])){
             if(selected){
                 startButton.performClick();
             }
@@ -193,29 +195,28 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
         }
     }
 
-
     public void disableButton(Button b){
         b.setAlpha(.5f);
         b.setClickable(false);
     }
 
     public void setButtonSelected(String endpointId, Button b){
-        //TODO: Methode disabled den button, und macht sonst nichts
         disableButton(b);
-        String buttontext = b.getText().toString();
-        String selector = ID_Name_Map.get(endpointId);
-        buttontext += " selected by "+ selector;
+        String buttonText = b.getText().toString();
+        String selector = IdNameMap.get(endpointId);
+        buttonText += " selected by "+ selector;
+        b.setText(buttonText);
     }
 
     public void disableAllOtherButtons(Button b){
-        Set<Button> buttonset = new HashSet<Button>();
-        buttonset.add(buttonGreen);
-        buttonset.add(buttonRed);
-        buttonset.add(buttonBlue);
-        buttonset.add(buttonYellow);
-        buttonset.remove(b);
+        Set<Button> buttonSet = new HashSet<>();
+        buttonSet.add(buttonGreen);
+        buttonSet.add(buttonRed);
+        buttonSet.add(buttonBlue);
+        buttonSet.add(buttonYellow);
+        buttonSet.remove(b);
 
-        for(Button bt : buttonset){
+        for(Button bt : buttonSet){
             disableButton(bt);
         }
     }
@@ -240,6 +241,8 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
             case "yellow":
                 b.setBackgroundColor(Color.YELLOW);
                 break;
+            default:
+                throw new ExceptionInInitializerError("Color failure");
         }
     }
 
@@ -251,8 +254,8 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
     private void handleButtons(int viewID){
 
         if(isHost){
-            turn = randomStartingLineup(ID_Name_Map.size()==2);
-            sendMessage("N-"+turn);
+            turn = randomStartingLineup(IdNameMap.size()==2);
+            sendMessage(messageCodes[2]+turn);
         }
 
         debugging("handle buttons");
@@ -261,7 +264,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
                 colorButton(buttonGreen, "green");
                 disableAllOtherButtons(buttonGreen);
                 color = 1;
-                sendMessage("COLOROK-"+R.id.button_green);
+                sendMessage(messageCodes[0]+R.id.button_green);
                 selectCount++;
                 selected = true;
                 checkGameStart();
@@ -271,7 +274,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
                 colorButton(buttonRed, "red");
                 disableAllOtherButtons(buttonRed);
                 color = 2;
-                sendMessage("COLOROK-"+R.id.button_red);
+                sendMessage(messageCodes[0]+R.id.button_red);
                 selectCount++;
                 selected = true;
                 checkGameStart();
@@ -281,7 +284,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
                 colorButton(buttonBlue, "blue");
                 disableAllOtherButtons(buttonBlue);
                 color = 3;
-                sendMessage("COLOROK-"+R.id.button_blue);
+                sendMessage(messageCodes[0]+R.id.button_blue);
                 selectCount++;
                 selected = true;
                 checkGameStart();
@@ -291,7 +294,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
                 colorButton(buttonYellow, "yellow");
                 disableAllOtherButtons(buttonYellow);
                 color = 4;
-                sendMessage("COLOROK-"+R.id.button_yellow);
+                sendMessage(messageCodes[0]+R.id.button_yellow);
                 selectCount++;
                 selected = true;
                 checkGameStart();
@@ -300,7 +303,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
             case R.id.button_startgame:
                 debugging("want to start that now");
                 final Intent intent = new Intent("at.aau.se2.test.FULLSCREENACTIVITY");
-                intent.putExtra("map", ID_Name_Map);
+                intent.putExtra("map", IdNameMap);
                 intent.putExtra("host", isHost);
                 intent.putExtra("hostEnd", remoteHostEndpoint);
                 intent.putExtra("color", color);
@@ -308,15 +311,18 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
                 intent.putExtra("test", true);
                 startActivity(intent);
                 if (isHost) {
-                    sendMessage("FULLSCREEN");
+                    sendMessage(messageCodes[1]);
                 }
                 break;
+
+            default:
+                throw new ExceptionInInitializerError("Buttonhandler failure");
         }
 
 
     }
 
-    private String randomStartingLineup(boolean twoplayer){
+    private static String randomStartingLineup(boolean twoplayer){
         Byte[] array;
         String s;
         if(twoplayer){
@@ -335,7 +341,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
 
     private void checkGameStart(){
         if(isHost) {
-            if (selectCount == ID_Name_Map.size()) {
+            if (selectCount == IdNameMap.size()) {
                 startButton.setVisibility(View.VISIBLE);
                 startButton.setClickable(true);
                 startButton.setBackgroundColor(Color.BLACK);
@@ -349,7 +355,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
 
     @Override
     public void onDisconnected(String s) {
-
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -364,7 +370,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+        throw new UnsupportedOperationException();
     }
 
     private void debugging(String debMessage) {
