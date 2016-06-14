@@ -152,6 +152,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
                 String[] messArray = message.split("-");
                 if (messArray.length == 2) {
                     int id = Integer.parseInt(messArray[1]);
+                    //TODO: endpointId hier (ist länger) != endpointId in der Map
                     setButtonSelected(endpointId, (Button) findViewById(id));
 
                 } else {
@@ -200,11 +201,11 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
     }
 
     public void setButtonSelected(String endpointId, Button b){
-        //TODO: Methode disabled den button, und macht sonst nichts
         disableButton(b);
         String buttontext = b.getText().toString();
         String selector = ID_Name_Map.get(endpointId);
         buttontext += " selected by "+ selector;
+        b.setText(buttontext);
     }
 
     public void disableAllOtherButtons(Button b){

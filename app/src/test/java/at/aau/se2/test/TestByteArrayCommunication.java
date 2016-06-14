@@ -51,4 +51,13 @@ public class TestByteArrayCommunication {
         Assert.assertTrue(Arrays.deepEquals(arr, someStone));
     }
 
+    @Test
+    public void testConversionAndReconversion(){
+        byte[] temp = helper.createNewByteArray(someStone, coordx, coordy, id);
+        helper.fetchInformationFromByteArray(temp);
+        byte[][] original = helper.getByteStone();
+        Assert.assertTrue(Arrays.deepEquals(original, someStone));
+
+    }
+
 }
