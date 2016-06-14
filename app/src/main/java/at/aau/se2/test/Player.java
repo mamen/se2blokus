@@ -112,7 +112,7 @@ public class Player {
         return remainingStones;
     }
 
-    public List<IndexTuple> getSaveIndices() {
+    public ArrayList<IndexTuple> getSaveIndices() {
         return saveIndices;
     }
 

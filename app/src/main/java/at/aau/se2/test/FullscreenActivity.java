@@ -271,7 +271,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                             fullscreenLayout.removeView(accept);
                                         }
                                     } catch (IllegalStateException e) {
-                                        e.printStackTrace();
+                                        Log.e("Error",e.getMessage());
                                     }
                                 } else {
                                     restore(--index_i, index_j);
@@ -1096,7 +1096,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         byte[][] stone = b.getByteStone();
 
         if (color != playerID) {
-            debugging("" + color + "_" + playerID);
+            debugging("" + Integer.toString(color) + "_" + Integer.toString(playerID));
             placeStoneOfOtherPlayer(stone, idy, idx);
             isItMyTurn();
 
@@ -1136,7 +1136,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
     @Override
     public void onDisconnected(String s) {
-
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -1146,7 +1146,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
      */
     @Override
     public void onClick(View v) {
-
+        throw new UnsupportedOperationException();
     }
 
     private void isItMyTurn() {
@@ -1191,7 +1191,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+        throw new UnsupportedOperationException();
     }
 
 
@@ -1208,9 +1208,9 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             for (int j = 0; j < b[i].length; j++) {
                 s += b[i][j] + ", ";
             }
-            s += '\n';
+            s += Character.toString('\n');
         }
-        s += '\n';
+        s += Character.toString('\n');
         Log.d("Board", s);
     }
 
