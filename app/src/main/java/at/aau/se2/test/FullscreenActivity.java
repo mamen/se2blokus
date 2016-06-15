@@ -244,7 +244,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                             public void onClick(View v) {
                                 restore(index_i, index_j);
                                 if (drawStone(index_i, (index_j + 1 > 20) ? 20 : ++index_j)) {
-                                if (drawStone(index_i, (index_j + 1 > 20) ? 20 : ++index_j, STAND_STILL)) {
                                     try {
                                         if (isYourPlacementValid(index_i, index_j)) {
                                             fullscreenLayout.addView(accept);
@@ -295,7 +294,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                             public void onClick(View v) {
                                 restore(index_i, index_j);
                                 if (drawStone((index_i + 1 > 20) ? 20 : ++index_i, index_j)) {
-                                if (drawStone((index_i + 1 > 20) ? 20 : ++index_i, index_j, STAND_STILL)) {
                                     try {
                                         if (isYourPlacementValid(index_i, index_j)) {
                                             fullscreenLayout.addView(accept);
@@ -421,6 +419,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                             dragged = false;
                             testView.setVisibility(View.VISIBLE);
                         }
+
                         break;
                     default:
                         break;
@@ -1219,7 +1218,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             enableScreenInteraction();
         } else {
             disableScreenInteraction();
-        }
+        }*/
 
     }
 
@@ -1260,7 +1259,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                 s += b[i][j] + ", ";
             }
             s += Character.toString('\n');
-        }*/
+        }
         s += Character.toString('\n');
         Log.d("Board", s);
     }
