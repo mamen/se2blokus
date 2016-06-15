@@ -1174,32 +1174,34 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     }
 
     private void isItMyTurn() {
+        int help = player.getScore();
         if (idNameMap.size() == 2) {
             actTurn++;
             if (actTurn == 3) actTurn = 1;
-            if (actTurn == myturn) {
-                player.setHasTurns(areTurnsLeft());
+            if (actTurn == myturn && help > 15) {   // Wenn ich dran bin und mehr als 15... (Ab dann wird überprüft ob noch Spielzüge möglich)
+                player.setHasTurns(areTurnsLeft()); // ...Punkte habe, wird im Player ein boolean gesetzt
             }
         } else {
             actTurn++;
             if (actTurn == 5) actTurn = 1;
-            if (actTurn == myturn) {
+            if (actTurn == myturn && help > 15) {
                 player.setHasTurns(areTurnsLeft());
             }
         }
 
-        if (actTurn == myturn && player.getHasTurns()) {
-            enableScreenInteraction();
-            Toast.makeText(getApplicationContext(), "There are turns left, you go", Toast.LENGTH_SHORT).show();
-        } else if (actTurn == myturn && !player.getHasTurns()) {
-            Toast.makeText(getApplicationContext(), "You lost buddy", Toast.LENGTH_SHORT).show();
-            disableScreenInteraction();
-            isItMyTurn();
+        if (actTurn == myturn) {
+            if (player.getHasTurns()) { // Wenn ich noch Spielzüge habe, kann ich weiterspielen..
+                enableScreenInteraction();
+                Toast.makeText(getApplicationContext(), "There are turns left, you go", Toast.LENGTH_SHORT).show();
+            } else { // TODO ... wenn nicht, was muss dann aufgerufen werden, dass der nächste Spieler dran kommt!? So geht's nicht ;)
+                Toast.makeText(getApplicationContext(), "You lost buddy", Toast.LENGTH_SHORT).show();
+                disableScreenInteraction();
+                isItMyTurn();
+            }
         } else {
             disableScreenInteraction();
         }
-
-
+        
         /*if (idNameMap.size() == 2) {
             debugging("small");
             actTurn++;
