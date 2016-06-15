@@ -1,7 +1,6 @@
 package at.aau.se2.test;
 
 import android.content.Context;
-import android.util.Log;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -25,6 +24,8 @@ public class TestGameLogicFunctions2 {
 
     @BeforeClass
     public static void initialise() {
+        gl.resetInstance();
+        gl = GameLogic.getInstance(player, context);
         firstTestStone = new byte[][]{
                 {playerId, playerId, playerId, playerId},
                 {0, 0, 0, 0},
@@ -44,8 +45,8 @@ public class TestGameLogicFunctions2 {
         remember2 = new byte[][]{
                 {0, playerId, playerId, 0},
                 {0, 0, playerId, 0},
-                {0,0,0,0},
-                {0,0,0,0}
+                {0, 0, 0, 0},
+                {0, 0, 0, 0}
         };
         gameBoardRestored = new byte[20][20];
         gameBoardRestored[12][12] = playerId;
@@ -106,12 +107,11 @@ public class TestGameLogicFunctions2 {
         Assert.assertTrue(gl.checkTheRules(firstTestStone, 12, 9));
     }
 
-    //TODO: junit test fails with jenkins
-    /*@Test
-    public void testRestoreFiel1() {
+    @Test
+    public void testRestoreField1() {
         gl.restoreField(remember2, 11, 12);
         Assert.assertTrue(Arrays.deepEquals(gameBoardRestored, gl.getGameBoard()));
-    }*/
+    }
 
     @Test
     public void testCheckSurroundings1() {
@@ -121,16 +121,5 @@ public class TestGameLogicFunctions2 {
     @Test
     public void testCheckSurroundings2() {
         Assert.assertFalse(gl.checkSurroundings(gl.getGameBoard()[2][5]));
-    }
-
-    public void arrayToLog(byte[][] b) {
-        String s = "";
-        for (int i = 0; i < b.length; i++) {
-            for (int j = 0; j < b.length; j++) {
-                s += b[i][j] + ", ";
-            }
-            s+= Character.toString('\n');
-        }
-        Log.d("arrayToLog",s);
     }
 }

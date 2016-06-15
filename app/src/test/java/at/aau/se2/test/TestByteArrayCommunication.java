@@ -36,8 +36,8 @@ public class TestByteArrayCommunication {
     public void testFetchAdditionalInformationFromMessage() {
         helper.fetchInformationFromByteArray(calcByte);
         int c = helper.getColor();
-        int x = helper.getIdx();
-        int y = helper.getIdy();
+        int y = helper.getIdx();
+        int x = helper.getIdy();
         Assert.assertEquals((c == id) && (x == coordx) && (y == coordy), true);
     }*/
 
@@ -49,7 +49,7 @@ public class TestByteArrayCommunication {
     }
 
     @Test
-    public void testConversionAndReconversion(){
+    public void testConversionAndReconversion() {
         byte[] temp = helper.createNewByteArray(someStone, coordx, coordy, id);
         helper.fetchInformationFromByteArray(temp);
         byte[][] original = helper.getByteStone();

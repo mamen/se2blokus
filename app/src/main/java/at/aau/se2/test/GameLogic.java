@@ -338,4 +338,12 @@ public class GameLogic {
             fullscreen.addView(view);
         }
     }
+
+
+    /**
+     * Resets the GameLogic Instance, use carefully!
+     */
+    public void resetInstance() {
+        GameLogic.instance = null;
+    }
 }
