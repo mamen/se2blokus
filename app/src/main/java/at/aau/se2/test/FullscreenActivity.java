@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.ClipData;
 import android.content.Context;
 import android.graphics.Point;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
@@ -67,11 +68,12 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     private ImageView imgView;
     private int myturn;
     private int actTurn;
+    private final MediaPlayer placeSound = MediaPlayer.create(getApplicationContext(), R.raw.click);
 
 
     /*private int plCount;
     private int turn;
-*/
+    */
     /*
     TODO:
         - roundbased game for 4 players, maybe random (also random decision who starts in the case of two players)
@@ -224,7 +226,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                         }
                                     } catch (IllegalStateException e) {
                                         Log.e("Error",e.getMessage());
-//                                        throw new IllegalStateException();
+                                        //throw new IllegalStateException();
                                     }
                                 } else {
                                     restore(index_i, index_j);
@@ -249,7 +251,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                         }
                                     } catch (IllegalStateException e) {
                                         Log.e("Error",e.getMessage());
-//                                        throw new IllegalStateException();
+                                        //throw new IllegalStateException();
                                     }
                                 } else {
                                     restore(index_i, --index_j);
@@ -278,7 +280,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                 } else {
                                     restore(--index_i, index_j);
                                     drawStone(index_i, index_j);
-//                                    cancel.performClick();
+                                    //cancel.performClick();
                                 }
                             }
                         });
@@ -299,7 +301,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                         }
                                     } catch (IllegalStateException e) {
                                         Log.e("Error",e.getMessage());
-//                                        throw new IllegalStateException();
+                                        //throw new IllegalStateException();
                                     }
                                 } else {
                                     restore(--index_i, index_j);
@@ -347,6 +349,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                             b = gl.rotate(b);
                                         }
                                         placeIt(b, index_i, index_j); //Wirkliches Plazieren vom Stein
+                                        placeSound.start(); //Sound abspielen
                                     }
                                     gl.removeViews(fullscreenLayout, accept, cancel, transpose, move_up, move_right, move_down, move_left);
                                     elementFinished = true; //Nächster Stein kann geLongClicked werden
@@ -394,7 +397,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                                 fullscreenLayout.addView(accept);
                                             } catch (IllegalStateException e) {
                                                 Log.e("Error",e.getMessage());
-//                                                throw new IllegalStateException();
+                                                //throw new IllegalStateException();
                                             }
                                         }
                                     } else {
@@ -851,10 +854,10 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         removeFromBlockDrawer();
         updatePartOfGameBoard(i, j, (i + b.length), (j + b.length));
 
-//        Print score, just for testing
+        //Print score, just for testing
         Toast.makeText(getApplicationContext(), "Your score is " + player.getScore(), Toast.LENGTH_SHORT).show();
 
-//        if there is another move to make doSomething; right now just for testing, can be used when needed
+        //if there is another move to make doSomething; right now just for testing, can be used when needed
         if (areTurnsLeft()) {
             Toast.makeText(getApplicationContext(), "There are turns left, you go", Toast.LENGTH_SHORT).show();
         } else {
@@ -966,7 +969,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                         selectedBlockID = stone + 1; // isYourPlacementValid needs selectedBlockID
                         byte[][] actualStone = player.getStone(selectedBlockID - 1);
                         int help = actualStone.length;
-//                        Log.d("DebugInfo", "i = " + i + ", j = " + j + ", selected = " + selectedBlockID + ", transpose = " + transposeCount);
+                        //Log.d("DebugInfo", "i = " + i + ", j = " + j + ", selected = " + selectedBlockID + ", transpose = " + transposeCount);
                         int lu = 0, ll = 0, ru = 0, rl = 0;
                         for (int h1 = help; h1 > 0; h1--) {
                             for (int h2 = help; h2 > 0; h2--) {
@@ -976,7 +979,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                         for (int tr = 0; tr < 4; tr++) { // Test all four transpositions
                                             transposeCount = tr;
                                             if (cornerTesting(j - h2, i - h1, selectionRemember, transposeRemember)) {
-//                                                Log.d("Winner is", "Col j-h2: " + (j - h2) + "; Row i-h1: " + (i - h1) + "; Transpose: " + tr + "; Selected: " + selectedBlockID);
+                                                //Log.d("Winner is", "Col j-h2: " + (j - h2) + "; Row i-h1: " + (i - h1) + "; Transpose: " + tr + "; Selected: " + selectedBlockID);
                                                 return true;
                                             }
                                         }
@@ -990,7 +993,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                         for (int tr = 0; tr < 4; tr++) {
                                             transposeCount = tr;
                                             if (cornerTesting(j + h2, i - h1, selectionRemember, transposeRemember)) {
-//                                                Log.d("Winner is", "Col j+h2: " + (j + h2) + "; Row i-h1: " + (i - h1) + "; Transpose: " + tr + "; Selected: " + selectedBlockID);
+                                                //Log.d("Winner is", "Col j+h2: " + (j + h2) + "; Row i-h1: " + (i - h1) + "; Transpose: " + tr + "; Selected: " + selectedBlockID);
                                                 return true;
                                             }
                                         }
@@ -1004,7 +1007,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                         for (int tr = 0; tr < 4; tr++) {
                                             transposeCount = tr;
                                             if (cornerTesting(j - h2, i + h1, selectionRemember, transposeRemember)) {
-//                                                Log.d("Winner is", "Col j-h2: " + (j - h2) + "; Row i+h1: " + (i + h1) + "; Transpose: " + tr + "; Selected: " + selectedBlockID);
+                                                //Log.d("Winner is", "Col j-h2: " + (j - h2) + "; Row i+h1: " + (i + h1) + "; Transpose: " + tr + "; Selected: " + selectedBlockID);
                                                 return true;
                                             }
                                         }
@@ -1018,7 +1021,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                         for (int tr = 0; tr < 4; tr++) {
                                             transposeCount = tr;
                                             if (cornerTesting(j + h2, i + h1, selectionRemember, transposeRemember)) {
-//                                                Log.d("Winner is", "Col j+h2: " + (j + h2) + "; Row i+h1: " + (i + h1) + "; Transpose: " + tr + "; Selected: " + selectedBlockID);
+                                                //Log.d("Winner is", "Col j+h2: " + (j + h2) + "; Row i+h1: " + (i + h1) + "; Transpose: " + tr + "; Selected: " + selectedBlockID);
                                                 return true;
                                             }
                                         }
