@@ -33,16 +33,16 @@ public class Splash extends Activity {
         TextView txt_logo = (TextView) findViewById(R.id.logo);
         txt_logo.setTypeface(font);
         int help = getScreenWidth();
-        if (help < 500) {
+        if (help < 250) {
+            txt_logo.setTextSize(70);
+        } else if (help >= 250 && help < 700) {
             txt_logo.setTextSize(80);
-        } else if (help >= 500 && help < 700) {
+        } else if (help >= 700 && help < 1200) {
             txt_logo.setTextSize(90);
-        } else if (help >= 700 && help < 1000) {
+        } else if (help >= 1200 && help < 1700) {
             txt_logo.setTextSize(100);
-        } else if (help >= 1000 && help < 1300) {
-            txt_logo.setTextSize(110);
         } else {
-            txt_logo.setTextSize(120);
+            txt_logo.setTextSize(110);
         }
 
         Thread checkWiFiThread = new Thread() {

@@ -68,7 +68,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     private ImageView imgView;
     private int myturn;
     private int actTurn;
-    private final MediaPlayer placeSound = MediaPlayer.create(getApplicationContext(), R.raw.click);
+    private MediaPlayer placeSound;
 
 
     /*private int plCount;
@@ -84,6 +84,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fullscreen);
+        placeSound = MediaPlayer.create(getApplicationContext(), R.raw.click);
 
         //Initialisierung div. Variablen.
         fullscreenLayout = (RelativeLayout) findViewById(R.id.contentPanel);
@@ -225,7 +226,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                             fullscreenLayout.removeView(accept);
                                         }
                                     } catch (IllegalStateException e) {
-                                        Log.e("Error",e.getMessage());
+                                        Log.e("Error", e.getMessage());
                                         //throw new IllegalStateException();
                                     }
                                 } else {
@@ -243,6 +244,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                             public void onClick(View v) {
                                 restore(index_i, index_j);
                                 if (drawStone(index_i, (index_j + 1 > 20) ? 20 : ++index_j)) {
+                                if (drawStone(index_i, (index_j + 1 > 20) ? 20 : ++index_j, STAND_STILL)) {
                                     try {
                                         if (isYourPlacementValid(index_i, index_j)) {
                                             fullscreenLayout.addView(accept);
@@ -250,7 +252,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                             fullscreenLayout.removeView(accept);
                                         }
                                     } catch (IllegalStateException e) {
-                                        Log.e("Error",e.getMessage());
+                                        Log.e("Error", e.getMessage());
                                         //throw new IllegalStateException();
                                     }
                                 } else {
@@ -293,6 +295,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                             public void onClick(View v) {
                                 restore(index_i, index_j);
                                 if (drawStone((index_i + 1 > 20) ? 20 : ++index_i, index_j)) {
+                                if (drawStone((index_i + 1 > 20) ? 20 : ++index_i, index_j, STAND_STILL)) {
                                     try {
                                         if (isYourPlacementValid(index_i, index_j)) {
                                             fullscreenLayout.addView(accept);
@@ -300,7 +303,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                             fullscreenLayout.removeView(accept);
                                         }
                                     } catch (IllegalStateException e) {
-                                        Log.e("Error",e.getMessage());
+                                        Log.e("Error", e.getMessage());
                                         //throw new IllegalStateException();
                                     }
                                 } else {
@@ -349,7 +352,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                             b = gl.rotate(b);
                                         }
                                         placeIt(b, index_i, index_j); //Wirkliches Plazieren vom Stein
-                                        placeSound.start(); //Sound abspielen
                                     }
                                     gl.removeViews(fullscreenLayout, accept, cancel, transpose, move_up, move_right, move_down, move_left);
                                     elementFinished = true; //Nächster Stein kann geLongClicked werden
@@ -396,7 +398,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                             try {
                                                 fullscreenLayout.addView(accept);
                                             } catch (IllegalStateException e) {
-                                                Log.e("Error",e.getMessage());
+                                                Log.e("Error", e.getMessage());
                                                 //throw new IllegalStateException();
                                             }
                                         }
@@ -850,6 +852,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         }
         player.removeFromArray(selectedBlockID - 1);
         player.putToSaveIndices(b, i, j);
+        placeSound.start(); //Sound abspielen
 
         removeFromBlockDrawer();
         updatePartOfGameBoard(i, j, (i + b.length), (j + b.length));
@@ -858,11 +861,11 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         Toast.makeText(getApplicationContext(), "Your score is " + player.getScore(), Toast.LENGTH_SHORT).show();
 
         //if there is another move to make doSomething; right now just for testing, can be used when needed
-        if (areTurnsLeft()) {
+        /*if (areTurnsLeft()) {
             Toast.makeText(getApplicationContext(), "There are turns left, you go", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(getApplicationContext(), "You lost buddy", Toast.LENGTH_SHORT).show();
-        }
+        }*/
         player.printSaveIndices();
 
         ByteArrayHelper ba = new ByteArrayHelper();
@@ -1173,6 +1176,32 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
     private void isItMyTurn() {
         if (idNameMap.size() == 2) {
+            actTurn++;
+            if (actTurn == 3) actTurn = 1;
+            if (actTurn == myturn) {
+                player.setHasTurns(areTurnsLeft());
+            }
+        } else {
+            actTurn++;
+            if (actTurn == 5) actTurn = 1;
+            if (actTurn == myturn) {
+                player.setHasTurns(areTurnsLeft());
+            }
+        }
+
+        if (actTurn == myturn && player.getHasTurns()) {
+            enableScreenInteraction();
+            Toast.makeText(getApplicationContext(), "There are turns left, you go", Toast.LENGTH_SHORT).show();
+        } else if (actTurn == myturn && !player.getHasTurns()) {
+            Toast.makeText(getApplicationContext(), "You lost buddy", Toast.LENGTH_SHORT).show();
+            disableScreenInteraction();
+            isItMyTurn();
+        } else {
+            disableScreenInteraction();
+        }
+
+
+        /*if (idNameMap.size() == 2) {
             debugging("small");
             actTurn++;
             if (actTurn == 3) {
@@ -1231,7 +1260,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                 s += b[i][j] + ", ";
             }
             s += Character.toString('\n');
-        }
+        }*/
         s += Character.toString('\n');
         Log.d("Board", s);
     }

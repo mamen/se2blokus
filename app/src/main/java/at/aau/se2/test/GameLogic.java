@@ -339,6 +339,48 @@ public class GameLogic {
         }
     }
 
+    public byte[][] deformStone(byte[][] b, int leftOrUp) {
+        byte[][] newStone = new byte[b.length][b.length];
+        boolean empty = true;
+        if(leftOrUp == 1) { //Left Movement
+            for (int i = 0; i < b.length; i++) {
+                if(b[i][0] != 0) empty = false;
+            }
+            if(empty) {
+                for (int i = 0; i < b.length; i++) {
+                    for (int j = 0; j < b.length-1; j++) {
+                        newStone[i][j] = b[i][j+1];
+                    }
+                }
+                for (int i = 0; i < b.length; i++) {
+                    newStone[i][newStone.length-1] = 0;
+                }
+                return newStone;
+            } else {
+                return b;
+            }
+        } else if(leftOrUp == 2) { //Up Movement
+            for (int i = 0; i < b.length; i++) {
+                if(b[0][i] != 0) empty = false;
+            }
+            if(empty) {
+                for (int i = 0; i < b.length-1; i++) {
+                    for (int j = 0; j < b.length; j++) {
+                        newStone[i][j] = b[i+1][j];
+                    }
+                }
+                for (int i = 0; i < b.length; i++) {
+                    newStone[newStone.length-1][i] = 0;
+                }
+                return newStone;
+            } else {
+                return b;
+            }
+        } else {
+            return b;
+        }
+    }
+
 
     /**
      * Resets the GameLogic Instance, use carefully!
