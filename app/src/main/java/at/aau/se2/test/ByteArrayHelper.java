@@ -53,8 +53,8 @@ public class ByteArrayHelper {
 
         this.byteStone = stone;
         this.color = b[b.length - 3];
-        this.idx = b[b.length - 2];
-        this.idy = b[b.length - 1];
+        this.idy = b[b.length - 2];
+        this.idx = b[b.length - 1];
     }
 
     public int getColor(){

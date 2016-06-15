@@ -11,6 +11,8 @@ public class Player {
     private int score;
     private byte[] remainingStones;
 
+    private boolean hasTurns;
+
     private ArrayList<IndexTuple> saveIndices;
     public static final int MAX_STONES = 89;
 
@@ -26,6 +28,7 @@ public class Player {
 
         remainingStones = new byte[21];
         fillArray();
+        hasTurns = true;
     }
 
     public byte getPlayerId() {
@@ -115,10 +118,6 @@ public class Player {
         return saveIndices;
     }
 
-    public int getSaveIndicesSize() {
-        return saveIndices.size();
-    }
-
     public void putToSaveIndices(byte[][] bytes, int index_i, int index_j) {
         for (int i = 0; i < bytes.length; i++) {
             for (int j = 0; j < bytes[i].length; j++) {
@@ -143,6 +142,14 @@ public class Player {
         return true;
     }
 
+    public void setHasTurns(boolean hasTurns) {
+        this.hasTurns = hasTurns;
+    }
+
+    public boolean getHasTurns() {
+        return hasTurns;
+    }
+
     /* ---DEBUGGING--- */
 
     public void stonesToLog() {
@@ -157,7 +164,7 @@ public class Player {
 
     public void printSaveIndices() {
         for (int i = 0; i < saveIndices.size(); i++) {
-            Log.d("Indices:", saveIndices.get(i).toString());
+            Log.d("Indices "+(i+1), saveIndices.get(i).toString());
         }
     }
 }

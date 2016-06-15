@@ -224,7 +224,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                         }
                                     } catch (IllegalStateException e) {
                                         Log.e("Error",e.getMessage());
-                                        throw new IllegalStateException();
+//                                        throw new IllegalStateException();
                                     }
                                 } else {
                                     restore(index_i, index_j);
@@ -249,7 +249,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                         }
                                     } catch (IllegalStateException e) {
                                         Log.e("Error",e.getMessage());
-                                        throw new IllegalStateException();
+//                                        throw new IllegalStateException();
                                     }
                                 } else {
                                     restore(index_i, --index_j);
@@ -299,7 +299,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                         }
                                     } catch (IllegalStateException e) {
                                         Log.e("Error",e.getMessage());
-                                        throw new IllegalStateException();
+//                                        throw new IllegalStateException();
                                     }
                                 } else {
                                     restore(--index_i, index_j);
@@ -394,7 +394,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                                 fullscreenLayout.addView(accept);
                                             } catch (IllegalStateException e) {
                                                 Log.e("Error",e.getMessage());
-                                                throw new IllegalStateException();
+//                                                throw new IllegalStateException();
                                             }
                                         }
                                     } else {
@@ -752,6 +752,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             case 16:
             case 18:
             case 19:
+            case 20:
                 return 1;
             default:
                 throw new ExceptionInInitializerError("manipulateX failed");
@@ -788,6 +789,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             case 17:
             case 18:
             case 19:
+            case 20:
                 return 1;
             case 14:
                 return 2;
@@ -858,6 +860,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         } else {
             Toast.makeText(getApplicationContext(), "You lost buddy", Toast.LENGTH_SHORT).show();
         }
+        player.printSaveIndices();
 
         ByteArrayHelper ba = new ByteArrayHelper();
         byte[] byteArr = ba.createNewByteArray(b, i, j, playerID);
@@ -944,13 +947,18 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
      * false, else
      */
     public boolean areTurnsLeft() {
+        IndexTuple removal = new IndexTuple(-1, -1);
+        boolean foundRedundance = false;
         int selectionRemember = selectedBlockID; // To restore, if there is another possible move
         int transposeRemember = transposeCount; // ---------||---------
         byte[] remainingStones = player.getRemainingStones(); // What stones do you still have (Saved as tags)
         byte[][] gameboard = gl.getGameBoard();
+
         ArrayList<IndexTuple> savedTuples = player.getSaveIndices(); // Tuples with the Indices of your placed stones
-        if (player.getSaveIndicesSize() < player.MAX_STONES) { // Probably useless, because you should not be able to lay more than MAX_STONES
+        if (player.getScore() < player.MAX_STONES) { // Probably useless, because you should not be able to lay more than MAX_STONES
             for (IndexTuple tuple : savedTuples) { // Look at every IndexTuple (where your stones lay)
+                removal = tuple;
+                foundRedundance = false;
                 for (byte stone : remainingStones) { // Look at every stone you still have
                     if (stone != -1) { // Already placed stone
                         int i = tuple.getIndex_j(); // Index_i, bit confusing with row and col..
@@ -1021,8 +1029,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
                                 // If there is no free corner for this IndexTuple, you can remove it
                                 // I don't know if this is any useful for the performance
-                                if(lu != 0 && ll != 0 && ru != 0 && rl != 0) {
-                                    savedTuples.remove(new IndexTuple(i, j));
+                                if (lu != 0 && ll != 0 && ru != 0 && rl != 0) {
                                     break;
 
                                 }
@@ -1030,6 +1037,14 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                         }
                     }
                 }
+                foundRedundance = true;
+                break;
+            }
+            Log.d("Indices: ", "Breaking here??");
+            player.printSaveIndices();
+            if (foundRedundance) {
+                savedTuples.remove(removal);
+                if (areTurnsLeft()) return true;
             }
         }
         return false;
