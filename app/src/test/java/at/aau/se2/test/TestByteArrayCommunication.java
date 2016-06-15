@@ -32,14 +32,14 @@ public class TestByteArrayCommunication {
         Assert.assertTrue(Arrays.equals(bt, calcByte));
     }
 
-    @Test
+    /*@Test
     public void testFetchAdditionalInformationFromMessage() {
         helper.fetchInformationFromByteArray(calcByte);
         int c = helper.getColor();
         int x = helper.getIdx();
         int y = helper.getIdy();
         Assert.assertEquals((c == id) && (x == coordx) && (y == coordy), true);
-    }
+    }*/
 
     @Test
     public void testFetchByteArrayFromMessage() {
