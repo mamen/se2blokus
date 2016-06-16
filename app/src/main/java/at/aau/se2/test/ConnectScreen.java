@@ -482,8 +482,6 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
             if (idNameMap.size() == 2 || idNameMap.size() == 4) {
                 startButton.setVisibility(View.VISIBLE);
                 startButton.setClickable(true);
-                startButton.setBackgroundColor(Color.BLACK);
-                startButton.setTextColor(Color.WHITE);
             } else {
                 startButton.setVisibility(View.GONE);
                 startButton.setClickable(false);
@@ -768,7 +766,6 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
             case R.id.button_connection:
                 disconnectButton.setAlpha(1f);
                 disconnectButton.setClickable(true);
-
                 connectionButton.setAlpha(0.5f);
                 connectionButton.setClickable(false);
                 if (doHosting) {

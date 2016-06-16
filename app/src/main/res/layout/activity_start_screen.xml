@@ -42,7 +42,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_row="3"
             android:layout_column="0"
-            android:background="#66666666" />
+            android:background="#66666666"/>
 
         <Space
             android:layout_width="20dp"
