@@ -843,6 +843,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     private void placeIt(byte[][] b, int i, int j) {
         gl.placeStone(b, i, j);
 
+        placeSound.start(); //Sound abspielen
+
         if (player.getScore() == (player.MAX_STONES - 1)) {
             player.addToScore(15); //GameRule: if last stone placed == single stone
             player.calculateScore(b);
@@ -851,7 +853,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         }
         player.removeFromArray(selectedBlockID - 1);
         player.putToSaveIndices(b, i, j);
-        placeSound.start(); //Sound abspielen
 
         removeFromBlockDrawer();
         updatePartOfGameBoard(i, j, (i + b.length), (j + b.length));

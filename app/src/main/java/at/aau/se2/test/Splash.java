@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class Splash extends Activity {
 
@@ -40,9 +41,9 @@ public class Splash extends Activity {
         } else if (help >= 700 && help < 1200) {
             txt_logo.setTextSize(90);
         } else if (help >= 1200 && help < 1700) {
-            txt_logo.setTextSize(100);
+            txt_logo.setTextSize(90);
         } else {
-            txt_logo.setTextSize(110);
+            txt_logo.setTextSize(100);
         }
 
         Thread checkWiFiThread = new Thread() {

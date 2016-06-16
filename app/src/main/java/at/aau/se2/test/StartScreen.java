@@ -35,6 +35,10 @@ public class StartScreen extends Activity implements View.OnClickListener {
                 goOn(false);
                 break;
             case R.id.settings:
+                final Intent intent = new Intent("at.aau.se2.test.RULES");
+                startActivity(intent);
+                break;
+            case R.id.singlePlayer:
                 doHosting();
                 break;
             default:
@@ -51,22 +55,26 @@ public class StartScreen extends Activity implements View.OnClickListener {
         TextView txtLogo = (TextView) findViewById(R.id.logo);
         TextView txtHostGame = (TextView) findViewById(R.id.hostGame);
         TextView txtJoinGame = (TextView) findViewById(R.id.joinGame);
+        TextView txtSingleplayer = (TextView) findViewById(R.id.singlePlayer);
         TextView txtSettings = (TextView) findViewById(R.id.settings);
 
         txtLogo.setTypeface(font);
         txtHostGame.setTypeface(font);
         txtJoinGame.setTypeface(font);
         txtSettings.setTypeface(font);
+        txtSingleplayer.setTypeface(font);
 
         txtLogo.setTextSize(60);
         txtHostGame.setTextSize(40);
         txtJoinGame.setTextSize(40);
         txtSettings.setTextSize(40);
+        txtSingleplayer.setTextSize(40);
 
         txtLogo.setOnClickListener(this);
         txtHostGame.setOnClickListener(this);
         txtJoinGame.setOnClickListener(this);
         txtSettings.setOnClickListener(this);
+        txtSingleplayer.setOnClickListener(this);
     }
 
 
