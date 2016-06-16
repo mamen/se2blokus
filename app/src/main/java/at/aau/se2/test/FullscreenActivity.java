@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.ClipData;
 import android.content.Context;
 import android.graphics.Point;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -69,6 +71,9 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     private int myturn;
     private int actTurn;
     private MediaPlayer placeSound;
+
+    private SensorManager mSensorManager;
+    private ShakeDetector mSensorListener;
 
 
     /*private int plCount;
@@ -442,6 +447,17 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                 disableScreenInteraction();
             }
         }
+
+        //Shake detection
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mSensorListener = new ShakeDetector();
+
+        mSensorListener.setOnShakeListener(new ShakeDetector.OnShakeListener() {
+
+            public void onShake() {
+                Toast.makeText(FullscreenActivity.this, "Shaked", Toast.LENGTH_SHORT).show();
+            }
+        });
 
 
     }
@@ -904,6 +920,15 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     protected void onResume() {
         super.onResume();
         hideStatusBar();
+        mSensorManager.registerListener(mSensorListener,
+                mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                SensorManager.SENSOR_DELAY_UI);
+    }
+
+    @Override
+    protected void onPause() {
+        mSensorManager.unregisterListener(mSensorListener);
+        super.onPause();
     }
 
     @Override
