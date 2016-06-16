@@ -43,4 +43,40 @@
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true" />
 
+
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/colorRed"
+        android:textAlignment="center"
+        android:padding="5dp"
+        android:textColor="@color/white"
+        android:id="@+id/pointsRed" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/colorGreen"
+        android:textAlignment="center"
+        android:padding="5dp"
+        android:textColor="@color/white"
+        android:id="@+id/pointsGreen" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/colorBlue"
+        android:textAlignment="center"
+        android:padding="5dp"
+        android:textColor="@color/white"
+        android:id="@+id/pointsBlue" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/colorYellow"
+        android:textAlignment="center"
+        android:padding="5dp"
+        android:textColor="@color/white"
+        android:id="@+id/pointsYellow" />
+
 </RelativeLayout>

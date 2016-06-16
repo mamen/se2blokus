@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.ClipData;
 import android.content.Context;
 import android.graphics.Point;
+import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.media.MediaPlayer;
@@ -24,6 +25,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -72,8 +74,10 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     private int actTurn;
     private MediaPlayer placeSound;
 
-    private SensorManager mSensorManager;
-    private ShakeDetector mSensorListener;
+    private TextView pointsRed;
+    private TextView pointsBlue;
+    private TextView pointsGreen;
+    private TextView pointsYellow;
 
 
     /*private int plCount;
@@ -93,6 +97,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
         //Initialisierung div. Variablen.
         fullscreenLayout = (RelativeLayout) findViewById(R.id.contentPanel);
+
+
 
         playerID = -1;
         selectedBlockID = -1;
@@ -322,16 +328,23 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                         RelativeLayout.LayoutParams paramsMoveDown = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
                         RelativeLayout.LayoutParams paramsMoveLeft = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
 
-                        //TODO: Berechnungen falsch, momentan einfach wird einfach irgendetwas gerechnet ;)
-                        paramsMoveUp.setMargins((int) Math.floor(gameBoardLayout.getHeight() / 2), 0, 0, 0);
-                        paramsMoveRight.setMargins((int) Math.floor(gameBoardLayout.getHeight() / 4) * 3, (int) Math.floor(gameBoardLayout.getHeight() / 2), 0, 0);
-                        paramsMoveDown.setMargins((int) Math.floor(gameBoardLayout.getHeight() / 2), (int) Math.floor(gameBoardLayout.getHeight() / 4) * 3, 0, 0);
-                        paramsMoveLeft.setMargins(0, (int) Math.floor(gameBoardLayout.getHeight() / 2), 0, 0);
+                        paramsMoveUp.setMargins((getScreenWidth()/2)-((move_up.getDrawable().getMinimumWidth()+move_up.getPaddingLeft()+move_up.getPaddingRight())/2), 0, 0, 0);
+
+                        paramsMoveRight.setMargins(gameBoardLayout.getWidth()-move_right.getPaddingLeft()-move_right.getPaddingRight()-move_right.getDrawable().getMinimumWidth(), (gameBoardLayout.getHeight()/2-move_right.getPaddingTop()-move_right.getDrawable().getMinimumHeight()/2), 0, 0);
+
+                        paramsMoveDown.setMargins((getScreenWidth()/2)-((move_down.getDrawable().getMinimumWidth()+move_down.getPaddingLeft()+move_down.getPaddingRight())/2), (gameBoardLayout.getHeight()-move_down.getPaddingTop()-move_down.getPaddingBottom()-move_up.getDrawable().getMinimumHeight()), 0, 0);
+
+                        paramsMoveLeft.setMargins(0, (gameBoardLayout.getHeight()/2-move_left.getPaddingTop()-move_left.getDrawable().getMinimumHeight()/2), 0, 0);
 
                         move_up.setLayoutParams(paramsMoveUp);
                         move_right.setLayoutParams(paramsMoveRight);
                         move_down.setLayoutParams(paramsMoveDown);
                         move_left.setLayoutParams(paramsMoveLeft);
+
+                        move_up.setAlpha(0.5f);
+                        move_right.setAlpha(0.5f);
+                        move_down.setAlpha(0.5f);
+                        move_left.setAlpha(0.5f);
 
                         // Accept-Button
                         if (drawn) {
@@ -346,15 +359,18 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                 public void onClick(View v) {
                                     // Platzieren nicht möglich - Preview wieder löschen und Bild im BlockDrawer wieder anzeigen
                                     if (!isYourPlacementValid(index_i, index_j)) {
-                                        vibrate(500);
+                                        //vibrate(500);
                                         restore(index_i, index_j);
                                     } else {
+                                        placeSound.start(); //Sound abspielen
                                         testView.setVisibility(View.INVISIBLE); //Müsste unnötig sein
                                         byte[][] b = player.getStone(selectedBlockID - 1);
                                         for (int a = 0; a < transposeCount; a++) { //Stein drehen, je nachdem wie oft der Button gedrückt wurde
                                             b = gl.rotate(b);
                                         }
                                         placeIt(b, index_i, index_j); //Wirkliches Plazieren vom Stein
+
+                                        updatePoints();
                                     }
                                     gl.removeViews(fullscreenLayout, accept, cancel, transpose, move_up, move_right, move_down, move_left);
                                     elementFinished = true; //Nächster Stein kann geLongClicked werden
@@ -434,9 +450,9 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         });
 
         imgView = (ImageView) findViewById(R.id.img_stop);
-        if (doSettings) {
-            imgView.setVisibility(View.INVISIBLE);
-        }
+        //if (doSettings) {
+            imgView.setVisibility(View.GONE);
+        //}
 
         actTurn = 1;
 
@@ -447,18 +463,95 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                 disableScreenInteraction();
             }
         }
+    }
 
-        //Shake detection
-        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        mSensorListener = new ShakeDetector();
 
-        mSensorListener.setOnShakeListener(new ShakeDetector.OnShakeListener() {
+    @Override
+    public void onStart(){
+        super.onStart();
+        initializePoints();
+    }
 
-            public void onShake() {
-                Toast.makeText(FullscreenActivity.this, "Shaked", Toast.LENGTH_SHORT).show();
+    private void initializePoints() {
+        Typeface font = Typeface.createFromAsset(getAssets(), "blocked.ttf");
+
+        pointsRed = (TextView)findViewById(R.id.pointsRed);
+        pointsBlue = (TextView)findViewById(R.id.pointsBlue);
+        pointsGreen = (TextView)findViewById(R.id.pointsGreen);
+        pointsYellow = (TextView)findViewById(R.id.pointsYellow);
+
+        RelativeLayout.LayoutParams paramsPointsRed = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        RelativeLayout.LayoutParams paramsPointsBlue = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        RelativeLayout.LayoutParams paramsPointsGreen = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        RelativeLayout.LayoutParams paramsPointsYellow = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+
+        int quater = getScreenWidth()/4;
+        int top = getScreenHeight()-pointsRed.getPaddingTop()-pointsRed.getPaddingBottom()-pointsRed.getLineHeight()-20;
+
+        paramsPointsRed.setMargins(0, top, 0, 0);
+        paramsPointsRed.width = quater;
+        paramsPointsBlue.setMargins(quater, top, 0, 0);
+        paramsPointsBlue.width = quater;
+        paramsPointsGreen.setMargins(quater*2, top, 0, 0);
+        paramsPointsGreen.width = quater;
+        paramsPointsYellow.setMargins(quater*3, top, 0, 0);
+        paramsPointsYellow.width = quater;
+
+        pointsRed.setTypeface(font);
+        pointsBlue.setTypeface(font);
+        pointsGreen.setTypeface(font);
+        pointsYellow.setTypeface(font);
+        pointsRed.setTextSize(20);
+        pointsBlue.setTextSize(20);
+        pointsGreen.setTextSize(20);
+        pointsYellow.setTextSize(20);
+
+
+
+        pointsRed.setLayoutParams(paramsPointsRed);
+        pointsBlue.setLayoutParams(paramsPointsBlue);
+        pointsGreen.setLayoutParams(paramsPointsGreen);
+        pointsYellow.setLayoutParams(paramsPointsYellow);
+
+        pointsRed.setText("0");
+        pointsBlue.setText("0");
+        pointsGreen.setText("0");
+        pointsYellow.setText("0");
+    }
+
+
+    private void updatePoints(){
+        byte[][] gameBoard = gl.getGameBoard();
+
+        int curPointsRed = 0;
+        int curPointsGreen = 0;
+        int curPointsBlue = 0;
+        int curPointsYellow = 0;
+
+        for(int i = 0; i < SIZE; i++){
+            for(int j = 0; j < SIZE; j++){
+                switch(gameBoard[i][j]){
+                    case 1:
+                        curPointsGreen++;
+                        break;
+                    case 2:
+                        curPointsRed++;
+                        break;
+                    case 3:
+                        curPointsBlue++;
+                        break;
+                    case 4:
+                        curPointsYellow++;
+                        break;
+
+                }
             }
-        });
+        }
 
+        pointsRed.setText(Integer.toString(curPointsRed));
+        pointsGreen.setText(Integer.toString(curPointsGreen));
+        pointsBlue.setText(Integer.toString(curPointsBlue));
+        pointsYellow.setText(Integer.toString(curPointsYellow));
 
     }
 
@@ -641,7 +734,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                     }
                 } else {
                     if (!gl.hitTheCorner(b, x, y)) {
-                        vibrate(500);
+                        //vibrate(500);
                         return false;
                     }
                 }
@@ -859,8 +952,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     private void placeIt(byte[][] b, int i, int j) {
         gl.placeStone(b, i, j);
 
-        placeSound.start(); //Sound abspielen
-
         if (player.getScore() == (player.MAX_STONES - 1)) {
             player.addToScore(15); //GameRule: if last stone placed == single stone
             player.calculateScore(b);
@@ -872,9 +963,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
         removeFromBlockDrawer();
         updatePartOfGameBoard(i, j, (i + b.length), (j + b.length));
-
-        //Print score, just for testing
-        Toast.makeText(getApplicationContext(), "Your score is " + player.getScore(), Toast.LENGTH_SHORT).show();
 
         //if there is another move to make doSomething; right now just for testing, can be used when needed
         /*if (areTurnsLeft()) {
@@ -920,14 +1008,10 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     protected void onResume() {
         super.onResume();
         hideStatusBar();
-        mSensorManager.registerListener(mSensorListener,
-                mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-                SensorManager.SENSOR_DELAY_UI);
     }
 
     @Override
     protected void onPause() {
-        mSensorManager.unregisterListener(mSensorListener);
         super.onPause();
     }
 
@@ -1131,7 +1215,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         debugging("endpoint lost");
     }
 
-
     @Override
     public void onMessageReceived(String endpointId, byte[] payload, boolean isReliable) {
 
@@ -1167,7 +1250,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
         return s;
     }
-
 
     private void sendMessage(byte[] mess) {
         debugging("sendMessage" + isHost + "..." + remotePeerEndpoints.toString() + "..." + remoteHostEndpoint);
@@ -1216,6 +1298,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         }
 
         if (actTurn == myturn) {
+            updatePoints();
             if (player.getHasTurns()) { // Wenn ich noch Spielzüge habe, kann ich weiterspielen..
                 enableScreenInteraction();
                 Toast.makeText(getApplicationContext(), "There are turns left, you go", Toast.LENGTH_SHORT).show();
@@ -1264,7 +1347,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     public void enableScreenInteraction() {
         debugging("should enable");
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-        imgView.setVisibility(View.INVISIBLE);
+        imgView.setVisibility(View.GONE);
     }
 
     @Override

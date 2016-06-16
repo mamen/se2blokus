@@ -210,7 +210,7 @@ public class GameLogic {
                             if (checkSurroundings(board[col + 1][row], board[col][row + 1], board[col - 1][row], board[col][row - 1])) {
 //                                vibrate();
 //                                Toast.makeText(context, ("That's invalid, dude!"), Toast.LENGTH_SHORT).show();
-                                return false;
+                                    return false;
                             } else if (checkSurroundings(board[col - 1][row - 1], board[col + 1][row - 1], board[col - 1][row + 1], board[col + 1][row + 1])) {
                                 corner++;
                             }
@@ -218,8 +218,9 @@ public class GameLogic {
                     }
                 }
             }
-            if (corner != 0)
+            if (corner != 0) {
                 return true;
+            }
         }
         return false;
     }
