@@ -5,8 +5,6 @@ import android.content.ClipData;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Typeface;
-import android.hardware.Sensor;
-import android.hardware.SensorManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;

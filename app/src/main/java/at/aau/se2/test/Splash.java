@@ -15,7 +15,6 @@ import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class Splash extends Activity {
 

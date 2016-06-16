@@ -1,13 +1,10 @@
 package at.aau.se2.test;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Typeface;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.os.Handler;
-import android.view.MotionEvent;
+import android.text.Html;
 import android.view.View;
 import android.widget.TextView;
 
@@ -28,11 +25,12 @@ public class RulesActivity extends AppCompatActivity {
         Typeface font = Typeface.createFromAsset(getAssets(), "blocked.ttf");
 
         TextView txtLogo = (TextView) findViewById(R.id.logo);
+        TextView txtRules = (TextView) findViewById(R.id.rules);
 
         txtLogo.setTypeface(font);
         txtLogo.setTextSize(60);
 
-
+        txtRules.setText(Html.fromHtml(getString(R.string.rules)));
     }
 
     @Override
