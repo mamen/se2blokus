@@ -72,10 +72,13 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     private int actTurn;
     private MediaPlayer placeSound;
 
+    private static ArrayList<Player> players;
+
     private TextView pointsRed;
     private TextView pointsBlue;
     private TextView pointsGreen;
     private TextView pointsYellow;
+
 
 
     /*private int plCount;
@@ -131,7 +134,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
         // lade Player
         player = new Player(playerID);
-
+        players = new ArrayList<>(4);
+        players.add(player);
         // lade GameLogic
         gl = GameLogic.getInstance(player, this.getApplicationContext());
 
@@ -143,6 +147,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
         // BlockDrawer erzeugen
         initializeBlockDrawer();
+
 
         // Draglistener erstellen
         gameBoardLayout.setOnDragListener(new View.OnDragListener() {
@@ -367,7 +372,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                             b = gl.rotate(b);
                                         }
                                         placeIt(b, index_i, index_j); //Wirkliches Plazieren vom Stein
-
+//                                        updateThePoints();
                                         updatePoints();
                                     }
                                     gl.removeViews(fullscreenLayout, accept, cancel, transpose, move_up, move_right, move_down, move_left);
@@ -552,6 +557,26 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         pointsYellow.setText(Integer.toString(curPointsYellow));
 
     }
+
+
+    /*private void updateThePoints() {
+        for (Player pl : players) {
+            switch (pl.getPlayerId()) {
+                case 1:
+                    pointsGreen.setText(Integer.toString(pl.getScore()));
+                    break;
+                case 2:
+                    pointsRed.setText(Integer.toString(pl.getScore()));
+                    break;
+                case 3:
+                    pointsBlue.setText(Integer.toString(pl.getScore()));
+                    break;
+                case 4:
+                    pointsYellow.setText(Integer.toString(pl.getScore()));
+                    break;
+            }
+        }
+    }*/
 
 
     private void initializeBlockDrawer() {
@@ -951,11 +976,15 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         gl.placeStone(b, i, j);
 
         if (player.getScore() == (player.MAX_STONES - 1)) {
-            player.addToScore(15); //GameRule: if last stone placed == single stone
+            player.addToScore(20); //GameRule: if last stone placed == single stone
             player.calculateScore(b);
         } else {
             player.calculateScore(b);
         }
+        if(player.getScore() >= player.MAX_STONES) {
+            player.addToScore(15);
+        }
+
         player.removeFromArray(selectedBlockID - 1);
         player.putToSaveIndices(b, i, j);
 
@@ -1226,9 +1255,12 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         int idy = b.getIdy();
         byte[][] stone = b.getByteStone();
 
+
+
         if (color != playerID) {
             debugging("" + Integer.toString(color) + "_" + Integer.toString(playerID));
             placeStoneOfOtherPlayer(stone, idy, idx);
+//            updateThePoints();
             isItMyTurn();
 
         }
@@ -1297,6 +1329,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
         if (actTurn == myturn) {
             updatePoints();
+//            updateThePoints();
             if (player.getHasTurns()) { // Wenn ich noch Spielzüge habe, kann ich weiterspielen..
                 enableScreenInteraction();
                 Toast.makeText(getApplicationContext(), "There are turns left, you go", Toast.LENGTH_SHORT).show();
