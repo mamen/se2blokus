@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="fill_parent"
     tools:context="at.aau.se2.test.Splash"
-    android:background="@drawable/application_dummy_start">
+    android:background="@drawable/background">
 
     <Space
         android:layout_width="20dp"
