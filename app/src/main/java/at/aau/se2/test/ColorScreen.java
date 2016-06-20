@@ -23,6 +23,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Screen to handle a synchronous color-pick.
+ */
 public class ColorScreen extends Activity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         Connections.ConnectionRequestListener,
@@ -145,12 +148,12 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
 
         if (message.startsWith(messageCodes[0])) {
             if (!selected) {
-                debugging("color chosen");
+                debugging("color chosen", 1);
                 String[] messArray = message.split("-");
+                String endpointSplit = endpointId.split(":")[0];
                 if (messArray.length == 2) {
                     int id = Integer.parseInt(messArray[1]);
-                    //TODO: endpointId hier (ist länger) != endpointId in der Map
-                    setButtonSelected(endpointId, (Button) findViewById(id));
+                    setButtonSelected(endpointSplit, (Button) findViewById(id));
 
                 } else {
                     debugging("message array has wrong format");
@@ -371,5 +374,9 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
 
     private void debugging(String debMessage) {
         Log.d("tobiasho", debMessage+"_"+isHost);
+    }
+
+    private void debugging(String debMessage, int t) {
+        Log.d("forthat", debMessage+"_"+isHost);
     }
 }
