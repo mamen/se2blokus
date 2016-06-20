@@ -31,7 +31,9 @@ import java.util.List;
 import java.util.Map;
 
 
-
+/**
+ * Activity which handles the connection establishment.
+ */
 public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         Connections.ConnectionRequestListener,
@@ -64,7 +66,6 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
 
     private static final String[] MESSAGE_CODES = {"COLOROK-","FULLSCREEN","N-","NEWPLAYER-","REMOVE-","START","REMOVE-"};
 
-
     //TableView
     private TextView player1;
     private TextView id1;
@@ -74,12 +75,6 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
     private TextView id3;
     private TextView player4;
     private TextView id4;
-
-
-    /**
-     *
-     * Finden sich nicht mehr ..
-     */
 
 
     /**
@@ -207,8 +202,6 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
         playerId.setTypeface(font);
         logo.setTypeface(font);
 
-
-
         connectionButton.setTextSize(FONT_SIZE_LARGE);
         connectionButton.setTextSize(FONT_SIZE_LARGE);
         disconnectButton.setTextSize(FONT_SIZE_LARGE);
@@ -226,7 +219,6 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
         id3.setTextSize(FONT_SIZE_SMALL);
         player4.setTextSize(FONT_SIZE_SMALL);
         id4.setTextSize(FONT_SIZE_SMALL);
-
 
         disconnectButton.setAlpha(.5f);
         disconnectButton.setClickable(false);
@@ -269,7 +261,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
         debugging("disconnect");
         if (!isConnectedToNetwork() || !isConnected)
             return;
-        //debugging("ishost? "+isHost);
+
         if (isHost) {
             idNameMap.clear();
             sendMessage("Shutting down host");
@@ -277,26 +269,18 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
             Nearby.Connections.stopAllEndpoints(apiClient);
             actStatus.setText(R.string.status_not_connected);
             remotePeerEndpoints.clear();
-            //participants = 0;
             finalizeDisconnection();
             clearTableView();
-            //isHost = false;
-
-            //debugging("Shutting down NR: "+idNameMap.size());
-        } else {
+        }
+        else {
             if (TextUtils.isEmpty(remoteHostEndpoint)) {
                 Nearby.Connections.stopDiscovery(apiClient, getString(R.string.service_id));
                 return;
             }
-            //debugging("komme ich hier her?");
-            //idNameMap.remove(Nearby.Connections.getLocalDeviceId(apiClient));
             idNameMap.clear();
-
             sendMessage("Disconnecting");
             Nearby.Connections.disconnectFromEndpoint(apiClient, remoteHostEndpoint);
             remoteHostEndpoint = null;
-            //participants--;
-            //debugging("Disconnect NR: "+idNameMap.size());
             actStatus.setText(R.string.status_disconnected);
             finalizeDisconnection();
             clearTableView();
@@ -309,9 +293,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
      * A host method. Advertises a connection to possible peers after checking it checks if the device has a WIFI-connection.
      */
     private void advertise() {
-        //debugging("advertise");
         if (!isConnectedToNetwork()) {
-            //debugging("not connected to wifi");
             actStatus.setText(R.string.status_please_connect_to_wifi);
             disconnectButton.setAlpha(0.5f);
             disconnectButton.setClickable(false);
@@ -323,17 +305,12 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
         idNameMap.put(Nearby.Connections.getLocalDeviceId(apiClient), username);
         String name = "Nearby Advertising";
 
-
         Nearby.Connections.startAdvertising(apiClient, name, null, CONNECTION_TIME_OUT, this).setResultCallback(new ResultCallback<Connections.StartAdvertisingResult>() {
             @Override
             public void onResult(Connections.StartAdvertisingResult result) {
                 if (result.getStatus().isSuccess()) {
                     actStatus.setText(R.string.status_advertising);
                     idNameMap.put(Nearby.Connections.getLocalDeviceId(apiClient), username);
-
-
-                    //participants++;
-                    //debugging("Starting to advertise NR: "+participants);
                     finalizeConnection();
                     setUpTableView();
                 }
@@ -368,6 +345,11 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
         //debugging("onConnected");
     }
 
+    /**
+     * Sets up the table view and fills it with the information
+     * contained in the idMap.
+     *
+     */
     private void setUpTableView(){
         if(isHost){
             idNameMap.put(Nearby.Connections.getLocalDeviceId(apiClient), username);
@@ -410,6 +392,9 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
         }
     }
 
+    /**
+     * Clears the table view content.
+     */
     private void clearTableView(){
         for (int i=1; i<=4; i++)
         {
@@ -421,9 +406,6 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
                 ((TextView) findViewById(resPlayer)).setText("");
         }
     }
-
-
-    // WICHTIG IST DIE DEVICEID
 
 
     @Override
@@ -474,9 +456,11 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
         }
     }
 
+    /**
+     *  Checks if a game start is possible. In case it it, there is a start button popping up
+     *  at the hosts screen.
+     */
     private void checkStartGame() {
-        //debugging("found that!");
-        //setupParticipantList();
         if (isHost) {
             if (idNameMap.size() == 2 || idNameMap.size() == 4) {
                 startButton.setVisibility(View.VISIBLE);
@@ -488,26 +472,29 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
         }
     }
 
-    //private void setupParticipantList() {
-    //    String partString = listCurrentParticipants();
-    //}
-
+    /**
+     * TODO: MUSS ANGEPASST WERDEN!!
+     * Finallizes the connection through setting the parameters and telling the others
+     * that this device is now part of the game.
+     */
     private void finalizeConnection() {
         if (!isConnected) {
             isConnected = true;
-            //debugging("Device "+Nearby.Connections.getLocalDeviceId(apiClient)+ " connected");
         }
 
         String partString = listCurrentParticipants();
         sendMessage(partString);
         checkStartGame();
-
     }
 
+    /**
+     * TODO: MUSS ANGEPASST WERDEN!!
+     * Finallizes the disconnection through setting the parameters and telling the others
+     * that this device is now not part of the game anymore.
+     */
     private void finalizeDisconnection() {
         if (isConnected) {
             isConnected = false;
-            //debugging("Device "+Nearby.Connections.getLocalDeviceId(apiClient)+ " disconnected");
         }
         String partString = listCurrentParticipants();
         sendMessage(partString);
@@ -515,6 +502,10 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
 
     }
 
+    /**
+     * TODO: Deprecated. Has to be either made in another function or adjusted.
+     * @return
+     */
     private String listCurrentParticipants() {
         String particip = "";
         for (Map.Entry<String, String> entry : idNameMap.entrySet()) {
@@ -527,29 +518,25 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
     /**
      * Method to send a message from to all other participants.
      *
-     * @param message text to be sent
+     * @param message text which is sent
      */
     private void sendMessage(String message) {
-        //debugging("sendMessage");
         if(!remotePeerEndpoints.isEmpty()) {
             if (isHost) {
                 Nearby.Connections.sendReliableMessage(apiClient, remotePeerEndpoints, (message).getBytes());
-                debugging("hostie_");
-                //messageAdapter.add(message);
-                //messageAdapter.notifyDataSetChanged();
             }
         }
         else {
             if (remoteHostEndpoint != null) {
-                debugging("not hostie_");
                 Nearby.Connections.sendReliableMessage(apiClient, remoteHostEndpoint, (message).getBytes());
             }
         }
     }
 
     /**
-     * Automatically sends a connectionRequest to a host-device in case an existing session is found (serviceID has to be the same).
-     * This connectionRequest is also automatically accepted by the host.
+     * Automatically sends a connectionRequest to a host-device in case an existing
+     * session is found (serviceID has to be the same). That connectionRequest contains
+     * the users name. This connectionRequest is also automatically accepted by the host.
      *
      * @param endpointId   Id of the endpoint
      * @param deviceId     deviceId of the endpoint
@@ -558,12 +545,8 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
      */
     @Override
     public void onEndpointFound(String endpointId, final String deviceId, final String serviceId, String endpointName) {
-        //debugging("onEndpointFound");
 
         byte[] payload = username.getBytes(StandardCharsets.UTF_8);
-        //byte[] payload = null;
-
-        //debugging("i found something");
         Nearby.Connections.sendConnectionRequest(apiClient, deviceId, endpointId, payload, new Connections.ConnectionResponseCallback() {
             @Override
             public void onConnectionResponse(String s, Status status, byte[] bytes) {
@@ -586,7 +569,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
     }
 
     /**
-     * Sets the isConnected field false in case the endpoint (host) is lost.
+     * Finalizes the disconnection and resets the tableView.
      *
      * @param s String parameter
      */
@@ -600,7 +583,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
     }
 
     /**
-     * Normalerweise nur niedrige Zahlen + Koordinaten (max 20) im Array und durch fehlende Konvertierung (zB von String auf byte[] bleibt das auch so
+     * Checks if a byte array contains numbers which are bigger than 20.
      *
      * @param b block-byte-array
      * @return true/false
@@ -612,17 +595,22 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
                 return false;
             }
         }
-
         return true;
     }
 
 
     /**
-     * Method to handle an incomming message
+     * Method to handle an incomming message depending on a prefix and either processes it
+     * whithin this activity or passes it to one of the other activities.
+     * At the beginning, it is checked if the payload is "onlyNum", so it just contains numbers from 0-20.
+     * It this onlyNum returns true this means that there is no String prefix in the payload and
+     * that means it is a stone + additional information - message from the Fullscreenactivity.
      *
-     * @param endpointId
-     * @param payload
-     * @param isReliable
+     * If the host receives a message, he has to send it to all other endpoints.
+     *
+     * @param endpointId sender
+     * @param payload message which was sent
+     * @param isReliable is it reliable or not
      */
     @Override
     public void onMessageReceived(String endpointId, byte[] payload, boolean isReliable) {
@@ -707,7 +695,8 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
     }
 
     /**
-     * Gets triggered at the endpoint after a device is disconnected.
+     * Gets triggered at at the host if (Nearby.Connections.) disconnectFromEndpoint()
+     * or stopAllEndpoints() are called at a device.
      *
      * @param s complete ID from disconnected partner
      */
@@ -728,11 +717,6 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
             checkStartGame();
             setUpTableView();
         }
-        /*if( !isHost ) {
-            finalizeDisconnection();
-        }
-        startButton.setVisibility(View.INVISIBLE);
-        debugging("Disconnected NR: "+participants);*/
     }
 
     /**
@@ -753,9 +737,11 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
      * button-connection-click:    evaluates if the current device is hosting or joining - and then decides
      * if it should advertise or discover a connection.
      * <p/>
-     * button-disconnection-click: connection is shut down and if it is a host, the whole connection gets dissolved.
+     * button-disconnection-click: connection is shut down and if it is a host, the whole connection gets dissolved
      * <p/>
-     * button-send-click:          sends a message to all other participants.
+     * button-send-click:          sends a message to all other participants
+     * <p/>
+     * button-start-click:         progresses to the next view and pushes the same button at the other participants
      *
      * @param v View which is clicked
      */

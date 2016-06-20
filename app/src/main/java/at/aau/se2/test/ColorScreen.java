@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Screen to handle a synchronous color-pick.
+ * Activity to handle a synchronous color-pick.
  */
 public class ColorScreen extends Activity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
@@ -56,6 +56,11 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
     private byte color = -1;
 
 
+    /**
+     * Sets up the screen and all the fields with the information from the previous screens.
+     *
+     * @param savedInstanceState saved instance bundle
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //debugging("onCreate");
@@ -75,8 +80,10 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
         startButton.setClickable(false);
     }
 
+    /**
+     *  Create fields to access/write from/to the graphic elements of the connectScreen.
+     */
     private void setupView() {
-
         buttonGreen = (Button) findViewById( R.id.button_green );
         buttonRed = (Button) findViewById(R.id.button_red);
         buttonBlue = (Button) findViewById( R.id.button_blue );
@@ -88,8 +95,6 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
         buttonBlue.setOnClickListener(this);
         buttonYellow.setOnClickListener(this);
         startButton.setOnClickListener(this);
-
-
     }
 
     public void setTurnString(String s){
@@ -121,25 +126,36 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Sends messages to handle the communication. Those messages are received by the other
+     * players in the "ConnectScreen", where they have to be handled depending on their prefixes.
+     *
+     * @param message Message-String
+     */
     private void sendMessage( String message ) {
         debugging("sendMessage");
         if(!remotePeerEndpoints.isEmpty()) {
             if (isHost) {
                 Nearby.Connections.sendReliableMessage(apiClient, remotePeerEndpoints, (message).getBytes());
-                debugging("hostie_");
-                //messageAdapter.add(message);
-                //messageAdapter.notifyDataSetChanged();
             }
         }
         else {
             if (remoteHostEndpoint != null) {
-                debugging("not hostie_");
                 Nearby.Connections.sendReliableMessage(apiClient, remoteHostEndpoint, (message).getBytes());
             }
         }
     }
 
 
+    /**
+     * Gets called from the correlating ConnectScreen "onMessageReceived" Function. Handles the messages
+     * which are to be processed from that class, but they just have to be passed here by the same
+     * function but in the ConnectScreen.
+     *
+     * @param endpointId full id, has to be split to match that one in the idMap
+     * @param payload bytearray with the message
+     * @param isReliable is it reliable or not
+     */
     @Override
     public void onMessageReceived(String endpointId, byte[] payload, boolean isReliable) {
         debugging("colorInRightActivity");
@@ -194,11 +210,23 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
         }
     }
 
+    /**
+     * disable a button
+     *
+     * @param b button to be disabled
+     */
     public void disableButton(Button b){
         b.setAlpha(.5f);
         b.setClickable(false);
     }
 
+    /**
+     * Sets a button selected and disables it.
+     * Also displays the selectorname in the buttontext.
+     *
+     * @param endpointId id of the selector
+     * @param b button to be selected
+     */
     public void setButtonSelected(String endpointId, Button b){
         disableButton(b);
         String buttonText = b.getText().toString();
@@ -207,6 +235,12 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
         b.setText(buttonText);
     }
 
+    // TODO: Umschreiben für den 2-Spieler-2-Farben-Modus
+    /**
+     * Disables all buttons but the one the player chose.
+     *
+     * @param b button which was selected
+     */
     public void disableAllOtherButtons(Button b){
         Set<Button> buttonSet = new HashSet<>();
         buttonSet.add(buttonGreen);
@@ -220,12 +254,19 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
         }
     }
 
+    /*
     public void enableButton(Button b){
         //TODO: Methode wird niemals verwendet
         b.setAlpha(1);
         b.setClickable(true);
-    }
+    }*/
 
+    /**
+     * Button gets colored in the case it is selected.
+     *
+     * @param b button to be filled with color
+     * @param col color
+     */
     public void colorButton(Button b, String col){
         switch(col){
             case "green":
@@ -245,11 +286,19 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
         }
     }
 
+    /*
     public void resetButton(Button b){
         //TODO: Methode wird niemals verwendet
         b.setBackgroundResource(android.R.drawable.btn_default);
-    }
+    }*/
 
+    /**
+     * Handles the button clicks. Sends the random generated
+     * turn-String (starting order) to the other players.
+     * In the case the Start-Game button gets clicked, all the necessary information is passed to an intent.
+     *
+     * @param viewID id of the view that was clicked
+     */
     private void handleButtons(int viewID){
 
         if(isHost){
@@ -321,6 +370,13 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
 
     }
 
+    /**
+     * Generates a random string containing numbers for the starting order depending on
+     * the count of players (2 or 4)
+     *
+     * @param twoplayer boolean indicating if there are two or 4 players
+     * @return turn string
+     */
     private static String randomStartingLineup(boolean twoplayer){
         Byte[] array;
         String s;
@@ -338,6 +394,11 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
         return s;
     }
 
+    /**
+     * Checks if a game start is possible. In case it it, there is a start button popping up
+     * at the hosts screen.
+     *
+     */
     private void checkGameStart(){
         if(isHost) {
             if (selectCount == idNameMap.size()) {
