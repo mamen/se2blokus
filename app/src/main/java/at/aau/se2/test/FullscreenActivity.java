@@ -70,6 +70,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     private ImageView imgView;
     private int myturn;
     private int actTurn;
+    private String otherColors = "";
     private MediaPlayer placeSound;
 
     private static ArrayList<Player> players;
@@ -113,6 +114,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         isHost = extras.getBoolean("host");
         remoteHostEndpoint = extras.getString("hostEnd");
         remotePeerEndpoints = Connection.getInstance().getRemotePeerEndpoints();
+        Log.d("String.length()", "Length: "+otherColors.length());
+        otherColors = extras.getString("setColors");
         //get the api from the Singleton
         apiClient = Connection.getInstance().getApiClient();
         Connection.getInstance().setFullscreenActivity(this);
@@ -125,7 +128,21 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                 } else {
                     myturn = Integer.parseInt(extras.getString("turn").charAt(1) + "");
                 }
-            } else {
+            }
+            else if(idNameMap.size() == 3){
+//                int other1 = Integer.parseInt(otherColors.charAt(0)+"");
+//                int other2 = Integer.parseInt(otherColors.charAt(1)+"");
+                if(otherColors.length() == 0){
+                    myturn = Integer.parseInt(extras.getString("turn").charAt(0) + "");
+                }
+                else if (otherColors.length() == 1){
+                    myturn = Integer.parseInt(extras.getString("turn").charAt(1) + "");
+                }
+                else if (otherColors.length() == 2){
+                    myturn = Integer.parseInt(extras.getString("turn").charAt(2) + "");
+                }
+            }
+            else {
                 myturn = Integer.parseInt(extras.getString("turn").charAt(playerID - 1) + "");
             }
             debugging(extras.getString("turn"));
@@ -1319,10 +1336,16 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             if (actTurn == myturn && help > 15) {   // Wenn ich dran bin und mehr als 15... (Ab dann wird überprüft ob noch Spielzüge möglich)
                 player.setHasTurns(areTurnsLeft()); // ...Punkte habe, wird im Player ein boolean gesetzt
             }
+        } else if(idNameMap.size() == 3){
+            actTurn++;
+            if (actTurn == 4) actTurn = 1;
+            if (actTurn == myturn && help > 15) {
+                player.setHasTurns(areTurnsLeft());
+            }
         } else {
             actTurn++;
-            if (actTurn == 5) actTurn = 1;
-            if (actTurn == myturn && help > 15) {
+            if(actTurn == 5) actTurn = 1;
+            if(actTurn == myturn && help > 15) {
                 player.setHasTurns(areTurnsLeft());
             }
         }

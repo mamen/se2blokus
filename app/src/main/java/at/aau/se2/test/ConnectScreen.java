@@ -463,7 +463,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
      */
     private void checkStartGame() {
         if (isHost) {
-            if (idNameMap.size() == 2 || idNameMap.size() == 4) {
+            if (idNameMap.size() > 1) {
                 startButton.setVisibility(View.VISIBLE);
                 startButton.setClickable(true);
             } else {

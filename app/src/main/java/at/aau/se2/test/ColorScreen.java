@@ -54,6 +54,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
     private static final String[] messageCodes = {"COLOROK-","FULLSCREEN","N-"};
 
     private byte color = -1;
+    private String setColors = "";
 
 
     /**
@@ -230,6 +231,20 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
     public void setButtonSelected(String endpointId, Button b){
         disableButton(b);
         String buttonText = b.getText().toString();
+        if(idNameMap.size()==3){
+            if(b.equals(buttonGreen)){
+                setColors += "1";
+            }
+            else if(b.equals(buttonRed)){
+                setColors += "2";
+            }
+            else if (b.equals(buttonBlue)){
+                setColors += "3";
+            }
+            else{
+                setColors += "4";
+            }
+        }
         String selector = idNameMap.get(endpointId);
         buttonText += " selected by "+ selector;
         b.setText(buttonText);
@@ -302,7 +317,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
     private void handleButtons(int viewID){
 
         if(isHost){
-            turn = randomStartingLineup(idNameMap.size()==2);
+            turn = randomStartingLineup(idNameMap.size());
             sendMessage(messageCodes[2]+turn);
         }
 
@@ -357,6 +372,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
                 intent.putExtra("color", color);
                 intent.putExtra("turn", turn);
                 intent.putExtra("test", true);
+                intent.putExtra("setColors", setColors);
                 startActivity(intent);
                 if (isHost) {
                     sendMessage(messageCodes[1]);
@@ -374,23 +390,31 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
      * Generates a random string containing numbers for the starting order depending on
      * the count of players (2 or 4)
      *
-     * @param twoplayer boolean indicating if there are two or 4 players
+     * @param count boolean indicating if there are two or 4 players
      * @return turn string
      */
-    private static String randomStartingLineup(boolean twoplayer){
+    private static String randomStartingLineup(int count){
         Byte[] array;
         String s;
-        if(twoplayer){
-            array = new Byte[]{1, 2};
-            Collections.shuffle(Arrays.asList(array));
-            s = "" + array[0] + "" + array[1] + "";
+        switch(count){
+            case 2:
+                array = new Byte[]{1, 2};
+                Collections.shuffle(Arrays.asList(array));
+                s = "" + array[0] + "" + array[1] + "";
+                break;
+            case 3:
+                array = new Byte[]{1, 2, 3};
+                Collections.shuffle(Arrays.asList(array));
+                s = "" + array[0] + "" + array[1] + "" +array[2];
+                break;
+            case 4:
+                array = new Byte[]{1, 2, 3, 4};
+                Collections.shuffle(Arrays.asList(array));
+                s = "" + array[0] + "" + array[1] + "" +array[2] + "" + array[3] + "";
+                break;
+            default:
+                throw new UnsupportedOperationException();
         }
-        else {
-            array = new Byte[]{1, 2, 3, 4};
-            Collections.shuffle(Arrays.asList(array));
-            s = "" + array[0] + "" + array[1] + "" +array[2] + "" + array[3] + "";
-        }
-
         return s;
     }
 
