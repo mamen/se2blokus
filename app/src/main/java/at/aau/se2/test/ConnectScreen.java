@@ -314,10 +314,8 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
                     finalizeConnection();
                     setUpTableView();
                 }
-
             }
         });
-
     }
 
 
@@ -351,6 +349,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
      *
      */
     private void setUpTableView(){
+        clearTableView();
         if(isHost){
             idNameMap.put(Nearby.Connections.getLocalDeviceId(apiClient), username);
             id1.setText(Nearby.Connections.getLocalDeviceId(apiClient));
@@ -440,7 +439,9 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
                         idNameMap.put(remoteDeviceId, user);
                         //debugging("INFORMATION: "+ remoteEndpointId + ", "+ remoteDeviceId+", "+ remoteEndpointName);
                         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                        sendMessage("NEWPLAYER-" + Nearby.Connections.getLocalDeviceId(apiClient) + "-" + username);
+                        for (Map.Entry<String, String> entry : idNameMap.entrySet()) {
+                            sendMessage("NEWPLAYER-" + entry.getKey() + "-" + entry.getValue());
+                        }
                         //sendMessage(username + " connected!");
                         //participants++;
                         //debugging("Request accepted NR: "+ idNameMap.size());
@@ -507,11 +508,10 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
      * @return
      */
     private String listCurrentParticipants() {
-        String particip = "";
+        String particip = "LIST-";
         for (Map.Entry<String, String> entry : idNameMap.entrySet()) {
-            particip += entry.getValue() + " (" + entry.getKey() + ")\n";
+            particip += entry.getValue() + "-" + entry.getKey() + "-\n";
         }
-        sendMessage(particip);
         return particip;
     }
 

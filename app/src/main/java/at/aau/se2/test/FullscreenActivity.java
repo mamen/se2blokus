@@ -1003,7 +1003,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         byte[] byteArr = ba.createNewByteArray(b, i, j, playerID);
         if (doSettings) {
             sendMessage(byteArr);
-            debugging("isit?");
+            //debugging("isit?");
             isItMyTurn();
         }
 
