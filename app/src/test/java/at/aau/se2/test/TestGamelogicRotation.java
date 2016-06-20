@@ -4,6 +4,7 @@ import android.content.Context;
 
 import junit.framework.Assert;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -17,6 +18,11 @@ public class TestGamelogicRotation {
     static GameLogic gl = GameLogic.getInstance(player, context);
 
 
+    @BeforeClass
+    public static void initialise() {
+        gl.resetInstance();
+        gl = GameLogic.getInstance(player, context);
+    }
     @Test
     public void testStoneZeroRotation() {
         byte[][] test = {{0, playerId}, {0, 0}};
@@ -51,4 +57,22 @@ public class TestGamelogicRotation {
         byte[][] rotated = gl.rotate(gl.rotate(player.getStone(5)));
         Assert.assertTrue(Arrays.deepEquals(test, rotated));
     }
+
+    @Test
+    public void testRotateAndPlaceLeft() {
+        byte[][] test = {{0, 0, playerId}, {0, 0, playerId}, {0, 0, playerId}};
+        Assert.assertFalse(gl.placeOverEdge(test, -2, 0));
+    }
+
+    @Test
+    public void testRotateAndPace() {
+        byte[][] test = {{0, 0, 0}, {0, 0, 0}, {playerId, playerId, playerId}};
+        byte[][] arr = new byte[20][20];
+        arr[0][0] = playerId;
+        arr[0][1] = playerId;
+        arr[0][2] = playerId;
+        gl.placeStone(gl.rotate(player.getStone(3)), -2, 0);
+        Assert.assertTrue(Arrays.deepEquals(gl.getGameBoard(), arr));
+    }
+
 }

@@ -80,6 +80,11 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     private TextView pointsGreen;
     private TextView pointsYellow;
 
+    private int oldPointsRed;
+    private int oldPointsBlue;
+    private int oldPointsGreen;
+    private int oldPointsYellow;
+    private final int MAX_POINTS_REGULAR = 89;
 
 
     /*private int plCount;
@@ -99,7 +104,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
         //Initialisierung div. Variablen.
         fullscreenLayout = (RelativeLayout) findViewById(R.id.contentPanel);
-
 
 
         playerID = -1;
@@ -151,11 +155,9 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
         // lade Player
         player = new Player(playerID);
-        players = new ArrayList<>(4);
-        players.add(player);
+
         // lade GameLogic
         gl = GameLogic.getInstance(player, this.getApplicationContext());
-
         // Statusbar verstecken
         hideStatusBar();
 
@@ -307,7 +309,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                             fullscreenLayout.removeView(accept);
                                         }
                                     } catch (IllegalStateException e) {
-                                        Log.e("Error",e.getMessage());
+                                        Log.e("Error", e.getMessage());
                                     }
                                 } else {
                                     restore(--index_i, index_j);
@@ -348,13 +350,13 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                         RelativeLayout.LayoutParams paramsMoveDown = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
                         RelativeLayout.LayoutParams paramsMoveLeft = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
 
-                        paramsMoveUp.setMargins((getScreenWidth()/2)-((move_up.getDrawable().getMinimumWidth()+move_up.getPaddingLeft()+move_up.getPaddingRight())/2), 0, 0, 0);
+                        paramsMoveUp.setMargins((getScreenWidth() / 2) - ((move_up.getDrawable().getMinimumWidth() + move_up.getPaddingLeft() + move_up.getPaddingRight()) / 2), 0, 0, 0);
 
-                        paramsMoveRight.setMargins(gameBoardLayout.getWidth()-move_right.getPaddingLeft()-move_right.getPaddingRight()-move_right.getDrawable().getMinimumWidth(), (gameBoardLayout.getHeight()/2-move_right.getPaddingTop()-move_right.getDrawable().getMinimumHeight()/2), 0, 0);
+                        paramsMoveRight.setMargins(gameBoardLayout.getWidth() - move_right.getPaddingLeft() - move_right.getPaddingRight() - move_right.getDrawable().getMinimumWidth(), (gameBoardLayout.getHeight() / 2 - move_right.getPaddingTop() - move_right.getDrawable().getMinimumHeight() / 2), 0, 0);
 
-                        paramsMoveDown.setMargins((getScreenWidth()/2)-((move_down.getDrawable().getMinimumWidth()+move_down.getPaddingLeft()+move_down.getPaddingRight())/2), (gameBoardLayout.getHeight()-move_down.getPaddingTop()-move_down.getPaddingBottom()-move_up.getDrawable().getMinimumHeight()), 0, 0);
+                        paramsMoveDown.setMargins((getScreenWidth() / 2) - ((move_down.getDrawable().getMinimumWidth() + move_down.getPaddingLeft() + move_down.getPaddingRight()) / 2), (gameBoardLayout.getHeight() - move_down.getPaddingTop() - move_down.getPaddingBottom() - move_up.getDrawable().getMinimumHeight()), 0, 0);
 
-                        paramsMoveLeft.setMargins(0, (gameBoardLayout.getHeight()/2-move_left.getPaddingTop()-move_left.getDrawable().getMinimumHeight()/2), 0, 0);
+                        paramsMoveLeft.setMargins(0, (gameBoardLayout.getHeight() / 2 - move_left.getPaddingTop() - move_left.getDrawable().getMinimumHeight() / 2), 0, 0);
 
                         move_up.setLayoutParams(paramsMoveUp);
                         move_right.setLayoutParams(paramsMoveRight);
@@ -471,7 +473,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
         imgView = (ImageView) findViewById(R.id.img_stop);
         //if (doSettings) {
-            imgView.setVisibility(View.GONE);
+        imgView.setVisibility(View.GONE);
         //}
 
         actTurn = 1;
@@ -487,7 +489,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
 
     @Override
-    public void onStart(){
+    public void onStart() {
         super.onStart();
         initializePoints();
     }
@@ -495,26 +497,26 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     private void initializePoints() {
         Typeface font = Typeface.createFromAsset(getAssets(), "blocked.ttf");
 
-        pointsRed = (TextView)findViewById(R.id.pointsRed);
-        pointsBlue = (TextView)findViewById(R.id.pointsBlue);
-        pointsGreen = (TextView)findViewById(R.id.pointsGreen);
-        pointsYellow = (TextView)findViewById(R.id.pointsYellow);
+        pointsRed = (TextView) findViewById(R.id.pointsRed);
+        pointsBlue = (TextView) findViewById(R.id.pointsBlue);
+        pointsGreen = (TextView) findViewById(R.id.pointsGreen);
+        pointsYellow = (TextView) findViewById(R.id.pointsYellow);
 
         RelativeLayout.LayoutParams paramsPointsRed = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         RelativeLayout.LayoutParams paramsPointsBlue = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         RelativeLayout.LayoutParams paramsPointsGreen = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         RelativeLayout.LayoutParams paramsPointsYellow = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
 
-        int quater = getScreenWidth()/4;
-        int top = getScreenHeight()-pointsRed.getPaddingTop()-pointsRed.getPaddingBottom()-pointsRed.getLineHeight()-20;
+        int quater = getScreenWidth() / 4;
+        int top = getScreenHeight() - pointsRed.getPaddingTop() - pointsRed.getPaddingBottom() - pointsRed.getLineHeight() - 20;
 
         paramsPointsRed.setMargins(0, top, 0, 0);
         paramsPointsRed.width = quater;
         paramsPointsBlue.setMargins(quater, top, 0, 0);
         paramsPointsBlue.width = quater;
-        paramsPointsGreen.setMargins(quater*2, top, 0, 0);
+        paramsPointsGreen.setMargins(quater * 2, top, 0, 0);
         paramsPointsGreen.width = quater;
-        paramsPointsYellow.setMargins(quater*3, top, 0, 0);
+        paramsPointsYellow.setMargins(quater * 3, top, 0, 0);
         paramsPointsYellow.width = quater;
 
         pointsRed.setTypeface(font);
@@ -527,7 +529,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         pointsYellow.setTextSize(20);
 
 
-
         pointsRed.setLayoutParams(paramsPointsRed);
         pointsBlue.setLayoutParams(paramsPointsBlue);
         pointsGreen.setLayoutParams(paramsPointsGreen);
@@ -537,10 +538,15 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         pointsBlue.setText("0");
         pointsGreen.setText("0");
         pointsYellow.setText("0");
+
+        oldPointsRed = 0;
+        oldPointsYellow = 0;
+        oldPointsBlue = 0;
+        oldPointsGreen = 0;
     }
 
 
-    private void updatePoints(){
+    private void updatePoints() {
         byte[][] gameBoard = gl.getGameBoard();
 
         int curPointsRed = 0;
@@ -548,9 +554,9 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         int curPointsBlue = 0;
         int curPointsYellow = 0;
 
-        for(int i = 0; i < SIZE; i++){
-            for(int j = 0; j < SIZE; j++){
-                switch(gameBoard[i][j]){
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                switch (gameBoard[i][j]) {
                     case 1:
                         curPointsGreen++;
                         break;
@@ -568,6 +574,16 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             }
         }
 
+        curPointsGreen += addExtraPoints(oldPointsGreen, curPointsGreen);
+        curPointsRed += addExtraPoints(oldPointsRed, curPointsRed);
+        curPointsBlue += addExtraPoints(oldPointsBlue, curPointsBlue);
+        curPointsYellow += addExtraPoints(oldPointsYellow, curPointsYellow);
+
+        oldPointsGreen = curPointsGreen;
+        oldPointsRed = curPointsRed;
+        oldPointsBlue = curPointsBlue;
+        oldPointsYellow = curPointsYellow;
+
         pointsRed.setText(Integer.toString(curPointsRed));
         pointsGreen.setText(Integer.toString(curPointsGreen));
         pointsBlue.setText(Integer.toString(curPointsBlue));
@@ -575,25 +591,17 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
     }
 
-
-    /*private void updateThePoints() {
-        for (Player pl : players) {
-            switch (pl.getPlayerId()) {
-                case 1:
-                    pointsGreen.setText(Integer.toString(pl.getScore()));
-                    break;
-                case 2:
-                    pointsRed.setText(Integer.toString(pl.getScore()));
-                    break;
-                case 3:
-                    pointsBlue.setText(Integer.toString(pl.getScore()));
-                    break;
-                case 4:
-                    pointsYellow.setText(Integer.toString(pl.getScore()));
-                    break;
-            }
+    private int addExtraPoints(int oldpoints, int currentPoints) {
+        int retValue = 0;
+        if (oldpoints == MAX_POINTS_REGULAR - 1 && currentPoints == MAX_POINTS_REGULAR) {
+            retValue += 20;
         }
-    }*/
+        if (currentPoints == MAX_POINTS_REGULAR) {
+            retValue += 15;
+        }
+
+        return retValue;
+    }
 
 
     private void initializeBlockDrawer() {
@@ -998,7 +1006,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         } else {
             player.calculateScore(b);
         }
-        if(player.getScore() >= player.MAX_STONES) {
+        if (player.getScore() >= player.MAX_STONES) {
             player.addToScore(15);
         }
 
@@ -1106,107 +1114,147 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
      * false, else
      */
     public boolean areTurnsLeft() {
-        IndexTuple removal = new IndexTuple(-1, -1);
-        boolean foundRedundance = false;
         int selectionRemember = selectedBlockID; // To restore, if there is another possible move
         int transposeRemember = transposeCount; // ---------||---------
         byte[] remainingStones = player.getRemainingStones(); // What stones do you still have (Saved as tags)
         byte[][] gameboard = gl.getGameBoard();
+        boolean breakable = false;
+        boolean oneMoreTurn = false;
+
+        boolean fullTest = true;
 
         ArrayList<IndexTuple> savedTuples = player.getSaveIndices(); // Tuples with the Indices of your placed stones
         if (player.getScore() < player.MAX_STONES) { // Probably useless, because you should not be able to lay more than MAX_STONES
             for (IndexTuple tuple : savedTuples) { // Look at every IndexTuple (where your stones lay)
-                removal = tuple;
-                foundRedundance = false;
-                for (byte stone : remainingStones) { // Look at every stone you still have
-                    if (stone != -1) { // Already placed stone
-                        int i = tuple.getIndex_j(); // Index_i, bit confusing with row and col..
-                        int j = tuple.getIndex_i(); // Index_j
-                        selectedBlockID = stone + 1; // isYourPlacementValid needs selectedBlockID
-                        byte[][] actualStone = player.getStone(selectedBlockID - 1);
-                        int help = actualStone.length;
-                        //Log.d("DebugInfo", "i = " + i + ", j = " + j + ", selected = " + selectedBlockID + ", transpose = " + transposeCount);
-                        int lu = 0, ll = 0, ru = 0, rl = 0;
-                        for (int h1 = help; h1 > 0; h1--) {
-                            for (int h2 = help; h2 > 0; h2--) {
+                if (tuple.getHasTurns()) {
+                    for (byte stone : remainingStones) { // Look at every stone you still have
+                        breakable = false;
+                        if (stone != -1) { // Already placed stone
+                            int i = tuple.getIndex_j(); // Index_i, bit confusing with row and col..
+                            int j = tuple.getIndex_i(); // Index_j
+                            selectedBlockID = stone + 1; // isYourPlacementValid needs selectedBlockID
+                            byte[][] actualStone = player.getStone(selectedBlockID - 1);
+                            int help = actualStone.length;
+                            //Log.d("DebugInfo", "i = " + i + ", j = " + j + ", selected = " + selectedBlockID + ", transpose = " + transposeCount);
+                            int lu = 0, ll = 0, ru = 0, rl = 0;
+                            for (int h1 = help; h1 > 0; h1--) {
+                                for (int h2 = help; h2 > 0; h2--) {
 
-                                if ((i - h1) >= 0 && (j - h2) >= 0 && lu == 0) { //Left upper corner
-                                    if (gameboard[i - 1][j - 1] == 0) { // If that corner is not free, you can stop...
-                                        for (int tr = 0; tr < 4; tr++) { // Test all four transpositions
-                                            transposeCount = tr;
-                                            if (cornerTesting(j - h2, i - h1, selectionRemember, transposeRemember)) {
-                                                //Log.d("Winner is", "Col j-h2: " + (j - h2) + "; Row i-h1: " + (i - h1) + "; Transpose: " + tr + "; Selected: " + selectedBlockID);
-                                                return true;
+                                    if ((i - h1) >= 0 && (j - h2) >= 0 && lu == 0) { //Left upper corner
+                                        if (gameboard[i - 1][j - 1] == 0) { // If that corner is not free, you can stop...
+                                            for (int tr = 0; tr < 4; tr++) { // Test all four transpositions
+                                                transposeCount = tr;
+                                                if (cornerTesting(j - h2, i - h1, selectionRemember, transposeRemember)) {
+                                                    if (fullTest) {
+                                                        breakable = true;
+                                                        oneMoreTurn = true;
+                                                        break;
+                                                    } else {
+                                                        return true;
+                                                    }
+                                                }
+                                                if (breakable) break;
                                             }
+                                            if (breakable) break;
+                                        } else {
+                                            lu++; // ...and set 1/4 int (needed later)
                                         }
-                                    } else {
-                                        lu++; // ...and set 1/4 int (needed later)
+                                        if (breakable) break;
+                                    }
+                                    if (breakable) break;
+
+                                    if ((i - h1) >= 0 && (j + h2) < SIZE && ll == 0) { //Right upper corner
+                                        if (gameboard[i - 1][j + 1] == 0) {
+                                            for (int tr = 0; tr < 4; tr++) {
+                                                transposeCount = tr;
+                                                if (cornerTesting(j + h2, i - h1, selectionRemember, transposeRemember)) {
+                                                    if (fullTest) {
+                                                        breakable = true;
+                                                        oneMoreTurn = true;
+                                                        break;
+                                                    } else {
+                                                        return true;
+                                                    }
+                                                }
+                                                if (breakable) break;
+                                            }
+                                            if (breakable) break;
+                                        } else {
+                                            ll++;
+                                        }
+                                        if (breakable) break;
+                                    }
+                                    if (breakable) break;
+
+                                    if ((i + h1) < SIZE && (j - h2) >= 0 && ru == 0) { //Left lower corner
+                                        if (gameboard[i + 1][j - 1] == 0) {
+                                            for (int tr = 0; tr < 4; tr++) {
+                                                transposeCount = tr;
+                                                if (cornerTesting(j - h2, i + h1, selectionRemember, transposeRemember)) {
+                                                    if (fullTest) {
+                                                        breakable = true;
+                                                        oneMoreTurn = true;
+                                                        break;
+                                                    } else {
+                                                        return true;
+                                                    }
+                                                }
+                                                if (breakable) break;
+                                            }
+                                            if (breakable) break;
+                                        } else {
+                                            ru++;
+                                        }
+                                        if (breakable) break;
+                                    }
+                                    if (breakable) break;
+
+                                    if ((i + h1) < SIZE && (j + h2) < SIZE && rl == 0) { //Right lower corner
+                                        if (gameboard[i + 1][j + 1] == 0) {
+                                            for (int tr = 0; tr < 4; tr++) {
+                                                transposeCount = tr;
+                                                if (cornerTesting(j + h2, i + h1, selectionRemember, transposeRemember)) {
+                                                    if (fullTest) {
+                                                        breakable = true;
+                                                        oneMoreTurn = true;
+                                                        break;
+                                                    } else {
+                                                        return true;
+                                                    }
+                                                }
+                                                if (breakable) break;
+                                            }
+                                            if (breakable) break;
+                                        } else {
+                                            rl++;
+                                        }
+                                        if (breakable) break;
+                                    }
+                                    if (breakable) break;
+
+                                    // If there is no free corner for this IndexTuple, it has no turns
+                                    // May be boosting performance if breaking far enough
+                                    if (lu != 0 && ll != 0 && ru != 0 && rl != 0) {
+                                        tuple.setHasTurns(false);
+
+                                        break;
+
                                     }
                                 }
-
-                                if ((i - h1) >= 0 && (j + h2) < SIZE && ll == 0) { //Right upper corner
-                                    if (gameboard[i - 1][j + 1] == 0) {
-                                        for (int tr = 0; tr < 4; tr++) {
-                                            transposeCount = tr;
-                                            if (cornerTesting(j + h2, i - h1, selectionRemember, transposeRemember)) {
-                                                //Log.d("Winner is", "Col j+h2: " + (j + h2) + "; Row i-h1: " + (i - h1) + "; Transpose: " + tr + "; Selected: " + selectedBlockID);
-                                                return true;
-                                            }
-                                        }
-                                    } else {
-                                        ll++;
-                                    }
-                                }
-
-                                if ((i + h1) < SIZE && (j - h2) >= 0 && ru == 0) { //Left lower corner
-                                    if (gameboard[i + 1][j - 1] == 0) {
-                                        for (int tr = 0; tr < 4; tr++) {
-                                            transposeCount = tr;
-                                            if (cornerTesting(j - h2, i + h1, selectionRemember, transposeRemember)) {
-                                                //Log.d("Winner is", "Col j-h2: " + (j - h2) + "; Row i+h1: " + (i + h1) + "; Transpose: " + tr + "; Selected: " + selectedBlockID);
-                                                return true;
-                                            }
-                                        }
-                                    } else {
-                                        ru++;
-                                    }
-                                }
-
-                                if ((i + h1) < SIZE && (j + h2) < SIZE && rl == 0) { //Right lower corner
-                                    if (gameboard[i + 1][j + 1] == 0) {
-                                        for (int tr = 0; tr < 4; tr++) {
-                                            transposeCount = tr;
-                                            if (cornerTesting(j + h2, i + h1, selectionRemember, transposeRemember)) {
-                                                //Log.d("Winner is", "Col j+h2: " + (j + h2) + "; Row i+h1: " + (i + h1) + "; Transpose: " + tr + "; Selected: " + selectedBlockID);
-                                                return true;
-                                            }
-                                        }
-                                    } else {
-                                        rl++;
-                                    }
-                                }
-
-                                // If there is no free corner for this IndexTuple, you can remove it
-                                // I don't know if this is any useful for the performance
-                                if (lu != 0 && ll != 0 && ru != 0 && rl != 0) {
+                                if (breakable) {
                                     break;
-
                                 }
                             }
                         }
                     }
+                    if (!breakable) {
+                        tuple.setHasTurns(false);
+                    }
+
                 }
-                foundRedundance = true;
-                break;
-            }
-            Log.d("Indices: ", "Breaking here??");
-            player.printSaveIndices();
-            if (foundRedundance) {
-                savedTuples.remove(removal);
-                if (areTurnsLeft()) return true;
             }
         }
-        return false;
+        return oneMoreTurn;
     }
 
 
@@ -1230,6 +1278,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             } else {
                 restore(i, j);
             }
+            restore(i, j);
         }
         return false;
     }
@@ -1271,7 +1320,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         int idx = b.getIdx();
         int idy = b.getIdy();
         byte[][] stone = b.getByteStone();
-
 
 
         if (color != playerID) {
