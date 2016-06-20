@@ -118,7 +118,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         isHost = extras.getBoolean("host");
         remoteHostEndpoint = extras.getString("hostEnd");
         remotePeerEndpoints = Connection.getInstance().getRemotePeerEndpoints();
-        Log.d("String.length()", "Length: "+otherColors.length());
+        Log.d("String.length()", "Length: " + otherColors.length());
         otherColors = extras.getString("setColors");
         //get the api from the Singleton
         apiClient = Connection.getInstance().getApiClient();
@@ -132,21 +132,17 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                 } else {
                     myturn = Integer.parseInt(extras.getString("turn").charAt(1) + "");
                 }
-            }
-            else if(idNameMap.size() == 3){
+            } else if (idNameMap.size() == 3) {
 //                int other1 = Integer.parseInt(otherColors.charAt(0)+"");
 //                int other2 = Integer.parseInt(otherColors.charAt(1)+"");
-                if(otherColors.length() == 0){
+                if (otherColors.length() == 0) {
                     myturn = Integer.parseInt(extras.getString("turn").charAt(0) + "");
-                }
-                else if (otherColors.length() == 1){
+                } else if (otherColors.length() == 1) {
                     myturn = Integer.parseInt(extras.getString("turn").charAt(1) + "");
-                }
-                else if (otherColors.length() == 2){
+                } else if (otherColors.length() == 2) {
                     myturn = Integer.parseInt(extras.getString("turn").charAt(2) + "");
                 }
-            }
-            else {
+            } else {
                 myturn = Integer.parseInt(extras.getString("turn").charAt(playerID - 1) + "");
             }
             debugging(extras.getString("turn"));
@@ -155,7 +151,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
         // lade Player
         player = new Player(playerID);
-
         // lade GameLogic
         gl = GameLogic.getInstance(player, this.getApplicationContext());
         // Statusbar verstecken
@@ -213,6 +208,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
                         transposeCount = 0; //Neuer Stein, Zähler zurücksetzen
                         draggedImage = (ImageView) event.getLocalState();
+                        byte[][] stone = player.getStone(selectedBlockID - 1);
+                        final int stoneLength = stone.length;
 
                         // Indexberechnung, wo der Stein platziert werden soll
                         // Indexmanipulation, abhängig vom gewählten Stein
@@ -251,7 +248,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                             @Override
                             public void onClick(View v) {
                                 restore(index_i, index_j);
-                                if (drawStone(index_i, (index_j - 1 < 0) ? 0 : --index_j)) {
+                                if (drawStone(index_i, (index_j - 1 < 0 - stoneLength) ? (0 - stoneLength) : --index_j)) {
                                     try {
                                         if (isYourPlacementValid(index_i, index_j)) {
                                             fullscreenLayout.addView(accept);
@@ -263,8 +260,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                         //throw new IllegalStateException();
                                     }
                                 } else {
-                                    restore(index_i, index_j);
-                                    cancel.performClick();
+                                    restore(index_i, ++index_j);
+                                    drawStone(index_i, index_j);
                                 }
                             }
                         });
@@ -301,7 +298,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                             @Override
                             public void onClick(View v) {
                                 restore(index_i, index_j);
-                                if (drawStone((index_i - 1 < 0) ? 0 : --index_i, index_j)) {
+                                if (drawStone((index_i - 1 < 0 - stoneLength) ? (0 - stoneLength) : --index_i, index_j)) {
                                     try {
                                         if (isYourPlacementValid(index_i, index_j)) {
                                             fullscreenLayout.addView(accept);
@@ -312,7 +309,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                         Log.e("Error", e.getMessage());
                                     }
                                 } else {
-                                    restore(--index_i, index_j);
+                                    restore(++index_i, index_j);
                                     drawStone(index_i, index_j);
                                     //cancel.performClick();
                                 }
@@ -391,7 +388,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                             b = gl.rotate(b);
                                         }
                                         placeIt(b, index_i, index_j); //Wirkliches Plazieren vom Stein
-//                                        updateThePoints();
                                         updatePoints();
                                     }
                                     gl.removeViews(fullscreenLayout, accept, cancel, transpose, move_up, move_right, move_down, move_left);
@@ -704,6 +700,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         //Toast.makeText(this.getApplicationContext(),"updated from x: " + startX + " y: " + startY + " to x: " + endX + " y:"+endY, Toast.LENGTH_LONG).show();
         if (endX > 20) endX = 20;
         if (endY > 20) endY = 20;
+        if (startX < 0) startX = 0;
+        if (startY < 0) startY = 0;
         for (int i = startX; i < endX; i++) {
             for (int j = startY; j < endY; j++) {
                 ImageView oImageView = (ImageView) gameBoardLayout.getChildAt(20 * i + j);
@@ -842,6 +840,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                 changeToPreview(b, false);
             }
         }
+
         updatePartOfGameBoard(x, y, (x + 6 > 20) ? 20 : x + 6, (y + 6 > 20) ? 20 : y + 6);
         return true;
     }
@@ -1027,9 +1026,9 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         ByteArrayHelper ba = new ByteArrayHelper();
         byte[] byteArr = ba.createNewByteArray(b, i, j, playerID);
         if (doSettings) {
-            sendMessage(byteArr);
+//            sendMessage(byteArr);
             //debugging("isit?");
-            isItMyTurn();
+            isItMyTurn(true, byteArr);
         }
 
         //updateGameBoard();
@@ -1038,6 +1037,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     private void placeStoneOfOtherPlayer(byte[][] b, int i, int j) {
         gl.placeStone(b, i, j);
         updatePartOfGameBoard(i, j, (i + b.length), (j + b.length));
+        updatePoints();
     }
 
     //Bildschirmbreite
@@ -1059,6 +1059,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     @Override
     protected void onResume() {
         super.onResume();
+        updatePoints();
         hideStatusBar();
     }
 
@@ -1113,7 +1114,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
      * @return true, as soon as it sees another possible turn
      * false, else
      */
-    public boolean areTurnsLeft() {
+    public boolean areTurnsLeft(boolean fullTest) {
         int selectionRemember = selectedBlockID; // To restore, if there is another possible move
         int transposeRemember = transposeCount; // ---------||---------
         byte[] remainingStones = player.getRemainingStones(); // What stones do you still have (Saved as tags)
@@ -1121,11 +1122,10 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         boolean breakable = false;
         boolean oneMoreTurn = false;
 
-        boolean fullTest = true;
-
         ArrayList<IndexTuple> savedTuples = player.getSaveIndices(); // Tuples with the Indices of your placed stones
         if (player.getScore() < player.MAX_STONES) { // Probably useless, because you should not be able to lay more than MAX_STONES
             for (IndexTuple tuple : savedTuples) { // Look at every IndexTuple (where your stones lay)
+//                Log.d("Tuple Info", tuple.toString());
                 if (tuple.getHasTurns()) {
                     for (byte stone : remainingStones) { // Look at every stone you still have
                         breakable = false;
@@ -1325,8 +1325,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         if (color != playerID) {
             debugging("" + Integer.toString(color) + "_" + Integer.toString(playerID));
             placeStoneOfOtherPlayer(stone, idy, idx);
-//            updateThePoints();
-            isItMyTurn();
+            isItMyTurn(false, null);
 
         }
 
@@ -1376,41 +1375,44 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         throw new UnsupportedOperationException();
     }
 
-    private void isItMyTurn() {
+    private void isItMyTurn(boolean sending, byte[] payload) {
+        if (sending) {
+            sendMessage(payload);
+        }
+
         int help = player.getScore();
+
         if (idNameMap.size() == 2) {
             actTurn++;
             if (actTurn == 3) actTurn = 1;
-            if (actTurn == myturn && help > 15) {   // Wenn ich dran bin und mehr als 15... (Ab dann wird überprüft ob noch Spielzüge möglich)
-                player.setHasTurns(areTurnsLeft()); // ...Punkte habe, wird im Player ein boolean gesetzt
-            }
-        } else if(idNameMap.size() == 3){
+        } else if (idNameMap.size() == 3) {
             actTurn++;
             if (actTurn == 4) actTurn = 1;
-            if (actTurn == myturn && help > 15) {
-                player.setHasTurns(areTurnsLeft());
-            }
         } else {
             actTurn++;
-            if(actTurn == 5) actTurn = 1;
-            if(actTurn == myturn && help > 15) {
-                player.setHasTurns(areTurnsLeft());
-            }
+            if (actTurn == 5) actTurn = 1;
         }
 
         if (actTurn == myturn) {
+            if (help > 0) {
+                player.setHasTurns(areTurnsLeft(false));
+            }
             updatePoints();
-//            updateThePoints();
             if (player.getHasTurns()) { // Wenn ich noch Spielzüge habe, kann ich weiterspielen..
                 enableScreenInteraction();
                 Toast.makeText(getApplicationContext(), "There are turns left, you go", Toast.LENGTH_SHORT).show();
             } else { // TODO ... wenn nicht, was muss dann aufgerufen werden, dass der nächste Spieler dran kommt!? So geht's nicht ;)
                 Toast.makeText(getApplicationContext(), "You lost buddy", Toast.LENGTH_SHORT).show();
                 disableScreenInteraction();
-                isItMyTurn();
+                if (sending) {
+                    isItMyTurn(true, payload);
+                }
             }
         } else {
             disableScreenInteraction();
+            if (player.getScore() > 0) {
+                player.setHasTurns(areTurnsLeft(true));
+            }
         }
         
         /*if (idNameMap.size() == 2) {

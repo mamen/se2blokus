@@ -257,7 +257,7 @@ public class GameLogic {
         byte[][] help = getGameBoard();
         for (int x = 0; x < b.length; x++) {
             for (int y = 0; y < b.length; y++) {
-                if (!((i + y) >= SIZE || (j + x) >= SIZE)) {
+                if (!((i + y) >= SIZE || (j + x) >= SIZE) && !((i + y) < 0 || (j + x) < 0)) {
                     retArr[x][y] = help[i + y][j + x];
                 }
             }
@@ -276,7 +276,7 @@ public class GameLogic {
     public static void restoreField(byte[][] b, int i, int j) {
         for (int x = 0; x < b.length; x++) {
             for (int y = 0; y < b[x].length; y++) {
-                if (!((i + y) >= SIZE || (j + x) >= SIZE)) {
+                if (!((i + y) >= SIZE || (j + x) >= SIZE) && !((i + y) < 0 || (j + x) < 0)) {
                     gameBoard[i + y][j + x] = b[x][y];
                 }
             }

@@ -23,6 +23,7 @@ public class TestGamelogicRotation {
         gl.resetInstance();
         gl = GameLogic.getInstance(player, context);
     }
+
     @Test
     public void testStoneZeroRotation() {
         byte[][] test = {{0, playerId}, {0, 0}};
@@ -64,15 +65,48 @@ public class TestGamelogicRotation {
         Assert.assertFalse(gl.placeOverEdge(test, -2, 0));
     }
 
+
     @Test
-    public void testRotateAndPace() {
-        byte[][] test = {{0, 0, 0}, {0, 0, 0}, {playerId, playerId, playerId}};
-        byte[][] arr = new byte[20][20];
-        arr[0][0] = playerId;
-        arr[0][1] = playerId;
-        arr[0][2] = playerId;
-        gl.placeStone(gl.rotate(player.getStone(3)), -2, 0);
-        Assert.assertTrue(Arrays.deepEquals(gl.getGameBoard(), arr));
+    public void testGameRules() {
+        byte[][] test = {{0, 0, playerId},
+                {0, 0, playerId},
+                {0, 0, playerId}
+        };
+        gl.placeStone(test, -2, 0);
+        Assert.assertTrue(gl.checkTheRules(test, -1, 3));
+
     }
 
+    @Test
+    public void testhitthecorner() {
+        byte[][] test = {{0, 0, playerId},
+                {0, 0, playerId},
+                {0, 0, playerId}
+        };
+        Assert.assertTrue(gl.hitTheCorner(test, -2, 0));
+    }
+
+    @Test
+    public void testRememberField() {
+        byte[][] test = {{0, 0, playerId},
+                {0, 0, playerId},
+                {0, 0, playerId}
+        };
+        byte[][] rememberMe = { {0, 0, 0},
+                                {0, 0, 0},
+                                {0, 0, 0}
+        };
+        Assert.assertTrue(Arrays.deepEquals(gl.rememberField(test, -2, 0), rememberMe));
+    }
+
+    @Test
+    public void testRestore() {
+        byte[][] rememberMe = { {0, 0, 0},
+                {0, 0, 0},
+                {0, 0, 0}
+        };
+        gl.getGameBoard();
+        gl.restoreField(rememberMe, -2, 0);
+        Assert.assertTrue(Arrays.deepEquals(gl.getGameBoard(), new byte[20][20]));
+    }
 }
