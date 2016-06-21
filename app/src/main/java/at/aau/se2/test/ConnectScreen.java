@@ -778,6 +778,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
             case R.id.button_start:
                 if (isHost) {
                     sendMessage("START");
+                    Nearby.Connections.stopAdvertising(apiClient);
                 }
                 //set the api in the Singleton
                 Connection.getInstance().setApiClient(apiClient);
