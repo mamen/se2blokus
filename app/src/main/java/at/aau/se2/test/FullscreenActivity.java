@@ -3,6 +3,7 @@ package at.aau.se2.test;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Point;
 import android.graphics.Typeface;
 import android.media.MediaPlayer;
@@ -13,13 +14,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.Display;
-import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.GridLayout;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -74,6 +73,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     public MediaPlayer placeSound;
 
     private static ArrayList<Player> players;
+    private int countFinished = 0;
 
     private TextView pointsRed;
     private TextView pointsBlue;
@@ -817,11 +817,9 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         ArrayList<IndexTuple> savedTuples = player.getSaveIndices(); // Tuples with the Indices of your placed stones
         if (player.getScore() < player.MAX_STONES) { // Probably useless, because you should not be able to lay more than MAX_STONES
             for (final IndexTuple tuple : savedTuples) { // Look at every IndexTuple (where your stones lay)
-//                Log.d("Tuple Info Vorm Testen", tuple.toString());
+                Log.d("Tuple Info Vorm Testen", tuple.toString());
                 if (tuple.getHasTurns()) {
                     for (final byte stone : remainingStones) { // Look at every stone you still have
-
-                        //
                         Thread t = new Thread() {
                             @Override
                             public void run() {
@@ -856,6 +854,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                                                         break;
                                                                     } else {
                                                                         instaBreak[0] = true;
+                                                                        oneMoreTurn[0] = true;
                                                                         Thread.currentThread().isInterrupted();
                                                                     }
                                                                 }
@@ -879,6 +878,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                                                         break;
                                                                     } else {
                                                                         instaBreak[0] = true;
+                                                                        oneMoreTurn[0] = true;
                                                                         Thread.currentThread().isInterrupted();
                                                                     }
                                                                 }
@@ -903,6 +903,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                                                         break;
                                                                     } else {
                                                                         instaBreak[0] = true;
+                                                                        oneMoreTurn[0] = true;
                                                                         Thread.currentThread().isInterrupted();
                                                                     }
                                                                 }
@@ -925,6 +926,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                                                     break;
                                                                 } else {
                                                                     instaBreak[0] = true;
+                                                                    oneMoreTurn[0] = true;
                                                                     Thread.currentThread().isInterrupted();
                                                                 }
                                                             }
@@ -939,7 +941,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                                 // May be boosting performance if breaking far enough
                                                 if (lu[0] != 0 && ll[0] != 0 && ru[0] != 0 && rl[0] != 0) {
 
-                                                    tuple.setHasTurns(false);
+//                                                    tuple.setHasTurns(false);
                                                     break;
                                                 }
                                             }
@@ -956,15 +958,19 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                                 }
                             }
                         };
-                        if (instaBreak[0]) return true;
-                        if (!breakable[0]) {
+
+                       /* if (!breakable[0]) {
                             tuple.setHasTurns(false);
-                        }
-//                    Log.d("Nach allen Steinen", tuple.toString());
+                        }*/
+                    Log.d("Tuple nach Steinen", tuple.toString());
                     }
+                    if (instaBreak[0]) return true;
                 }
+                if (instaBreak[0]) return true;
             }
+            if (instaBreak[0]) return true;
         }
+        if (instaBreak[0]) return true;
         return oneMoreTurn[0];
     }
 
@@ -1048,6 +1054,13 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
     }
 
+    public void setFinished(String id){
+        if(!id.equals(playerID)){
+            countFinished++;
+            goOn();
+        }
+    }
+
     public String arrToString(byte[] arr) {
         String s = "";
         for (int i = 0; i < arr.length; i++) {
@@ -1055,6 +1068,20 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         }
 
         return s;
+    }
+
+    private void sendMessage( String message ) {
+        debugging("sendMessage");
+        if(!remotePeerEndpoints.isEmpty()) {
+            if (isHost) {
+                Nearby.Connections.sendReliableMessage(apiClient, remotePeerEndpoints, (message).getBytes());
+            }
+        }
+        else {
+            if (remoteHostEndpoint != null) {
+                Nearby.Connections.sendReliableMessage(apiClient, remoteHostEndpoint, (message).getBytes());
+            }
+        }
     }
 
     private void sendMessage(byte[] mess) {
@@ -1116,6 +1143,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             } else { // TODO ... wenn nicht, was muss dann aufgerufen werden, dass der nächste Spieler dran kommt!? So geht's nicht ;)
                 Toast.makeText(getApplicationContext(), "You lost buddy", Toast.LENGTH_SHORT).show();
                 disableScreenInteraction();
+                notifyFinished();
+
                 if (sending) {
                     isItMyTurn(true, payload);
                 }
@@ -1171,6 +1200,21 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         debugging("should enable");
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
         imgView.setVisibility(View.GONE);
+    }
+
+    private void notifyFinished(){
+        countFinished++;
+        goOn();
+        sendMessage("FINISHED-"+playerID);
+    }
+
+    private void goOn(){
+        if(countFinished==idNameMap.size()){
+            final Intent intent = new Intent("at.aau.se2.test.ENDSCREEN");
+            intent.putExtra("isHost", isHost);
+            intent.putExtra("hostEnd", remoteHostEndpoint);
+            startActivity(intent);
+        }
     }
 
     @Override

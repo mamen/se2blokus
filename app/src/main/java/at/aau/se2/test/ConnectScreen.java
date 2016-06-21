@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -64,7 +65,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
     private static final int FONT_SIZE_SMALL = 16;
     private static final int FONT_SIZE_LARGE = 19;
 
-    private static final String[] MESSAGE_CODES = {"COLOROK-","FULLSCREEN","N-","NEWPLAYER-","REMOVE-","START","REMOVE-"};
+    private static final String[] MESSAGE_CODES = {"COLOROK-","FULLSCREEN","N-","NEWPLAYER-","REMOVE-","START","REMOVE-", "FINISHED-"};
 
     //TableView
     private TextView player1;
@@ -146,6 +147,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
                     dialog.dismiss();
                 }
                 else{
+                    Toast.makeText(getApplicationContext(), "Insert a name!", Toast.LENGTH_SHORT).show();
                     return;
                 }
             }
@@ -656,18 +658,14 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
             } else if (message.startsWith(MESSAGE_CODES[5])) {
                 debugging("try to start game");
                 startButton.performClick();
-            /*String[] messArray = message.split("-");
-            if(messArray.length == 2) {
-                String playerID = messArray[1];
-                idNameMap.remove(playerID);
             }
-            else {
-                debugging("message array has wrong format");
-            }
-            if( isHost ) {
-                sendMessage(message);
-                debugging("remove player");
-            }*/
+            else if (message.startsWith(MESSAGE_CODES[7])) {
+                FullscreenActivity full = Connection.getInstance().getFullscreenActivity();
+                String mess = message.split("-")[1];
+                full.setFinished(mess);
+                if(isHost){
+                    sendMessage(mess);
+                }
             }
             else if (message.startsWith(MESSAGE_CODES[2])) {
                 debugging("startnum");
