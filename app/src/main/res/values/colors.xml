@@ -4,5 +4,11 @@
     <color name="colorPrimaryDark">#333333</color>
     <color name="colorAccent">#666666</color>
 
+    <color name="colorRed">#dc110a</color>
+    <color name="colorGreen">#91c50a</color>
+    <color name="colorBlue">#2977ce</color>
+    <color name="colorYellow">#fec725</color>
+    <color name="white">#FFFFFF</color>
+
     <color name="black_overlay">#66000000</color>
 </resources>

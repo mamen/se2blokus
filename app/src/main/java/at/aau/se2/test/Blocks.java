@@ -1,8 +1,5 @@
 package at.aau.se2.test;
 
-/**
- * Created by Markus on 22.04.2016.
- */
 public class Blocks {
     private byte playerID;
     private byte[][][] stones;
@@ -12,6 +9,10 @@ public class Blocks {
         generateStonesMatrix();
     }
 
+    /**
+     * generates the stones as a byte-matrix
+     * the playerID defines the color
+     */
     private void generateStonesMatrix(){
         stones = new byte[][][]{
                 {
@@ -124,7 +125,13 @@ public class Blocks {
         };
     }
 
+    /**
+     * returns the stone according to the given number
+     * @param num
+     * @return
+     */
     public byte[][] getStone(int num){
         return stones[num];
     }
+
 }
