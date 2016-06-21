@@ -5,6 +5,7 @@ import android.graphics.Typeface;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.TextView;
 
 public class EndScreen extends AppCompatActivity {
@@ -33,6 +34,8 @@ public class EndScreen extends AppCompatActivity {
         txtWinnerScore.setTypeface(font);
         txtMainMenu.setTypeface(font);
         txtWinnerHeading.setTypeface(font);
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         txtLogo.setTextSize(60);
         txtMainMenu.setTextSize(40);

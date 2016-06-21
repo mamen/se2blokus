@@ -133,13 +133,13 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                     myturn = Integer.parseInt(extras.getString("turn").charAt(1) + "");
                 }
             } else if (idNameMap.size() == 3) {
-//                int other1 = Integer.parseInt(otherColors.charAt(0)+"");
-//                int other2 = Integer.parseInt(otherColors.charAt(1)+"");
-                if (otherColors.length() == 0) {
+                int other1 = Integer.parseInt(otherColors.charAt(0)+"");
+                int other2 = Integer.parseInt(otherColors.charAt(1)+"");
+                if (playerID < other1 && playerID < other2) {
                     myturn = Integer.parseInt(extras.getString("turn").charAt(0) + "");
-                } else if (otherColors.length() == 1) {
+                } else if (playerID > other1 && playerID > other2) {
                     myturn = Integer.parseInt(extras.getString("turn").charAt(1) + "");
-                } else if (otherColors.length() == 2) {
+                } else {
                     myturn = Integer.parseInt(extras.getString("turn").charAt(2) + "");
                 }
             } else {
@@ -149,6 +149,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             debugging(Integer.toString(myturn));
         }
 
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         // lade Player
         player = new Player(playerID);
         // lade GameLogic

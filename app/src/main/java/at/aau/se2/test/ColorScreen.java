@@ -77,6 +77,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
         apiClient = Connection.getInstance().getApiClient();
         remotePeerEndpoints = Connection.getInstance().getRemotePeerEndpoints();
         setupView();
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         startButton.setVisibility(View.INVISIBLE);
         startButton.setClickable(false);
     }
@@ -316,11 +317,6 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
      */
     private void handleButtons(int viewID){
 
-        if(isHost){
-            turn = randomStartingLineup(idNameMap.size());
-            sendMessage(messageCodes[2]+turn);
-        }
-
         debugging("handle buttons");
         switch( viewID ) {
             case R.id.button_green:
@@ -364,6 +360,12 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
                 break;
 
             case R.id.button_startgame:
+
+                if(isHost){
+                    turn = randomStartingLineup(idNameMap.size());
+                    sendMessage(messageCodes[2]+turn);
+                }
+
                 debugging("want to start that now");
                 final Intent intent = new Intent("at.aau.se2.test.FULLSCREENACTIVITY");
                 intent.putExtra("map", idNameMap);
