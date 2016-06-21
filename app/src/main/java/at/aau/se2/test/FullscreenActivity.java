@@ -42,21 +42,21 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         Connections.EndpointDiscoveryListener,
         View.OnClickListener {
 
-    private RelativeLayout fullscreenLayout;
-    private GridLayout gameBoardLayout;
+    public RelativeLayout fullscreenLayout;
+    public GridLayout gameBoardLayout;
     private LinearLayout blockDrawer;
-    private GameLogic gl;
+    public GameLogic gl;
     private static final int SIZE = 20;
-    private int selectedBlockID;
+    public int selectedBlockID;
     private List<ImageView> blockDrawerChildren;
     private List<ImageView> removedBlockDrawerChildren;
-    private Player player;
+    public Player player;
     private boolean doubleBackToExitPressedOnce = false;
-    private ImageView testView;
+    public static ImageView testView;
     private byte[][] rememberField;
-    private boolean elementFinished;
+    public boolean elementFinished;
     private View.DragShadowBuilder shadowBuilder;
-    private int transposeCount; //Zähler wie oft der Stein gedreht wurde
+    public int transposeCount; //Zähler wie oft der Stein gedreht wurde
     private boolean doSettings;
 
     //private Connection connection;
@@ -71,7 +71,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     private int myturn;
     private int actTurn;
     private String otherColors = "";
-    private MediaPlayer placeSound;
+    public MediaPlayer placeSound;
 
     private static ArrayList<Player> players;
 
@@ -86,16 +86,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     private int oldPointsYellow;
     private final int MAX_POINTS_REGULAR = 89;
 
-
-    /*private int plCount;
-    private int turn;
-    */
-    /*
-    TODO:
-        - roundbased game for 4 players, maybe random (also random decision who starts in the case of two players)
-        - better lobby (was already better before)
-        - displaying the count of other players
-     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -128,22 +118,22 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         if (doSettings) {
             if (idNameMap.size() == 2) {
                 if (isHost) {
-                    myturn = Integer.parseInt(extras.getString("turn").charAt(0) + "");
+                    myturn = Integer.parseInt(String.format("%s", extras.getString("turn").charAt(0)));
                 } else {
-                    myturn = Integer.parseInt(extras.getString("turn").charAt(1) + "");
+                    myturn = Integer.parseInt(String.format("%s", extras.getString("turn").charAt(1)));
                 }
             } else if (idNameMap.size() == 3) {
 //                int other1 = Integer.parseInt(otherColors.charAt(0)+"");
 //                int other2 = Integer.parseInt(otherColors.charAt(1)+"");
                 if (otherColors.length() == 0) {
-                    myturn = Integer.parseInt(extras.getString("turn").charAt(0) + "");
+                    myturn = Integer.parseInt(String.format("%s", extras.getString("turn").charAt(0)));
                 } else if (otherColors.length() == 1) {
-                    myturn = Integer.parseInt(extras.getString("turn").charAt(1) + "");
+                    myturn = Integer.parseInt(String.format("%s", extras.getString("turn").charAt(1)));
                 } else if (otherColors.length() == 2) {
-                    myturn = Integer.parseInt(extras.getString("turn").charAt(2) + "");
+                    myturn = Integer.parseInt(String.format("%s", extras.getString("turn").charAt(2)));
                 }
             } else {
-                myturn = Integer.parseInt(extras.getString("turn").charAt(playerID - 1) + "");
+                myturn = Integer.parseInt(String.format("%s", extras.getString("turn").charAt(playerID - 1)));
             }
             debugging(extras.getString("turn"));
             debugging(Integer.toString(myturn));
@@ -164,308 +154,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
 
         // Draglistener erstellen
-        gameBoardLayout.setOnDragListener(new View.OnDragListener() {
-
-            byte index_i = -1;
-            byte index_j = -1;
-            ImageButton accept;
-            ImageButton cancel;
-            ImageButton transpose;
-            ImageButton move_up;
-            ImageButton move_right;
-            ImageButton move_down;
-            ImageButton move_left;
-            ImageView draggedImage;
-            boolean dragged = false;
-            boolean drawn;
-
-            @Override
-            public boolean onDrag(View v, DragEvent event) {
-                switch (event.getAction()) {
-                    case DragEvent.ACTION_DRAG_STARTED: //LongClick startet den Drag, Bild unsichtbar machen
-                        testView.setVisibility(View.INVISIBLE);
-                        dragged = false;
-                        Log.d("DragStart", "Started");
-                        break;
-                    case DragEvent.ACTION_DRAG_ENTERED: //Im Spielfeld
-                        dragged = true;
-                        Log.d("DragEntered", "Entered");
-                        break;
-                    case DragEvent.ACTION_DRAG_EXITED: //Außerhalb vom Spielfeld
-                        dragged = false;
-                        Log.d("DragExited", "Exited");
-                        break;
-                    case DragEvent.ACTION_DRAG_ENDED: //Wird geworfen, egal wo der Drag beendet wird
-                        if (dragged) {
-                            testView.setVisibility(View.INVISIBLE);
-                        } else {
-                            testView.setVisibility(View.VISIBLE);
-                            elementFinished = true;
-                        }
-                        Log.d("DragEnded", "Ended");
-                        break;
-                    case DragEvent.ACTION_DROP: //Drop wird nur geworfen, wenn man im Spielfeld dropped
-
-                        transposeCount = 0; //Neuer Stein, Zähler zurücksetzen
-                        draggedImage = (ImageView) event.getLocalState();
-                        byte[][] stone = player.getStone(selectedBlockID - 1);
-                        final int stoneLength = stone.length;
-
-                        // Indexberechnung, wo der Stein platziert werden soll
-                        // Indexmanipulation, abhängig vom gewählten Stein
-                        index_i = (byte) (Math.floor(event.getX() / Math.floor(v.getWidth() / 20)) - manipulateX(selectedBlockID - 1));
-                        index_j = (byte) (Math.floor(event.getY() / Math.floor(v.getHeight() / 20)) - manipulateY(selectedBlockID - 1));
-
-                        //außerhalb des gültigen bereichs platziert
-                        if (index_i < 0 || index_i > 19) {
-                            if (index_i < 0) {
-                                index_i = 0;
-                            } else {
-                                index_i = 19;
-                            }
-                        }
-
-                        if (index_j < 0 || index_j > 19) {
-                            if (index_j < 0) {
-                                index_j = 0;
-                            } else {
-                                index_j = 19;
-                            }
-                        }
-
-                        //Preview erfolgreich gezeichnet?
-                        drawn = drawStone(index_i, index_j);
-
-                        //Bei left und up Probleme, das Stein nur richtig gedreht nach oben/links kann (Nullzeilen und Nullspalten)
-
-                        // Movement Buttons müssen try-catch, da nicht ersichtlich ist,
-                        // ob bei neuem moven, der Accept Button noch da ist
-                        // Wenn keine Preview gezeichnet wurde, muss der alte Zustand wiederhergestellt werden
-                        move_up = new ImageButton(getApplicationContext());
-                        move_up.setImageResource(R.drawable.move_up);
-
-                        move_up.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                restore(index_i, index_j);
-                                if (drawStone(index_i, (index_j - 1 < 0 - stoneLength) ? (0 - stoneLength) : --index_j)) {
-                                    try {
-                                        if (isYourPlacementValid(index_i, index_j)) {
-                                            fullscreenLayout.addView(accept);
-                                        } else {
-                                            fullscreenLayout.removeView(accept);
-                                        }
-                                    } catch (IllegalStateException e) {
-                                        Log.e("Error", e.getMessage());
-                                        //throw new IllegalStateException();
-                                    }
-                                } else {
-                                    restore(index_i, ++index_j);
-                                    drawStone(index_i, index_j);
-                                }
-                            }
-                        });
-
-                        move_down = new ImageButton(getApplicationContext());
-                        move_down.setImageResource(R.drawable.move_down);
-
-                        move_down.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                restore(index_i, index_j);
-                                if (drawStone(index_i, (index_j + 1 > 20) ? 20 : ++index_j)) {
-                                    try {
-                                        if (isYourPlacementValid(index_i, index_j)) {
-                                            fullscreenLayout.addView(accept);
-                                        } else {
-                                            fullscreenLayout.removeView(accept);
-                                        }
-                                    } catch (IllegalStateException e) {
-                                        Log.e("Error", e.getMessage());
-                                        //throw new IllegalStateException();
-                                    }
-                                } else {
-                                    restore(index_i, --index_j);
-                                    drawStone(index_i, index_j);
-                                }
-                            }
-                        });
-
-                        move_left = new ImageButton(getApplicationContext());
-                        move_left.setImageResource(R.drawable.move_left);
-
-                        move_left.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                restore(index_i, index_j);
-                                if (drawStone((index_i - 1 < 0 - stoneLength) ? (0 - stoneLength) : --index_i, index_j)) {
-                                    try {
-                                        if (isYourPlacementValid(index_i, index_j)) {
-                                            fullscreenLayout.addView(accept);
-                                        } else {
-                                            fullscreenLayout.removeView(accept);
-                                        }
-                                    } catch (IllegalStateException e) {
-                                        Log.e("Error", e.getMessage());
-                                    }
-                                } else {
-                                    restore(++index_i, index_j);
-                                    drawStone(index_i, index_j);
-                                    //cancel.performClick();
-                                }
-                            }
-                        });
-
-                        move_right = new ImageButton(getApplicationContext());
-                        move_right.setImageResource(R.drawable.move_right);
-
-                        move_right.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                restore(index_i, index_j);
-                                if (drawStone((index_i + 1 > 20) ? 20 : ++index_i, index_j)) {
-                                    try {
-                                        if (isYourPlacementValid(index_i, index_j)) {
-                                            fullscreenLayout.addView(accept);
-                                        } else {
-                                            fullscreenLayout.removeView(accept);
-                                        }
-                                    } catch (IllegalStateException e) {
-                                        Log.e("Error", e.getMessage());
-                                        //throw new IllegalStateException();
-                                    }
-                                } else {
-                                    restore(--index_i, index_j);
-                                    drawStone(index_i, index_j);
-                                }
-                            }
-                        });
-
-
-                        RelativeLayout.LayoutParams paramsMoveUp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-                        RelativeLayout.LayoutParams paramsMoveRight = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-                        RelativeLayout.LayoutParams paramsMoveDown = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-                        RelativeLayout.LayoutParams paramsMoveLeft = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-
-                        paramsMoveUp.setMargins((getScreenWidth() / 2) - ((move_up.getDrawable().getMinimumWidth() + move_up.getPaddingLeft() + move_up.getPaddingRight()) / 2), 0, 0, 0);
-
-                        paramsMoveRight.setMargins(gameBoardLayout.getWidth() - move_right.getPaddingLeft() - move_right.getPaddingRight() - move_right.getDrawable().getMinimumWidth(), (gameBoardLayout.getHeight() / 2 - move_right.getPaddingTop() - move_right.getDrawable().getMinimumHeight() / 2), 0, 0);
-
-                        paramsMoveDown.setMargins((getScreenWidth() / 2) - ((move_down.getDrawable().getMinimumWidth() + move_down.getPaddingLeft() + move_down.getPaddingRight()) / 2), (gameBoardLayout.getHeight() - move_down.getPaddingTop() - move_down.getPaddingBottom() - move_up.getDrawable().getMinimumHeight()), 0, 0);
-
-                        paramsMoveLeft.setMargins(0, (gameBoardLayout.getHeight() / 2 - move_left.getPaddingTop() - move_left.getDrawable().getMinimumHeight() / 2), 0, 0);
-
-                        move_up.setLayoutParams(paramsMoveUp);
-                        move_right.setLayoutParams(paramsMoveRight);
-                        move_down.setLayoutParams(paramsMoveDown);
-                        move_left.setLayoutParams(paramsMoveLeft);
-
-                        move_up.setAlpha(0.5f);
-                        move_right.setAlpha(0.5f);
-                        move_down.setAlpha(0.5f);
-                        move_left.setAlpha(0.5f);
-
-                        // Accept-Button
-                        if (drawn) {
-                            RelativeLayout.LayoutParams paramsAccept = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-                            accept = new ImageButton(getApplicationContext());
-                            accept.setImageResource(R.drawable.checkmark);
-                            paramsAccept.setMargins(0, v.getHeight() + accept.getHeight(), 0, 0);
-                            accept.setLayoutParams(paramsAccept);
-
-                            accept.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    // Platzieren nicht möglich - Preview wieder löschen und Bild im BlockDrawer wieder anzeigen
-                                    if (!isYourPlacementValid(index_i, index_j)) {
-                                        //vibrate(500);
-                                        restore(index_i, index_j);
-                                    } else {
-                                        placeSound.start(); //Sound abspielen
-                                        testView.setVisibility(View.INVISIBLE); //Müsste unnötig sein
-                                        byte[][] b = player.getStone(selectedBlockID - 1);
-                                        for (int a = 0; a < transposeCount; a++) { //Stein drehen, je nachdem wie oft der Button gedrückt wurde
-                                            b = gl.rotate(b);
-                                        }
-                                        placeIt(b, index_i, index_j); //Wirkliches Plazieren vom Stein
-                                        updatePoints();
-                                    }
-                                    gl.removeViews(fullscreenLayout, accept, cancel, transpose, move_up, move_right, move_down, move_left);
-                                    elementFinished = true; //Nächster Stein kann geLongClicked werden
-                                }
-                            });
-
-
-                            // Cancel-Button
-                            RelativeLayout.LayoutParams paramsCancel = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-                            cancel = new ImageButton(getApplicationContext());
-                            cancel.setImageResource(R.drawable.cancel);
-                            paramsCancel.setMargins(Math.round(v.getWidth() / 3), v.getHeight() + cancel.getHeight(), 0, 0);
-                            cancel.setLayoutParams(paramsCancel);
-
-                            cancel.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    gl.removeViews(fullscreenLayout, accept, cancel, transpose, move_up, move_right, move_down, move_left);
-                                    testView.setVisibility(View.VISIBLE);
-                                    elementFinished = true;
-                                    restore(index_i, index_j);
-                                    //boardToLog();
-                                }
-                            });
-
-                            RelativeLayout.LayoutParams paramsTranspose = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-                            transpose = new ImageButton(getApplicationContext());
-                            transpose.setImageResource(R.drawable.transpose);
-                            paramsTranspose.setMargins(Math.round((2 * v.getWidth()) / 3), v.getHeight() + transpose.getHeight(), 0, 0);
-                            transpose.setLayoutParams(paramsTranspose);
-
-                            //Board wiederherstellen, Stein drehen und neue Preview zeichnen, Accept Button nur bei gültigem Zug anzeigen
-                            //Try-Catch, da ich Accept nicht zweimal adden darf
-                            transpose.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    restore(index_i, index_j);
-                                    transposeCount = (transposeCount + 1) % 4;
-                                    drawn = drawStone(index_i, index_j);
-                                    if (drawn) {
-                                        if (!isYourPlacementValid(index_i, index_j)) {
-                                            fullscreenLayout.removeView(accept);
-                                        } else {
-                                            try {
-                                                fullscreenLayout.addView(accept);
-                                            } catch (IllegalStateException e) {
-                                                Log.e("Error", e.getMessage());
-                                                //throw new IllegalStateException();
-                                            }
-                                        }
-                                    } else {
-                                        Toast.makeText(getApplicationContext(), "I'm sorry, but I can't draw this", Toast.LENGTH_SHORT).show();
-                                        cancel.performClick();
-                                    }
-                                }
-                            });
-
-
-                            // Buttons zum View hinzufügen
-                            if (isYourPlacementValid(index_i, index_j)) { //Ungültiger Zug, braucht Accept Button nicht
-                                fullscreenLayout.addView(accept);
-                            }
-                            gl.addViews(fullscreenLayout, cancel, transpose, move_up, move_right, move_down, move_left);
-                        } else {
-                            //Preview wurde nicht gezeichnet
-                            elementFinished = true;
-                            dragged = false;
-                            testView.setVisibility(View.VISIBLE);
-                        }
-
-                        break;
-                    default:
-                        break;
-                }
-                return true;
-            }
-        });
+        gameBoardLayout.setOnDragListener(new DragListener(getApplicationContext()));
 
         imgView = (ImageView) findViewById(R.id.img_stop);
         //if (doSettings) {
@@ -542,7 +231,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     }
 
 
-    private void updatePoints() {
+    public void updatePoints() {
         byte[][] gameBoard = gl.getGameBoard();
 
         int curPointsRed = 0;
@@ -819,7 +508,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
      * @return false, if stone goes over edge (Should we handle this case better?)
      * true, if stone was drawn
      */
-    private boolean drawStone(int x, int y) {
+    public boolean drawStone(int x, int y) {
         if (selectedBlockID >= 0) {
             byte[][] b = player.getStone(selectedBlockID - 1);
 
@@ -876,7 +565,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
      * @param i - the col where you want to restore it
      * @param j - the row where you want to restore it
      */
-    private void restore(int i, int j) {
+    public void restore(int i, int j) {
         gl.restoreField(rememberField, i, j);
         updatePartOfGameBoard(i, j, (i + 5 > 20) ? 20 : i + 5, (j + 5 > 20) ? 20 : j + 5);
         //updateGameBoard();
@@ -889,7 +578,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
      * @param selectedBlock The tag of your stone
      * @return an Integer, to change the placement in X-direction
      */
-    private static int manipulateX(int selectedBlock) {
+    public static int manipulateX(int selectedBlock) {
         switch (selectedBlock) {
             case 0:
             case 1:
@@ -927,7 +616,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
      * @param selectedBlock The tag of your stone
      * @return an Integer, to change the placement in Y-direction
      */
-    private static int manipulateY(int selectedBlock) {
+    public static int manipulateY(int selectedBlock) {
         switch (selectedBlock) {
             case 0:
             case 1:
@@ -1041,7 +730,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     }
 
     //Bildschirmbreite
-    private int getScreenWidth() {
+    public int getScreenWidth() {
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
