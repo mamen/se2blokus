@@ -135,8 +135,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             } else {
                 myturn = Integer.parseInt(String.format("%s", extras.getString("turn").charAt(playerID - 1)));
             }
-            debugging(extras.getString("turn"));
-            debugging(Integer.toString(myturn));
+            //Log.d("--DEBUG--",extras.getString("turn"));
+            //Log.d("--DEBUG--",Integer.toString(myturn));
         }
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -173,13 +173,16 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         }
     }
 
-
     @Override
     public void onStart() {
         super.onStart();
         initializePoints();
     }
 
+    /**
+     * Initialises the points-counter
+     * sets the layoutparams and font-styles
+     */
     private void initializePoints() {
         Typeface font = Typeface.createFromAsset(getAssets(), "blocked.ttf");
 
@@ -231,7 +234,9 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         oldPointsGreen = 0;
     }
 
-
+    /**
+     * updates the player-points
+     */
     public void updatePoints() {
         byte[][] gameBoard = gl.getGameBoard();
 
@@ -277,6 +282,12 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
     }
 
+    /**
+     * adds a bonus to the points
+     * @param oldpoints
+     * @param currentPoints
+     * @return new points
+     */
     private int addExtraPoints(int oldpoints, int currentPoints) {
         int retValue = 0;
         if (oldpoints == MAX_POINTS_REGULAR - 1 && currentPoints == MAX_POINTS_REGULAR) {
@@ -289,7 +300,11 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         return retValue;
     }
 
-
+    /**
+     * initialises the Blockdrawer
+     * adds all the stones to the drawer
+     * this method is only called at the beginning of the game
+     */
     private void initializeBlockDrawer() {
         LinearLayout blockDrawerParent = (LinearLayout) findViewById(R.id.blockDrawer_parent);
         ViewGroup.LayoutParams params = blockDrawerParent.getLayoutParams();
@@ -345,7 +360,10 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
     }
 
-
+    /**
+     * creates the gameboard and fills the gameboardlayout
+     * this method is only called at the beginning of the game
+     */
     private void updateGameBoard() {
         gameBoardLayout = null;
         gameBoardLayout = (GridLayout) findViewById(R.id.gameBoard);
@@ -377,7 +395,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     }
 
     /**
-     * Updates the GameBoard
+     * Updates a specific part of the GameBoard
      *
      * @param startX start-position (X) for the update
      * @param startY start-position (Y) for the update
@@ -444,7 +462,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             }
         }
     }
-
 
     /**
      * Checks your placement:
@@ -535,7 +552,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         return true;
     }
 
-
     /**
      * Changes the color of the stone, to give it the same color (But recognizable as Preview)
      *
@@ -559,7 +575,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         return retArr;
     }
 
-
     /**
      * Restores the field, to the state before the preview was drawn
      *
@@ -569,7 +584,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     public void restore(int i, int j) {
         gl.restoreField(rememberField, i, j);
         updatePartOfGameBoard(i, j, (i + 5 > 20) ? 20 : i + 5, (j + 5 > 20) ? 20 : j + 5);
-        //updateGameBoard();
     }
 
     /**
@@ -609,7 +623,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         }
     }
 
-
     /**
      * Manipulates the YPlacement, so that you can place it more natural
      * Don't change the BlockOrder, or this won't work properly!!
@@ -648,13 +661,14 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         }
     }
 
-
+    /**
+     * makes the phone go vrrr vrrr ;)
+     * @param duration
+     */
     private void vibrate(int duration) {
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        // Vibrate for 500 milliseconds
         v.vibrate(duration);
     }
-
 
     /**
      * Removes the used stone from the View
@@ -671,13 +685,11 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
         int rmIndex = Math.max(0, (selectedBlockID) - count);
         ImageView rm = (ImageView) blockDrawer.getChildAt(rmIndex);
-        //Toast.makeText(getApplicationContext(), (selectedBlockID) + " / " + rm_index + " / " + (22 - blockDrawer.getChildCount()), Toast.LENGTH_SHORT).show();
         blockDrawer.removeView(rm);
         blockDrawerChildren.remove(rm);
         removedBlockDrawerChildren.add(rm);
         selectedBlockID = -1;
     }
-
 
     /**
      * Stone placement, removal from BlockDrawer, Update and calculating new Score and looking for anymore turns
@@ -717,20 +729,29 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         byte[] byteArr = ba.createNewByteArray(b, i, j, playerID);
         if (doSettings) {
 //            sendMessage(byteArr);
-            //debugging("isit?");
+            //Log.d("--DEBUG--","isit?");
             isItMyTurn(true, byteArr);
         }
 
         //updateGameBoard();
     }
 
+    /**
+     * places the stone of an other player
+     * @param b
+     * @param i
+     * @param j
+     */
     private void placeStoneOfOtherPlayer(byte[][] b, int i, int j) {
         gl.placeStone(b, i, j);
         updatePartOfGameBoard(i, j, (i + b.length), (j + b.length));
         updatePoints();
     }
 
-    //Bildschirmbreite
+    /**
+     * gets the screen width
+     * @return the screen width
+     */
     public int getScreenWidth() {
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
@@ -738,65 +759,16 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         return size.x;
     }
 
-    //Bilschirmhöhe
+    /**
+     * gets the screen height
+     * @return the screen height
+     */
     private int getScreenHeight() {
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
         return size.y;
     }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        updatePoints();
-        hideStatusBar();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        hideStatusBar();
-    }
-
-    private void hideStatusBar() {
-        View decorView = getWindow().getDecorView();
-        // Hide the status bar.
-        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
-        decorView.setSystemUiVisibility(uiOptions);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        finish();
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (doubleBackToExitPressedOnce) {
-            super.finish();
-            finish();
-            return;
-        }
-
-        this.doubleBackToExitPressedOnce = true;
-        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
-
-        new Handler().postDelayed(new Runnable() {
-
-            @Override
-            public void run() {
-                doubleBackToExitPressedOnce = false;
-            }
-        }, 2000);
-    }
-
 
     /**
      * Not excessively tested, but worked where I wanted it to work :)
@@ -974,7 +946,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         return oneMoreTurn[0];
     }
 
-
     /**
      * Watch one corner around your stone, to see if there is at least one more turn
      *
@@ -985,7 +956,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
      * @return true, if there is one more turn
      * false, else
      */
-
     public boolean cornerTesting(int i, int j, int selectionRemember, int transposeRemember) {
         if (drawStone(i, j)) { // Is needed, to make isYourPlacementValid work
             if (isYourPlacementValid(i, j)) {
@@ -1001,59 +971,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         return false;
     }
 
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        debugging("onConnected");
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        debugging("connSuspended");
-    }
-
-    @Override
-    public void onConnectionRequest(String s, String s1, String s2, byte[] bytes) {
-        debugging("request");
-    }
-
-    @Override
-    public void onEndpointFound(String s, String s1, String s2, String s3) {
-        debugging("endpoind found");
-    }
-
-    @Override
-    public void onEndpointLost(String s) {
-        debugging("endpoint lost");
-    }
-
-    @Override
-    public void onMessageReceived(String endpointId, byte[] payload, boolean isReliable) {
-
-        debugging("action received");
-
-        ByteArrayHelper b = new ByteArrayHelper();
-        b.fetchInformationFromByteArray(payload);
-
-        int color = b.getColor();
-        int idx = b.getIdx();
-        int idy = b.getIdy();
-        byte[][] stone = b.getByteStone();
-
-
-        if (color != playerID) {
-            debugging("" + Integer.toString(color) + "_" + Integer.toString(playerID));
-            placeStoneOfOtherPlayer(stone, idy, idx);
-            isItMyTurn(false, null);
-
-        }
-
-        if (isHost) {
-            sendMessage(payload);
-            debugging("send new action");
-        }
-
-    }
-
     public void setFinished(String id){
         if(!id.equals(playerID)){
             countFinished++;
@@ -1061,6 +978,11 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         }
     }
 
+    /**
+     * converts an array to a string
+     * @param arr
+     * @return the converted string
+     */
     public String arrToString(byte[] arr) {
         String s = "";
         for (int i = 0; i < arr.length; i++) {
@@ -1070,8 +992,12 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         return s;
     }
 
+    /**
+     * this sends a string message
+     * @param message
+     */
     private void sendMessage( String message ) {
-        debugging("sendMessage");
+        Log.d("--DEBUG--","sendMessage");
         if(!remotePeerEndpoints.isEmpty()) {
             if (isHost) {
                 Nearby.Connections.sendReliableMessage(apiClient, remotePeerEndpoints, (message).getBytes());
@@ -1084,36 +1010,30 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         }
     }
 
+    /**
+     * this sends a byte-array message
+     * @param mess
+     */
     private void sendMessage(byte[] mess) {
-        debugging("sendMessage" + isHost + "..." + remotePeerEndpoints.toString() + "..." + remoteHostEndpoint);
+        Log.d("--DEBUG--","sendMessage" + isHost + "..." + remotePeerEndpoints.toString() + "..." + remoteHostEndpoint);
         if (!remotePeerEndpoints.isEmpty()) {
             if (isHost) {
-                debugging(arrToString(mess));
+                Log.d("--DEBUG--",arrToString(mess));
                 Nearby.Connections.sendReliableMessage(apiClient, remotePeerEndpoints, mess);
             }
         } else {
             if (remoteHostEndpoint != null) {
-                debugging(arrToString(mess));
+                Log.d("--DEBUG--",arrToString(mess));
                 Nearby.Connections.sendReliableMessage(apiClient, remoteHostEndpoint, mess);
             }
         }
     }
 
-    @Override
-    public void onDisconnected(String s) {
-        throw new UnsupportedOperationException();
-    }
-
     /**
-     * Called when a view has been clicked.
-     *
-     * @param v The view that was clicked.
+     * is it my turn? i don't know
+     * @param sending
+     * @param payload
      */
-    @Override
-    public void onClick(View v) {
-        throw new UnsupportedOperationException();
-    }
-
     private void isItMyTurn(boolean sending, byte[] payload) {
         if (sending) {
             sendMessage(payload);
@@ -1164,19 +1084,19 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         }
         
         /*if (idNameMap.size() == 2) {
-            debugging("small");
+            Log.d("--DEBUG--","small");
             actTurn++;
             if (actTurn == 3) {
                 actTurn = 1;
             }
         } else {
-            debugging("big");
+            Log.d("--DEBUG--","big");
             actTurn++;
             if (actTurn == 5) {
                 actTurn = 1;
             }
         }
-        debugging("actturn" + actTurn + ", " + myturn);
+        Log.d("--DEBUG--","actturn" + actTurn + ", " + myturn);
         if (actTurn == myturn) {
             enableScreenInteraction();
         } else {
@@ -1185,7 +1105,9 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
     }
 
-
+    /**
+     * this disables the screen interaction
+     */
     public void disableScreenInteraction() {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                 WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
@@ -1193,11 +1115,14 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         imgView.setVisibility(View.VISIBLE);
         imgView.setImageResource(R.drawable.wait);
         imgView.setAlpha(0.4f);
-        debugging("should disable and display pic");
+        Log.d("--DEBUG--","should disable and display pic");
     }
 
+    /**
+     * this enables the screen interaction
+     */
     public void enableScreenInteraction() {
-        debugging("should enable");
+        Log.d("--DEBUG--","should enable");
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
         imgView.setVisibility(View.GONE);
     }
@@ -1217,29 +1142,129 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         }
     }
 
+    /**
+     * this hides the statusbar
+     */
+    private void hideStatusBar() {
+        View decorView = getWindow().getDecorView();
+        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+        decorView.setSystemUiVisibility(uiOptions);
+    }
+
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         throw new UnsupportedOperationException();
     }
 
-
-    /* ---DEBUGGING--- */
-
-    private void debugging(String debMessage) {
-        Log.d("tobiasho", debMessage);
+    @Override
+    public void onDisconnected(String s) {
+        throw new UnsupportedOperationException();
     }
 
-    public void boardToLog() {
-        byte[][] b = gl.getGameBoard();
-        String s = "";
-        for (int i = 0; i < b.length; i++) {
-            for (int j = 0; j < b[i].length; j++) {
-                s += b[i][j] + ", ";
-            }
-            s += Character.toString('\n');
+    /**
+     * Called when a view has been clicked.
+     *
+     * @param v The view that was clicked.
+     */
+    @Override
+    public void onClick(View v) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Log.d("--DEBUG--","onConnected");
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Log.d("--DEBUG--","connSuspended");
+    }
+
+    @Override
+    public void onConnectionRequest(String s, String s1, String s2, byte[] bytes) {
+        Log.d("--DEBUG--","request");
+    }
+
+    @Override
+    public void onEndpointFound(String s, String s1, String s2, String s3) {
+        Log.d("--DEBUG--","endpoind found");
+    }
+
+    @Override
+    public void onEndpointLost(String s) {
+        Log.d("--DEBUG--","endpoint lost");
+    }
+
+    @Override
+    public void onMessageReceived(String endpointId, byte[] payload, boolean isReliable) {
+
+        Log.d("--DEBUG--","action received");
+
+        ByteArrayHelper b = new ByteArrayHelper();
+        b.fetchInformationFromByteArray(payload);
+
+        int color = b.getColor();
+        int idx = b.getIdx();
+        int idy = b.getIdy();
+        byte[][] stone = b.getByteStone();
+
+
+        if (color != playerID) {
+            Log.d("--DEBUG--","" + Integer.toString(color) + "_" + Integer.toString(playerID));
+            placeStoneOfOtherPlayer(stone, idy, idx);
+            isItMyTurn(false, null);
+
         }
-        s += Character.toString('\n');
-        Log.d("Board", s);
+
+        if (isHost) {
+            sendMessage(payload);
+            Log.d("--DEBUG--","send new action");
+        }
+
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updatePoints();
+        hideStatusBar();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        hideStatusBar();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            super.finish();
+            finish();
+            return;
+        }
+
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce = false;
+            }
+        }, 2000);
+    }
 }
