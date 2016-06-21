@@ -25,8 +25,8 @@ public class DragListener implements View.OnDragListener {
     boolean drawn;
     private FullscreenActivity context;
 
-    public DragListener(Context c){
-        this.context = (FullscreenActivity) c;
+    public DragListener(FullscreenActivity c){
+        this.context = c;
     }
 
 

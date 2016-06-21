@@ -154,7 +154,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
 
         // Draglistener erstellen
-        gameBoardLayout.setOnDragListener(new DragListener(getApplicationContext()));
+        gameBoardLayout.setOnDragListener(new DragListener(this));
 
         imgView = (ImageView) findViewById(R.id.img_stop);
         //if (doSettings) {
