@@ -162,14 +162,14 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
         debugging("colorInRightActivity");
         String message = new String( payload );
 
-
         if (message.startsWith(messageCodes[0])) {
-            if (!selected) {
                 debugging("color chosen", 1);
                 String[] messArray = message.split("-");
-                String endpointSplit = endpointId.split(":")[0];
-                if (messArray.length == 2) {
+                debugging(messArray.length+"", 1);
+                debugging(messArray.toString()+"", 1);
+                if (messArray.length == 3) {
                     int id = Integer.parseInt(messArray[1]);
+                    String endpointSplit = messArray[2];
                     setButtonSelected(endpointSplit, (Button) findViewById(id));
 
                 } else {
@@ -179,7 +179,6 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
                     sendMessage(message);
                     debugging("sendcolor");
                 }
-            }
             selectCount++;
             checkGameStart();
         }
@@ -229,25 +228,26 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
      * @param b button to be selected
      */
     public void setButtonSelected(String endpointId, Button b){
-        disableButton(b);
-        String buttonText = b.getText().toString();
-        if(idNameMap.size()==3){
-            if(b.equals(buttonGreen)){
-                setColors += "1";
+        String localEndpoint = Nearby.Connections.getLocalDeviceId(apiClient).split(":")[0];
+        if(!endpointId.equals(localEndpoint)) {
+            disableButton(b);
+            String buttonText = b.getText().toString();
+            String selector = idNameMap.get(endpointId);
+            buttonText += " selected by " + selector;
+            if (idNameMap.size() == 3) {
+                if (b.equals(buttonGreen)) {
+                    setColors += "1";
+                } else if (b.equals(buttonRed)) {
+                    setColors += "2";
+                } else if (b.equals(buttonBlue)) {
+                    setColors += "3";
+                } else {
+                    setColors += "4";
+                }
             }
-            else if(b.equals(buttonRed)){
-                setColors += "2";
-            }
-            else if (b.equals(buttonBlue)){
-                setColors += "3";
-            }
-            else{
-                setColors += "4";
-            }
+            b.setText(buttonText);
         }
-        String selector = idNameMap.get(endpointId);
-        buttonText += " selected by "+ selector;
-        b.setText(buttonText);
+
     }
 
     // TODO: Umschreiben für den 2-Spieler-2-Farben-Modus
@@ -327,7 +327,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
                 colorButton(buttonGreen, "green");
                 disableAllOtherButtons(buttonGreen);
                 color = 1;
-                sendMessage(messageCodes[0]+R.id.button_green);
+                sendMessage(messageCodes[0]+R.id.button_green+"-"+Nearby.Connections.getLocalDeviceId(apiClient).split(":")[0]);
                 selectCount++;
                 selected = true;
                 checkGameStart();
@@ -337,7 +337,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
                 colorButton(buttonRed, "red");
                 disableAllOtherButtons(buttonRed);
                 color = 2;
-                sendMessage(messageCodes[0]+R.id.button_red);
+                sendMessage(messageCodes[0]+R.id.button_red+"-"+Nearby.Connections.getLocalDeviceId(apiClient).split(":")[0]);
                 selectCount++;
                 selected = true;
                 checkGameStart();
@@ -347,7 +347,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
                 colorButton(buttonBlue, "blue");
                 disableAllOtherButtons(buttonBlue);
                 color = 3;
-                sendMessage(messageCodes[0]+R.id.button_blue);
+                sendMessage(messageCodes[0]+R.id.button_blue+"-"+Nearby.Connections.getLocalDeviceId(apiClient).split(":")[0]);
                 selectCount++;
                 selected = true;
                 checkGameStart();
@@ -357,7 +357,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
                 colorButton(buttonYellow, "yellow");
                 disableAllOtherButtons(buttonYellow);
                 color = 4;
-                sendMessage(messageCodes[0]+R.id.button_yellow);
+                sendMessage(messageCodes[0]+R.id.button_yellow+"-"+Nearby.Connections.getLocalDeviceId(apiClient).split(":")[0]);
                 selectCount++;
                 selected = true;
                 checkGameStart();
