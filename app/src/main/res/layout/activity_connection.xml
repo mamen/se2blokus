@@ -92,20 +92,6 @@
                 android:paddingTop="5pt"
                 android:paddingBottom="5pt" />
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="@string/connection_playerid"
-                android:id="@+id/button_playerid"
-                android:background="#66666666"
-                android:textColor="@android:color/white"
-                android:layout_weight="1"
-                android:textAlignment="center"
-                android:layout_marginTop="4pt"
-                android:paddingTop="5pt"
-                android:paddingBottom="5pt" />
-
         </TableRow>
 
         <TableRow
@@ -120,19 +106,7 @@
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:id="@+id/player1"
                 android:background="#66666666"
-                android:textColor="@android:color/white"
-                android:layout_weight="1"
-                android:textAlignment="center"
-                android:paddingTop="5pt"
-                android:paddingBottom="5pt" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:id="@+id/id1"
-                android:background="#66666666"
-                android:textColor="@android:color/white"
+                android:textColor="@android:color/holo_orange_light"
                 android:layout_weight="1"
                 android:textAlignment="center"
                 android:paddingTop="5pt"
@@ -156,18 +130,6 @@
                 android:textColor="@android:color/white"
                 android:paddingTop="5pt"
                 android:paddingBottom="5pt" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:id="@+id/id2"
-                android:layout_weight="1"
-                android:textAlignment="center"
-                android:background="#66666666"
-                android:textColor="@android:color/white"
-                android:paddingTop="5pt"
-                android:paddingBottom="5pt" />
         </TableRow>
 
         <TableRow
@@ -181,19 +143,6 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:id="@+id/player3"
-                android:layout_weight="1"
-                android:textAlignment="center"
-                android:background="#66666666"
-                android:textColor="@android:color/white"
-                android:paddingTop="5pt"
-                android:paddingBottom="5pt"
-                android:text="" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:id="@+id/id3"
                 android:layout_weight="1"
                 android:textAlignment="center"
                 android:background="#66666666"
@@ -221,21 +170,6 @@
                 android:paddingTop="5pt"
                 android:paddingBottom="5pt"
                 android:text="" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:id="@+id/id4"
-                android:layout_weight="1"
-                android:layout_marginTop="4pt"
-                android:layout_marginBottom="4pt"
-                android:textAlignment="center"
-                android:background="#66666666"
-                android:textColor="@android:color/white"
-                android:paddingTop="5pt"
-                android:paddingBottom="5pt"
-                android:text=""/>
         </TableRow>
     </TableLayout>
 </LinearLayout>

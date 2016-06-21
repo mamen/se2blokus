@@ -68,13 +68,9 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
 
     //TableView
     private TextView player1;
-    private TextView id1;
     private TextView player2;
-    private TextView id2;
     private TextView player3;
-    private TextView id3;
     private TextView player4;
-    private TextView id4;
 
 
     /**
@@ -171,17 +167,12 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
         startButton.setVisibility(View.GONE);
 
         player1 = (TextView) findViewById(R.id.player1);
-        id1 = (TextView) findViewById(R.id.id1);
         player2 = (TextView) findViewById(R.id.player2);
-        id2 = (TextView) findViewById(R.id.id2);
         player3 = (TextView) findViewById(R.id.player3);
-        id3 = (TextView) findViewById(R.id.id3);
         player4 = (TextView) findViewById(R.id.player4);
-        id4 = (TextView) findViewById(R.id.id4);
 
 
         TextView playerName = (TextView) findViewById(R.id.button_playername);
-        TextView playerId = (TextView) findViewById(R.id.button_playerid);
         TextView logo = (TextView) findViewById(R.id.logo);
 
         Typeface font = Typeface.createFromAsset(getAssets(), "blocked.ttf");
@@ -191,15 +182,10 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
         disconnectButton.setTypeface(font);
         startButton.setTypeface(font);
         player1.setTypeface(font);
-        id1.setTypeface(font);
         player2.setTypeface(font);
-        id2.setTypeface(font);
         player3.setTypeface(font);
-        id3.setTypeface(font);
         player4.setTypeface(font);
-        id4.setTypeface(font);
         playerName.setTypeface(font);
-        playerId.setTypeface(font);
         logo.setTypeface(font);
 
         connectionButton.setTextSize(FONT_SIZE_LARGE);
@@ -207,18 +193,13 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
         disconnectButton.setTextSize(FONT_SIZE_LARGE);
         startButton.setTextSize(FONT_SIZE_LARGE);
         playerName.setTextSize(FONT_SIZE_LARGE);
-        playerId.setTextSize(FONT_SIZE_LARGE);
 
         logo.setTextSize(60);
 
         player1.setTextSize(FONT_SIZE_SMALL);
-        id1.setTextSize(FONT_SIZE_SMALL);
         player2.setTextSize(FONT_SIZE_SMALL);
-        id2.setTextSize(FONT_SIZE_SMALL);
         player3.setTextSize(FONT_SIZE_SMALL);
-        id3.setTextSize(FONT_SIZE_SMALL);
         player4.setTextSize(FONT_SIZE_SMALL);
-        id4.setTextSize(FONT_SIZE_SMALL);
 
         disconnectButton.setAlpha(.5f);
         disconnectButton.setClickable(false);
@@ -352,18 +333,14 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
         clearTableView();
         if(isHost){
             idNameMap.put(Nearby.Connections.getLocalDeviceId(apiClient), username);
-            id1.setText(Nearby.Connections.getLocalDeviceId(apiClient));
             player1.setText(username);
             int i = 2;
 
             for (Map.Entry<String, String> entry : idNameMap.entrySet())
             {
                 if(!entry.getValue().equals(username)) {
-                    String textViewID = "id" + i;
                     String textViewPlayer = "player" + i;
-                    int resID = getResources().getIdentifier(textViewID, "id", getPackageName());
                     int resPlayer = getResources().getIdentifier(textViewPlayer, "id", getPackageName());
-                    ((TextView) findViewById(resID)).setText(entry.getKey());
                     ((TextView) findViewById(resPlayer)).setText(entry.getValue());
                     i++;
                 }
@@ -373,17 +350,13 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
         else{
             String[] rem = remoteHostEndpoint.split(":");
             String remoteHost = rem[0];
-            id1.setText(remoteHost);
             player1.setText(idNameMap.get(remoteHost));
             int i = 2;
             for (Map.Entry<String, String> entry : idNameMap.entrySet())
             {
                 if(!entry.getKey().equals(remoteHost)) {
-                    String textViewID = "id" + i;
                     String textViewPlayer = "player" + i;
-                    int resID = getResources().getIdentifier(textViewID, "id", getPackageName());
                     int resPlayer = getResources().getIdentifier(textViewPlayer, "id", getPackageName());
-                    ((TextView) findViewById(resID)).setText(entry.getKey());
                     ((TextView) findViewById(resPlayer)).setText(entry.getValue());
                     i++;
                 }
@@ -397,11 +370,8 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
     private void clearTableView(){
         for (int i=1; i<=4; i++)
         {
-                String textViewID = "id" + i;
                 String textViewPlayer = "player" + i;
-                int resID = getResources().getIdentifier(textViewID, "id", getPackageName());
                 int resPlayer = getResources().getIdentifier(textViewPlayer, "id", getPackageName());
-                ((TextView) findViewById(resID)).setText("");
                 ((TextView) findViewById(resPlayer)).setText("");
         }
     }
