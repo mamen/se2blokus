@@ -1114,153 +1114,168 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
      * @return true, as soon as it sees another possible turn
      * false, else
      */
-    public boolean areTurnsLeft(boolean fullTest) {
-        int selectionRemember = selectedBlockID; // To restore, if there is another possible move
-        int transposeRemember = transposeCount; // ---------||---------
+    public boolean areTurnsLeft(final boolean fullTest) {
+        final int selectionRemember = selectedBlockID; // To restore, if there is another possible move
+        final int transposeRemember = transposeCount; // ---------||---------
         byte[] remainingStones = player.getRemainingStones(); // What stones do you still have (Saved as tags)
-        byte[][] gameboard = gl.getGameBoard();
-        boolean breakable = false;
-        boolean oneMoreTurn = false;
+        final byte[][] gameboard = gl.getGameBoard();
+        final boolean[] instaBreak = {false};
+        final boolean[] breakable = {false};
+        final boolean[] oneMoreTurn = {false};
+
 
         ArrayList<IndexTuple> savedTuples = player.getSaveIndices(); // Tuples with the Indices of your placed stones
         if (player.getScore() < player.MAX_STONES) { // Probably useless, because you should not be able to lay more than MAX_STONES
-            for (IndexTuple tuple : savedTuples) { // Look at every IndexTuple (where your stones lay)
-                Log.d("Tuple Info Vorm Testen", tuple.toString());
+            for (final IndexTuple tuple : savedTuples) { // Look at every IndexTuple (where your stones lay)
+//                Log.d("Tuple Info Vorm Testen", tuple.toString());
                 if (tuple.getHasTurns()) {
-                    for (byte stone : remainingStones) { // Look at every stone you still have
-                        breakable = false;
-                        if (stone != -1) { // Already placed stone
-                            int i = tuple.getIndex_j(); // Index_i, bit confusing with row and col..
-                            int j = tuple.getIndex_i(); // Index_j
-                            selectedBlockID = stone + 1; // isYourPlacementValid needs selectedBlockID
-                            byte[][] actualStone = player.getStone(selectedBlockID - 1);
-                            int help = actualStone.length;
-                            //Log.d("DebugInfo", "i = " + i + ", j = " + j + ", selected = " + selectedBlockID + ", transpose = " + transposeCount);
-                            int lu = 0, ll = 0, ru = 0, rl = 0;
-                            for (int h1 = help; h1 > 0; h1--) {
-                                for (int h2 = help; h2 > 0; h2--) {
+                    for (final byte stone : remainingStones) { // Look at every stone you still have
 
-                                    if ((i - h1) >= 0 - h1 && (j - h2) >= 0 - h2 && lu == 0) { //Left upper corner
-                                        if (i - 1 >= 0 && j - 1 >= 0) {
-                                            if (gameboard[i - 1][j - 1] == 0) { // If that corner is not free, you can stop...
-                                                for (int tr = 0; tr < 4; tr++) { // Test all four transpositions
-                                                    transposeCount = tr;
-                                                    if (cornerTesting(j - h2, i - h1, selectionRemember, transposeRemember)) {
-                                                        if (fullTest) {
-                                                            breakable = true;
-                                                            oneMoreTurn = true;
-                                                            break;
+                        //
+                        Thread t = new Thread() {
+                            @Override
+                            public void run() {
+                                try {
+
+                                    breakable[0] = false;
+                                    if (stone != -1) { // Already placed stone
+                                        final int i = tuple.getIndex_j(); // Index_i, bit confusing with row and col..
+                                        final int j = tuple.getIndex_i(); // Index_j
+                                        selectedBlockID = stone + 1; // isYourPlacementValid needs selectedBlockID
+                                        byte[][] actualStone = player.getStone(selectedBlockID - 1);
+                                        int help = actualStone.length;
+                                        //Log.d("DebugInfo", "i = " + i + ", j = " + j + ", selected = " + selectedBlockID + ", transpose = " + transposeCount);
+                                        final int[] lu = {0};
+                                        final int[] ll = {0};
+                                        final int[] ru = {0};
+                                        final int[] rl = {0};
+                                        for (int h1 = help; h1 > 0; h1--) {
+                                            for (int h2 = help; h2 > 0; h2--) {
+                                                final int finalH2 = h2;
+                                                final int finalH1 = h1;
+
+                                                if ((i - finalH1) >= 0 - finalH1 && (j - finalH2) >= 0 - finalH2 && lu[0] == 0) { //Left upper corner
+                                                    if (i - 1 >= 0 && j - 1 >= 0) {
+                                                        if (gameboard[i - 1][j - 1] == 0) { // If that corner is not free, you can stop...
+                                                            for (int tr = 0; tr < 4; tr++) { // Test all four transpositions
+                                                                transposeCount = tr;
+                                                                if (cornerTesting(j - finalH2, i - finalH1, selectionRemember, transposeRemember)) {
+                                                                    if (fullTest) {
+                                                                        breakable[0] = true;
+                                                                        oneMoreTurn[0] = true;
+                                                                        break;
+                                                                    } else {
+                                                                        instaBreak[0] = true;
+                                                                        Thread.currentThread().isInterrupted();
+                                                                    }
+                                                                }
+                                                            }
                                                         } else {
-                                                            return true;
+                                                            lu[0]++; // ...and set 1/4 int (needed later)
                                                         }
                                                     }
-                                                    if (breakable) break;
                                                 }
-                                                if (breakable) break;
-                                            } else {
-                                                lu++; // ...and set 1/4 int (needed later)
-                                            }
-                                        }
-                                        if (breakable) break;
-                                    }
-                                    if (breakable) break;
+                                                if (breakable[0]) break;
 
-                                    if ((i - h1) >= 0 - h1 && (j + h2) < SIZE && ll == 0) { //Right upper corner
-                                        if (i - 1 >= 0) {
-                                            if (gameboard[i - 1][j + 1] == 0) {
-                                                for (int tr = 0; tr < 4; tr++) {
-                                                    transposeCount = tr;
-                                                    if (cornerTesting(j + h2, i - h1, selectionRemember, transposeRemember)) {
-                                                        if (fullTest) {
-                                                            breakable = true;
-                                                            oneMoreTurn = true;
-                                                            break;
+                                                if ((i - finalH1) >= 0 - finalH1 && (j + finalH2) < SIZE && ll[0] == 0) { //Right upper corner
+                                                    if (i - 1 >= 0) {
+                                                        if (gameboard[i - 1][j + 1] == 0) {
+                                                            for (int tr = 0; tr < 4; tr++) {
+                                                                transposeCount = tr;
+                                                                if (cornerTesting(j + finalH2, i - finalH1, selectionRemember, transposeRemember)) {
+                                                                    if (fullTest) {
+                                                                        breakable[0] = true;
+                                                                        oneMoreTurn[0] = true;
+                                                                        break;
+                                                                    } else {
+                                                                        instaBreak[0] = true;
+                                                                        Thread.currentThread().isInterrupted();
+                                                                    }
+                                                                }
+                                                                ;
+                                                            }
                                                         } else {
-                                                            return true;
+                                                            ll[0]++;
                                                         }
                                                     }
-                                                    if (breakable) break;
                                                 }
-                                                if (breakable) break;
-                                            } else {
-                                                ll++;
-                                            }
-                                        }
-                                        if (breakable) break;
-                                    }
-                                    if (breakable) break;
+                                                if (breakable[0]) break;
 
-                                    if ((i + h1) < SIZE && (j - h2) >= 0 - h2 && ru == 0) { //Left lower corner
-                                        if (j - 1 >= 0) {
-                                            if (gameboard[i + 1][j - 1] == 0) {
-                                                for (int tr = 0; tr < 4; tr++) {
-                                                    transposeCount = tr;
-                                                    if (cornerTesting(j - h2, i + h1, selectionRemember, transposeRemember)) {
-                                                        if (fullTest) {
-                                                            breakable = true;
-                                                            oneMoreTurn = true;
-                                                            break;
+                                                if ((i + finalH1) < SIZE && (j - finalH2) >= 0 - finalH2 && ru[0] == 0) { //Left lower corner
+                                                    if (j - 1 >= 0) {
+                                                        if (gameboard[i + 1][j - 1] == 0) {
+                                                            for (int tr = 0; tr < 4; tr++) {
+                                                                transposeCount = tr;
+                                                                if (cornerTesting(j - finalH2, i + finalH1, selectionRemember, transposeRemember)) {
+                                                                    if (fullTest) {
+                                                                        breakable[0] = true;
+                                                                        oneMoreTurn[0] = true;
+                                                                        break;
+                                                                    } else {
+                                                                        instaBreak[0] = true;
+                                                                        Thread.currentThread().isInterrupted();
+                                                                    }
+                                                                }
+                                                            }
                                                         } else {
-                                                            return true;
+                                                            ru[0]++;
                                                         }
                                                     }
-                                                    if (breakable) break;
                                                 }
-                                                if (breakable) break;
-                                            } else {
-                                                ru++;
-                                            }
-                                        }
-                                        if (breakable) break;
-                                    }
-                                    if (breakable) break;
+                                                if (breakable[0]) break;
 
-                                    if ((i + h1) < SIZE && (j + h2) < SIZE && rl == 0) { //Right lower corner
-                                        if (gameboard[i + 1][j + 1] == 0) {
-                                            for (int tr = 0; tr < 4; tr++) {
-                                                transposeCount = tr;
-                                                if (cornerTesting(j + h2, i + h1, selectionRemember, transposeRemember)) {
-                                                    if (fullTest) {
-                                                        breakable = true;
-                                                        oneMoreTurn = true;
-                                                        break;
+                                                if ((i + finalH1) < SIZE && (j + finalH2) < SIZE && rl[0] == 0) { //Right lower corner
+                                                    if (gameboard[i + 1][j + 1] == 0) {
+                                                        for (int tr = 0; tr < 4; tr++) {
+                                                            transposeCount = tr;
+                                                            if (cornerTesting(j + finalH2, i + finalH1, selectionRemember, transposeRemember)) {
+                                                                if (fullTest) {
+                                                                    breakable[0] = true;
+                                                                    oneMoreTurn[0] = true;
+                                                                    break;
+                                                                } else {
+                                                                    instaBreak[0] = true;
+                                                                    Thread.currentThread().isInterrupted();
+                                                                }
+                                                            }
+                                                        }
                                                     } else {
-                                                        return true;
+                                                        rl[0]++;
                                                     }
                                                 }
-                                                if (breakable) break;
+                                                if (breakable[0]) break;
+
+                                                // If there is no free corner for this IndexTuple, it has no turns
+                                                // May be boosting performance if breaking far enough
+                                                if (lu[0] != 0 && ll[0] != 0 && ru[0] != 0 && rl[0] != 0) {
+
+                                                    tuple.setHasTurns(false);
+                                                    break;
+                                                }
                                             }
-                                            if (breakable) break;
-                                        } else {
-                                            rl++;
+                                            if (breakable[0]) {
+                                                break;
+                                            }
                                         }
-                                        if (breakable) break;
                                     }
-                                    if (breakable) break;
+                                } catch (Exception e) {
+                                    Log.e("Error", e.getMessage());
+                                    throw new IllegalStateException();
+                                } finally {
 
-                                    // If there is no free corner for this IndexTuple, it has no turns
-                                    // May be boosting performance if breaking far enough
-                                    if (lu != 0 && ll != 0 && ru != 0 && rl != 0) {
-                                        tuple.setHasTurns(false);
-
-                                        break;
-
-                                    }
-                                }
-                                if (breakable) {
-                                    break;
                                 }
                             }
+                        };
+                        if (instaBreak[0]) return true;
+                        if (!breakable[0]) {
+                            tuple.setHasTurns(false);
                         }
+//                    Log.d("Nach allen Steinen", tuple.toString());
                     }
-                    if (!breakable) {
-                        tuple.setHasTurns(false);
-                    }
-                    Log.d("Nach allen Steinen", tuple.toString());
                 }
             }
         }
-        return oneMoreTurn;
+        return oneMoreTurn[0];
     }
 
 
@@ -1274,6 +1289,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
      * @return true, if there is one more turn
      * false, else
      */
+
     public boolean cornerTesting(int i, int j, int selectionRemember, int transposeRemember) {
         if (drawStone(i, j)) { // Is needed, to make isYourPlacementValid work
             if (isYourPlacementValid(i, j)) {
@@ -1416,9 +1432,16 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             }
         } else {
             disableScreenInteraction();
-            if (player.getScore() > 0) {
-                player.setHasTurns(areTurnsLeft(true));
-            }
+            new Handler().postDelayed(new Runnable() {
+
+                @Override
+                public void run() {
+                    if (player.getScore() > 0) {
+                        player.setHasTurns(areTurnsLeft(true));
+                    }
+                }
+            }, 200);
+
         }
         
         /*if (idNameMap.size() == 2) {
