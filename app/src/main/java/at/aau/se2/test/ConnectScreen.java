@@ -58,8 +58,8 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
     private TextView disconnectButton;
     private TextView startButton;
 
-    private String username = "Guest";
-    private String hostName = "Guest";
+    private String username = "";
+    private String hostName = "";
     //private static int participants = 0;
     private static final int FONT_SIZE_SMALL = 16;
     private static final int FONT_SIZE_LARGE = 19;
@@ -99,6 +99,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
                 .build();
         //debugging("api erstellt");
         setupView();
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         if (doHosting) {
             connectionButton.setText(R.string.connection_advertise_connection);
@@ -124,21 +125,47 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
         name.setInputType(InputType.TYPE_CLASS_TEXT);
         builder.setTitle(R.string.connection_select_username);
         builder.setView(name);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("SET NAME", null);
+        builder.setNegativeButton("GO BACK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                username = name.getText().toString();
-                if (doHosting) {
-                    hostName = username;
-                }
-                //
-                // debugging("start - "+ username + " + hostname "+ hostName);
+                final Intent intent = new Intent("at.aau.se2.test.STARTSCREEN");
+                startActivity(intent);
             }
         });
-        builder.show();
+
+        final AlertDialog dialog = builder.create();
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        dialog.show();
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(name.getText().toString().trim().length() > 0){
+                    username = name.getText().toString();
+                    dialog.dismiss();
+                }
+                else{
+                    return;
+                }
+            }
+        });
 
     }
 
+/**
+ * String actName = "";
+ if (name.getText().toString().trim().length() > 0) {
+ actName = name.getText().toString();
+ } else {
+ actName = "NoNameUser";
+ }
+ if (doHosting) {
+ hostName = username;
+ }
+ //
+ // debugging("start - "+ username + " + hostname "+ hostName);
+ */
     /**
      * Ends the connection
      */
@@ -205,6 +232,8 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
         disconnectButton.setClickable(false);
         setupButtons();
     }
+
+
 
     /**
      * Set button listeners.
@@ -408,7 +437,6 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
                         debugging("name of partner" + remoteEndpointId);
                         idNameMap.put(remoteDeviceId, user);
                         //debugging("INFORMATION: "+ remoteEndpointId + ", "+ remoteDeviceId+", "+ remoteEndpointName);
-                        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                         for (Map.Entry<String, String> entry : idNameMap.entrySet()) {
                             sendMessage("NEWPLAYER-" + entry.getKey() + "-" + entry.getValue());
                         }
@@ -526,7 +554,6 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
                     actStatus.setText(text);
                     Nearby.Connections.stopDiscovery(apiClient, serviceId);
                     remoteHostEndpoint = s;
-                    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                     finalizeConnection();
                     setUpTableView();
 

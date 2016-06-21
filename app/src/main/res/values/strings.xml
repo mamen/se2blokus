@@ -14,7 +14,7 @@
     <string name="connection_playername">Playername</string>
     <string name="connection_playerid">Player ID</string>
     <string name="connection_select_username">Select Username</string>
-    <string name="connection_advertise_connection">Advertise connection</string>
+    <string name="connection_advertise_connection">Host a game session</string>
     <string name="connection_search_existing_game">Search for an existing game</string>
     <string name="connection_type_host">Host</string>
     <string name="connection_type_client">Client</string>
