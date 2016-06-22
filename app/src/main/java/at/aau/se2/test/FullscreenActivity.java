@@ -210,6 +210,112 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         pointsGreen = (TextView) findViewById(R.id.pointsGreen);
         pointsYellow = (TextView) findViewById(R.id.pointsYellow);
 
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        switch (playerID){
+            case 1:
+                pointsGreen.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        builder.setCancelable(false);
+                        builder.setTitle("DO YOU WANT TO PASS TO THE NEXT PLAYER?");
+                        builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                        builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                sendMessage("GOON");
+                                myTurnAdd();
+                                disableScreenInteraction();
+
+                            }
+                        });
+                        builder.show();
+                    }
+                });
+                break;
+            case 2:
+                pointsRed.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        builder.setCancelable(false);
+                        builder.setTitle("DO YOU WANT TO PASS TO THE NEXT PLAYER?");
+                        builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                        builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                sendMessage("GOON");
+                                myTurnAdd();
+                                disableScreenInteraction();
+
+                            }
+                        });
+                        builder.show();
+                    }
+                });
+                break;
+            case 3:
+                pointsBlue.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        builder.setCancelable(false);
+                        builder.setTitle("DO YOU WANT TO PASS TO THE NEXT PLAYER?");
+                        builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                        builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                sendMessage("GOON");
+                                myTurnAdd();
+                                disableScreenInteraction();
+
+                            }
+                        });
+                        builder.show();
+                    }
+                });
+                break;
+            case 4:
+                pointsYellow.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        builder.setCancelable(false);
+                        builder.setTitle("DO YOU WANT TO PASS TO THE NEXT PLAYER?");
+                        builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                        builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                sendMessage("GOON");
+                                myTurnAdd();
+                                disableScreenInteraction();
+
+                            }
+                        });
+                        builder.show();
+                    }
+                });
+                break;
+
+        }
+
         RelativeLayout.LayoutParams paramsPointsRed = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         RelativeLayout.LayoutParams paramsPointsBlue = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         RelativeLayout.LayoutParams paramsPointsGreen = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
@@ -1130,18 +1236,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         }
     }
 
-    /**
-     * is it my turn? i don't know
-     * @param sending
-     * @param payload
-     */
-    private void isItMyTurn(boolean sending, byte[] payload) {
-        if (sending) {
-            sendMessage(payload);
-        }
-
-        int help = player.getScore();
-
+    private void myTurnAdd(){
         if (idNameMap.size() == 2) {
             actTurn++;
             if (actTurn == 3) actTurn = 1;
@@ -1152,6 +1247,21 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             actTurn++;
             if (actTurn == 5) actTurn = 1;
         }
+    }
+
+    /**
+     * is it my turn? i don't know
+     * @param sending
+     * @param payload
+     */
+    public void isItMyTurn(boolean sending, byte[] payload) {
+            if (sending) {
+                sendMessage(payload);
+            }
+
+        int help = player.getScore();
+
+        myTurnAdd();
 
         if (actTurn == myturn) {
             if (help > 0) {
