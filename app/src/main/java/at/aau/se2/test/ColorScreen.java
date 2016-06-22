@@ -4,12 +4,14 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -39,6 +41,7 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
     //private boolean isConnected = true;
     private String remoteHostEndpoint;
     private List<String> remotePeerEndpoints;
+    private boolean doubleBackToExitPressedOnce = false;
     private HashMap<String, String> idNameMap = new HashMap<>();
     //private byte playerID;
 
@@ -124,7 +127,48 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
     }
 
     @Override
+    public void onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            super.finish();
+            finish();
+            return;
+        }
+
+        this.doubleBackToExitPressedOnce = true;
+
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce = false;
+            }
+        }, 15);
+    }
+
+    public void endGame(){
+        dev("endCOLOR");
+        Toast.makeText(getApplicationContext(), "Player Connection lost - going back to StartScreen ...", Toast.LENGTH_SHORT).show();
+        Thread endGameThread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    //wait for connection
+                        sleep(2000);
+                } catch (Exception e) {
+                    Log.e("Error",e.getMessage());
+                    throw new IllegalStateException();
+                } finally {
+                    Intent openStart = new Intent("at.aau.se2.test.STARTSCREEN");
+                    startActivity(openStart);
+                }
+            }
+        };
+    }
+
+    @Override
     public void onEndpointLost(String s) {
+
+        dev("onEndpointLostCOLOR");
         throw new UnsupportedOperationException();
     }
 
@@ -461,6 +505,10 @@ public class ColorScreen extends Activity implements GoogleApiClient.ConnectionC
 
     private void debugging(String debMessage) {
         Log.d("tobiasho", debMessage+"_"+isHost);
+    }
+
+    private void dev(String debMessage) {
+        Log.d("asdfconn", debMessage);
     }
 
     private void debugging(String debMessage, int t) {

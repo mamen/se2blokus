@@ -36,7 +36,7 @@ public class StartScreen extends Activity implements View.OnClickListener {
                 goOn(false);
                 break;
             case R.id.settings:
-                final Intent intent = new Intent("at.aau.se2.test.ENDSCREEN");
+                final Intent intent = new Intent("at.aau.se2.test.RULES");
                 startActivity(intent);
                 break;
             case R.id.singlePlayer:

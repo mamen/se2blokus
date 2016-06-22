@@ -52,6 +52,7 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
     private String remoteHostEndpoint;
     private List<String> remotePeerEndpoints = new ArrayList<>();
     private HashMap<String, String> idNameMap = new HashMap<>();
+    public int goneOn = 0;
 
     //Graphic fields
     private TextView actStatus;
@@ -574,11 +575,37 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
      */
     @Override
     public void onEndpointLost(String s) {
-        debugging("onEndpointLost");
-        if (!isHost) {
-            finalizeDisconnection();
-            clearTableView();
+        dev("onEndpointLost");
+
+        if(!Connection.getInstance().getColorScreen().equals(null)){
+            dev("yeah");
+            if(!Connection.getInstance().getFullscreenActivity().equals(null)){
+                dev("fs");
+                FullscreenActivity fs = Connection.getInstance().getFullscreenActivity();
+                fs.endGame();
+            }
+            else{
+                dev("cs");
+                ColorScreen cs = Connection.getInstance().getColorScreen();
+                cs.endGame();
+            }
+            if(isHost && !remotePeerEndpoints.equals(null)){
+                sendMessage("ENDGAME");
+            }
         }
+        else{
+            dev("cn");
+            disconnectButton.performClick();
+        }
+        if (!isHost) {
+            dev("onEndpointLost");
+            finalizeDisconnection();
+            if(!Connection.getInstance().getColorScreen().equals(null)) {
+                clearTableView();
+            }
+        }
+
+
     }
 
     /**
@@ -679,6 +706,25 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
                 debugging("start it!"+message);
                 ColorScreen cs = Connection.getInstance().getColorScreen();
                 cs.onMessageReceived(endpointId, payload, isReliable);
+            }
+            else if (message.startsWith("CLAIM-")){
+                dev("i realized a claim");
+
+                FullscreenActivity full = Connection.getInstance().getFullscreenActivity();
+                full.claim(message.split("-")[1]);
+                if(isHost){
+                    sendMessage(message);
+                }
+            }
+            else if (message.startsWith("WINNER-")){
+                FullscreenActivity full = Connection.getInstance().getFullscreenActivity();
+                full.winAdd(message.split("-")[1]);
+                if(isHost){
+                    sendMessage(message);
+                }
+            }
+            else if (message.equals("ENDGAME")){
+                onEndpointLost("s");
             }
             else {
 
@@ -814,6 +860,10 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
 
     private void deb(String debMessage) {
         Log.d("asdf", debMessage);
+    }
+
+    private void dev(String debMessage) {
+        Log.d("asdfconn", debMessage);
     }
 
 }

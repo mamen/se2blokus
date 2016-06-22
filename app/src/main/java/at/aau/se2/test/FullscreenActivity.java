@@ -1,8 +1,10 @@
 package at.aau.se2.test;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Point;
 import android.graphics.Typeface;
@@ -39,7 +41,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         Connections.ConnectionRequestListener,
         Connections.MessageListener,
         Connections.EndpointDiscoveryListener,
-        View.OnClickListener {
+        View.OnClickListener
+{
 
     public RelativeLayout fullscreenLayout;
     public GridLayout gameBoardLayout;
@@ -51,12 +54,14 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     private List<ImageView> removedBlockDrawerChildren;
     public Player player;
     private boolean doubleBackToExitPressedOnce = false;
+    private boolean doubleTappedToClaim = false;
     public static ImageView testView;
     private byte[][] rememberField;
     public boolean elementFinished;
     private View.DragShadowBuilder shadowBuilder;
     public int transposeCount; //Zähler wie oft der Stein gedreht wurde
     private boolean doSettings;
+
 
     //private Connection connection;
     private GoogleApiClient apiClient;
@@ -71,6 +76,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     private int actTurn;
     private String otherColors = "";
     public MediaPlayer placeSound;
+    private int winCount = 0;
+    private String winner = "";
 
     private static ArrayList<Player> players;
     private int countFinished = 0;
@@ -139,6 +146,11 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             debugging(Integer.toString(myturn));
         }
 
+
+
+
+
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         // lade Player
         player = new Player(playerID);
@@ -157,9 +169,16 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         // Draglistener erstellen
         gameBoardLayout.setOnDragListener(new DragListener(this));
 
+
         imgView = (ImageView) findViewById(R.id.img_stop);
         //if (doSettings) {
         imgView.setVisibility(View.GONE);
+        imgView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                doubleTap();
+            }
+        });
         //}
 
         actTurn = 1;
@@ -276,6 +295,69 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         pointsYellow.setText(Integer.toString(curPointsYellow));
 
     }
+
+    public void winAdd(String endpointId){
+        dev(endpointId);
+        String localEndpoint = Nearby.Connections.getLocalDeviceId(apiClient).split(":")[0];
+        dev(localEndpoint);
+        if(!endpointId.equals(localEndpoint)) {
+            winCount++;
+            dev(winCount+"");
+            if(winCount==idNameMap.size()-1){
+                //PLAYER OFFICIALLY WINS!
+                goOn();
+            }
+        }
+
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                winCount = 0;
+            }
+        }, 5000);
+    }
+
+    public void claim(String s){
+        final String win = s;
+        dev(""+s);
+        String localEndpoint = Nearby.Connections.getLocalDeviceId(apiClient).split(":")[0];
+        dev(""+localEndpoint);
+        if(!s.equals(localEndpoint)) {
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setCancelable(false);
+            builder.setTitle(idNameMap.get(s) + " CLAIMS TO BE THE WINNER.");
+            builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            builder.setPositiveButton("HE IS!", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    winner = idNameMap.get(win);
+                    sendMessage("WINNER-" + Nearby.Connections.getLocalDeviceId(apiClient).split(":")[0]);
+                    winCount++;
+
+                    new Handler().postDelayed(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            winCount = 0;
+                        }
+                    }, 5000);
+                    if(winCount==idNameMap.size()-1){
+                        //PLAYER OFFICIALLY WINS!
+                        goOn();
+                    }
+                }
+            });
+            builder.show();
+        }
+    }
+
+
 
     private int addExtraPoints(int oldpoints, int currentPoints) {
         int retValue = 0;
@@ -572,6 +654,26 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         //updateGameBoard();
     }
 
+    public void endGame(){
+        dev("endFULL");
+        Toast.makeText(getApplicationContext(), "Player Connection lost - going back to StartScreen ...", Toast.LENGTH_SHORT).show();
+        Thread endGameThread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    //wait for connection
+                    sleep(2000);
+                } catch (Exception e) {
+                    Log.e("Error",e.getMessage());
+                    throw new IllegalStateException();
+                } finally {
+                    Intent openStart = new Intent("at.aau.se2.test.STARTSCREEN");
+                    startActivity(openStart);
+                }
+            }
+        };
+    }
+
     /**
      * Manipulates the XPlacement, so that you can place it more natural
      * Don't change the BlockOrder, or this won't work properly!!
@@ -786,7 +888,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         }
 
         this.doubleBackToExitPressedOnce = true;
-        Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
 
         new Handler().postDelayed(new Runnable() {
 
@@ -794,7 +895,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             public void run() {
                 doubleBackToExitPressedOnce = false;
             }
-        }, 2000);
+        }, 10);
     }
 
 
@@ -1023,7 +1124,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
     @Override
     public void onEndpointLost(String s) {
-        debugging("endpoint lost");
+        dev("onEndpointLostFULL");
     }
 
     @Override
@@ -1134,7 +1235,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
         if (actTurn == myturn) {
             if (help > 0) {
-                player.setHasTurns(areTurnsLeft(false));
+                //player.setHasTurns(areTurnsLeft(false));
             }
             updatePoints();
             if (player.getHasTurns()) { // Wenn ich noch Spielzüge habe, kann ich weiterspielen..
@@ -1156,7 +1257,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                 @Override
                 public void run() {
                     if (player.getScore() > 0) {
-                        player.setHasTurns(areTurnsLeft(true));
+                        //player.setHasTurns(areTurnsLeft(true));
                     }
                 }
             }, 200);
@@ -1187,18 +1288,60 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
 
     public void disableScreenInteraction() {
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        /*getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);*/
 
         imgView.setVisibility(View.VISIBLE);
         imgView.setImageResource(R.drawable.wait);
         imgView.setAlpha(0.4f);
+        for (ImageView view : blockDrawerChildren) {
+            view.setEnabled(false);
+        }
+
         debugging("should disable and display pic");
+    }
+
+    public void doubleTap(){
+        if (doubleTappedToClaim) {
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setCancelable(false);
+            builder.setTitle("DO YOU WANT TO CLAIM YOUR WIN?");
+            builder.setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    sendMessage("CLAIM-"+Nearby.Connections.getLocalDeviceId(apiClient).split(":")[0]);
+                    winner = idNameMap.get(Nearby.Connections.getLocalDeviceId(apiClient).split(":")[0]);
+                }
+            });
+            builder.show();
+        }
+
+        this.doubleTappedToClaim = true;
+        Toast.makeText(this, "Double-Tap for claiming the win!", Toast.LENGTH_SHORT).show();
+
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                doubleTappedToClaim = false;
+            }
+        }, 300);
+
+
     }
 
     public void enableScreenInteraction() {
         debugging("should enable");
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        //getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        for (ImageView view : blockDrawerChildren) {
+            view.setEnabled(true);
+        }
         imgView.setVisibility(View.GONE);
     }
 
@@ -1209,12 +1352,13 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     }
 
     private void goOn(){
-        if(countFinished==idNameMap.size()){
             final Intent intent = new Intent("at.aau.se2.test.ENDSCREEN");
             intent.putExtra("isHost", isHost);
             intent.putExtra("hostEnd", remoteHostEndpoint);
+            intent.putExtra("winner", winner);
             startActivity(intent);
-        }
+            gl.resetInstance();
+
     }
 
     @Override
@@ -1240,6 +1384,10 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         }
         s += Character.toString('\n');
         Log.d("Board", s);
+    }
+
+    private void dev(String debMessage) {
+        Log.d("asdfconn", debMessage);
     }
 
 }

@@ -3,6 +3,7 @@ package at.aau.se2.test;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.WindowManager;
@@ -15,6 +16,8 @@ public class EndScreen extends AppCompatActivity {
 
     private boolean isHost;
     private String hostEnd;
+    private String winner;
+    private boolean doubleBackToExitPressedOnce = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +26,7 @@ public class EndScreen extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
         isHost = extras.getBoolean("isHost");
         hostEnd = extras.getString("hostEnd");
+        winner = extras.getString("winner");
 
 
         View decorView = getWindow().getDecorView();
@@ -34,13 +38,11 @@ public class EndScreen extends AppCompatActivity {
 
         TextView txtLogo = (TextView) findViewById(R.id.logo);
         TextView txtWinnerName = (TextView) findViewById(R.id.winner_name);
-        TextView txtWinnerScore = (TextView) findViewById(R.id.winner_score);
         TextView txtMainMenu = (TextView) findViewById(R.id.mainMenu);
         TextView txtWinnerHeading = (TextView) findViewById(R.id.winner_heading);
 
         txtLogo.setTypeface(font);
         txtWinnerName.setTypeface(font);
-        txtWinnerScore.setTypeface(font);
         txtMainMenu.setTypeface(font);
         txtWinnerHeading.setTypeface(font);
 
@@ -49,8 +51,8 @@ public class EndScreen extends AppCompatActivity {
         txtLogo.setTextSize(60);
         txtMainMenu.setTextSize(40);
         txtWinnerName.setTextSize(20);
-        txtWinnerScore.setTextSize(20);
         txtWinnerHeading.setTextSize(40);
+
 
         txtMainMenu.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,17 +64,35 @@ public class EndScreen extends AppCompatActivity {
                     Nearby.Connections.stopDiscovery(apiClient, getString(R.string.service_id));
                 }
                 else{
-                    Nearby.Connections.stopAdvertising(apiClient);
                     Nearby.Connections.stopAllEndpoints(apiClient);
                 }
                 apiClient.disconnect();
                 startActivity(intent);
+
             }
         });
 
         //TODO: set winner name and score
-        txtWinnerName.setText("asdf");
-        txtWinnerScore.setText("1234");
+        txtWinnerName.setText(winner);
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            super.finish();
+            finish();
+            return;
+        }
+
+        this.doubleBackToExitPressedOnce = true;
+
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce = false;
+            }
+        }, 10);
     }
 }
