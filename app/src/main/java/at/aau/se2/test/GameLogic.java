@@ -23,6 +23,12 @@ public class GameLogic {
         setupNewGameBoard();
     }
 
+    /**
+     * singleton pattern
+     * @param player the player
+     * @param context the application-context
+     * @return an instange of the gamelogic
+     */
     public static GameLogic getInstance(Player player, Context context) {
         if (GameLogic.instance == null) {
             GameLogic.instance = new GameLogic(player, context);
@@ -32,11 +38,17 @@ public class GameLogic {
         return GameLogic.instance;
     }
 
-
+    /**
+     * this creates an new gameboard, filled with 0
+     */
     private static void setupNewGameBoard() {
         gameBoard = new byte[SIZE][SIZE];
     }
 
+    /**
+     * getter for the gameboard
+     * @return the gameboard
+     */
     public byte[][] getGameBoard() {
         return gameBoard;
     }

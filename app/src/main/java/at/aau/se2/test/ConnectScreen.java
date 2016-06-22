@@ -686,14 +686,14 @@ public class ConnectScreen extends AppCompatActivity implements GoogleApiClient.
                 debugging("try to start game");
                 startButton.performClick();
             }
-            else if (message.startsWith(MESSAGE_CODES[7])) {
+            /*else if (message.startsWith(MESSAGE_CODES[7])) {
                 FullscreenActivity full = Connection.getInstance().getFullscreenActivity();
                 String mess = message.split("-")[1];
                 full.setFinished(mess);
                 if(isHost){
                     sendMessage(mess);
                 }
-            }
+            }*/
             else if (message.startsWith(MESSAGE_CODES[2])) {
                 debugging("startnum");
                 debugging(message);
