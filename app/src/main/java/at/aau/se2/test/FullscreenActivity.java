@@ -3,6 +3,7 @@ package at.aau.se2.test;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Point;
 import android.graphics.Typeface;
 import android.media.MediaPlayer;
@@ -13,13 +14,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.Display;
-import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.GridLayout;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -74,6 +73,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     public MediaPlayer placeSound;
 
     private static ArrayList<Player> players;
+    private int countFinished = 0;
 
     private TextView pointsRed;
     private TextView pointsBlue;
@@ -123,8 +123,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
                     myturn = Integer.parseInt(String.format("%s", extras.getString("turn").charAt(1)));
                 }
             } else if (idNameMap.size() == 3) {
-                int other1 = Integer.parseInt(otherColors.charAt(0)+"");
-                int other2 = Integer.parseInt(otherColors.charAt(1)+"");
+                int other1 = Integer.parseInt(otherColors.charAt(0) + "");
+                int other2 = Integer.parseInt(otherColors.charAt(1) + "");
                 if (playerID < other1 && playerID < other2) {
                     myturn = Integer.parseInt(extras.getString("turn").charAt(0) + "");
                 } else if (playerID > other1 && playerID > other2) {
@@ -135,8 +135,8 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             } else {
                 myturn = Integer.parseInt(String.format("%s", extras.getString("turn").charAt(playerID - 1)));
             }
-            debugging(extras.getString("turn"));
-            debugging(Integer.toString(myturn));
+            //Log.d("--DEBUG--",extras.getString("turn"));
+            //Log.d("--DEBUG--",Integer.toString(myturn));
         }
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -173,13 +173,16 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         }
     }
 
-
     @Override
     public void onStart() {
         super.onStart();
         initializePoints();
     }
 
+    /**
+     * Initialises the points-counter
+     * sets the layoutparams and font-styles
+     */
     private void initializePoints() {
         Typeface font = Typeface.createFromAsset(getAssets(), "blocked.ttf");
 
@@ -231,7 +234,9 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         oldPointsGreen = 0;
     }
 
-
+    /**
+     * updates the player-points
+     */
     public void updatePoints() {
         byte[][] gameBoard = gl.getGameBoard();
 
@@ -277,6 +282,12 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
     }
 
+    /**
+     * adds a bonus to the points
+     * @param oldpoints
+     * @param currentPoints
+     * @return new points
+     */
     private int addExtraPoints(int oldpoints, int currentPoints) {
         int retValue = 0;
         if (oldpoints == MAX_POINTS_REGULAR - 1 && currentPoints == MAX_POINTS_REGULAR) {
@@ -289,7 +300,11 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         return retValue;
     }
 
-
+    /**
+     * initialises the Blockdrawer
+     * adds all the stones to the drawer
+     * this method is only called at the beginning of the game
+     */
     private void initializeBlockDrawer() {
         LinearLayout blockDrawerParent = (LinearLayout) findViewById(R.id.blockDrawer_parent);
         ViewGroup.LayoutParams params = blockDrawerParent.getLayoutParams();
@@ -345,7 +360,10 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
     }
 
-
+    /**
+     * creates the gameboard and fills the gameboardlayout
+     * this method is only called at the beginning of the game
+     */
     private void updateGameBoard() {
         gameBoardLayout = null;
         gameBoardLayout = (GridLayout) findViewById(R.id.gameBoard);
@@ -377,7 +395,7 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     }
 
     /**
-     * Updates the GameBoard
+     * Updates a specific part of the GameBoard
      *
      * @param startX start-position (X) for the update
      * @param startY start-position (Y) for the update
@@ -444,7 +462,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             }
         }
     }
-
 
     /**
      * Checks your placement:
@@ -535,7 +552,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         return true;
     }
 
-
     /**
      * Changes the color of the stone, to give it the same color (But recognizable as Preview)
      *
@@ -559,7 +575,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         return retArr;
     }
 
-
     /**
      * Restores the field, to the state before the preview was drawn
      *
@@ -569,7 +584,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     public void restore(int i, int j) {
         gl.restoreField(rememberField, i, j);
         updatePartOfGameBoard(i, j, (i + 5 > 20) ? 20 : i + 5, (j + 5 > 20) ? 20 : j + 5);
-        //updateGameBoard();
     }
 
     /**
@@ -609,7 +623,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         }
     }
 
-
     /**
      * Manipulates the YPlacement, so that you can place it more natural
      * Don't change the BlockOrder, or this won't work properly!!
@@ -648,13 +661,14 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         }
     }
 
-
+    /**
+     * makes the phone go vrrr vrrr ;)
+     * @param duration
+     */
     private void vibrate(int duration) {
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        // Vibrate for 500 milliseconds
         v.vibrate(duration);
     }
-
 
     /**
      * Removes the used stone from the View
@@ -671,13 +685,11 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
 
         int rmIndex = Math.max(0, (selectedBlockID) - count);
         ImageView rm = (ImageView) blockDrawer.getChildAt(rmIndex);
-        //Toast.makeText(getApplicationContext(), (selectedBlockID) + " / " + rm_index + " / " + (22 - blockDrawer.getChildCount()), Toast.LENGTH_SHORT).show();
         blockDrawer.removeView(rm);
         blockDrawerChildren.remove(rm);
         removedBlockDrawerChildren.add(rm);
         selectedBlockID = -1;
     }
-
 
     /**
      * Stone placement, removal from BlockDrawer, Update and calculating new Score and looking for anymore turns
@@ -717,20 +729,29 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         byte[] byteArr = ba.createNewByteArray(b, i, j, playerID);
         if (doSettings) {
 //            sendMessage(byteArr);
-            //debugging("isit?");
+            //Log.d("--DEBUG--","isit?");
             isItMyTurn(true, byteArr);
         }
 
         //updateGameBoard();
     }
 
+    /**
+     * places the stone of an other player
+     * @param b
+     * @param i
+     * @param j
+     */
     private void placeStoneOfOtherPlayer(byte[][] b, int i, int j) {
         gl.placeStone(b, i, j);
         updatePartOfGameBoard(i, j, (i + b.length), (j + b.length));
         updatePoints();
     }
 
-    //Bildschirmbreite
+    /**
+     * gets the screen width
+     * @return the screen width
+     */
     public int getScreenWidth() {
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
@@ -738,12 +759,448 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
         return size.x;
     }
 
-    //Bilschirmhöhe
+    /**
+     * gets the screen height
+     * @return the screen height
+     */
     private int getScreenHeight() {
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
         return size.y;
+    }
+
+    /**
+     * Not excessively tested, but worked where I wanted it to work :)
+     *
+     * @return true, as soon as it sees another possible turn
+     * false, else
+     */
+    public boolean areTurnsLeft() {
+
+        int selectionRemember = selectedBlockID; // To restore, if there is another possible move
+        int transposeRemember = transposeCount; // ---------||---------
+        byte[] remainingStones = player.getRemainingStones(); // What stones do you still have (Saved as tags)
+        byte[][] gameboard = gl.getGameBoard();
+        boolean breakable = false;
+        boolean oneMoreTurn = false;
+        boolean fullTest = false;
+
+        ArrayList<IndexTuple> savedTuples = player.getSaveIndices(); // Tuples with the Indices of your placed stones
+        if (player.getScore() < player.MAX_STONES) { // Probably useless, because you should not be able to lay more than MAX_STONES
+            for (IndexTuple tuple : savedTuples) { // Look at every IndexTuple (where your stones lay)
+//                Log.d("Tuple Info Vorm Testen", tuple.toString());
+                if (tuple.getHasTurns()) {
+                    for (byte stone : remainingStones) { // Look at every stone you still have
+                        breakable = false;
+                        if (stone != -1) { // Already placed stone
+                            int i = tuple.getIndex_j(); // Index_i, bit confusing with row and col..
+                            int j = tuple.getIndex_i(); // Index_j
+                            selectedBlockID = stone + 1; // isYourPlacementValid needs selectedBlockID
+                            byte[][] actualStone = player.getStone(selectedBlockID - 1);
+                            int help = actualStone.length;
+                            //Log.d("DebugInfo", "i = " + i + ", j = " + j + ", selected = " + selectedBlockID + ", transpose = " + transposeCount);
+                            int lu = 0, ll = 0, ru = 0, rl = 0;
+                            for (int h1 = help; h1 > 0; h1--) {
+                                for (int h2 = help; h2 > 0; h2--) {
+
+                                    if ((i - h1) >= 0 - h1 && (j - h2) >= 0 - h2 && lu == 0) { //Left upper corner
+                                        if (i - 1 >= 0 && j - 1 >= 0) {
+                                            if (gameboard[i - 1][j - 1] == 0) { // If that corner is not free, you can stop...
+                                                for (int tr = 0; tr < 4; tr++) { // Test all four transpositions
+                                                    transposeCount = tr;
+                                                    if (cornerTesting(j - h2, i - h1, selectionRemember, transposeRemember)) {
+                                                        if (fullTest) {
+                                                            breakable = true;
+                                                            oneMoreTurn = true;
+                                                            break;
+                                                        } else {
+                                                            return true;
+                                                        }
+                                                    }
+                                                    if (breakable) break;
+                                                }
+                                                if (breakable) break;
+                                            } else {
+                                                lu++; // ...and set 1/4 int (needed later)
+                                            }
+                                        }
+                                        if (breakable) break;
+                                    }
+                                    if (breakable) break;
+
+                                    if ((i - h1) >= 0 - h1 && (j + h2) < SIZE && ll == 0) { //Right upper corner
+                                        if (i - 1 >= 0) {
+                                            if (gameboard[i - 1][j + 1] == 0) {
+                                                for (int tr = 0; tr < 4; tr++) {
+                                                    transposeCount = tr;
+                                                    if (cornerTesting(j + h2, i - h1, selectionRemember, transposeRemember)) {
+                                                        if (fullTest) {
+                                                            breakable = true;
+                                                            oneMoreTurn = true;
+                                                            break;
+                                                        } else {
+                                                            return true;
+                                                        }
+                                                    }
+                                                    if (breakable) break;
+                                                }
+                                                if (breakable) break;
+                                            } else {
+                                                ll++;
+                                            }
+                                        }
+                                        if (breakable) break;
+                                    }
+                                    if (breakable) break;
+
+                                    if ((i + h1) < SIZE && (j - h2) >= 0 - h2 && ru == 0) { //Left lower corner
+                                        if (j - 1 >= 0) {
+                                            if (gameboard[i + 1][j - 1] == 0) {
+                                                for (int tr = 0; tr < 4; tr++) {
+                                                    transposeCount = tr;
+                                                    if (cornerTesting(j - h2, i + h1, selectionRemember, transposeRemember)) {
+                                                        if (fullTest) {
+                                                            breakable = true;
+                                                            oneMoreTurn = true;
+                                                            break;
+                                                        } else {
+                                                            return true;
+                                                        }
+                                                    }
+                                                    if (breakable) break;
+                                                }
+                                                if (breakable) break;
+                                            } else {
+                                                ru++;
+                                            }
+                                        }
+                                        if (breakable) break;
+                                    }
+                                    if (breakable) break;
+
+                                    if ((i + h1) < SIZE && (j + h2) < SIZE && rl == 0) { //Right lower corner
+                                        if (gameboard[i + 1][j + 1] == 0) {
+                                            for (int tr = 0; tr < 4; tr++) {
+                                                transposeCount = tr;
+                                                if (cornerTesting(j + h2, i + h1, selectionRemember, transposeRemember)) {
+                                                    if (fullTest) {
+                                                        breakable = true;
+                                                        oneMoreTurn = true;
+                                                        break;
+                                                    } else {
+                                                        return true;
+                                                    }
+                                                }
+                                                if (breakable) break;
+                                            }
+                                            if (breakable) break;
+                                        } else {
+                                            rl++;
+                                        }
+                                        if (breakable) break;
+                                    }
+                                    if (breakable) break;
+
+                                    // If there is no free corner for this IndexTuple, it has no turns
+                                    // May be boosting performance if breaking far enough
+                                    if (lu != 0 && ll != 0 && ru != 0 && rl != 0) {
+                                        tuple.setHasTurns(false);
+                                        break;
+                                    }
+                                }
+                                if (breakable) {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (!breakable) {
+                        tuple.setHasTurns(false);
+                    }
+//                    Log.d("Nach allen Steinen", tuple.toString());
+                }
+            }
+        }
+        return oneMoreTurn;
+    }
+
+    /**
+     * Watch one corner around your stone, to see if there is at least one more turn
+     *
+     * @param i                 - the col to check the placement
+     * @param j                 - the row to check the placement
+     * @param selectionRemember - if one placement is valid, reset selectedBlockID
+     * @param transposeRemember - if one placement is valid, reset transposeCount
+     * @return true, if there is one more turn
+     * false, else
+     */
+    public boolean cornerTesting(int i, int j, int selectionRemember, int transposeRemember) {
+        if (drawStone(i, j)) { // Is needed, to make isYourPlacementValid work
+            if (isYourPlacementValid(i, j)) {
+                selectedBlockID = selectionRemember;
+                transposeCount = transposeRemember;
+                restore(i, j);
+                return true;
+            } else {
+                restore(i, j);
+            }
+            restore(i, j);
+        }
+        return false;
+    }
+
+
+    public void setFinished(String id){
+        if(!id.equals(playerID)){
+            countFinished++;
+            goOn();
+        }
+    }
+
+    /**
+     * converts an array to a string
+     * @param arr
+     * @return the converted string
+     */
+    public String arrToString(byte[] arr) {
+        String s = "";
+        for (int i = 0; i < arr.length; i++) {
+            s += arr[i] + ", ";
+        }
+
+        return s;
+    }
+
+    /**
+     * this sends a string message
+     * @param message
+     */
+    private void sendMessage( String message ) {
+        Log.d("--DEBUG--","sendMessage");
+        if(!remotePeerEndpoints.isEmpty()) {
+            if (isHost) {
+                Nearby.Connections.sendReliableMessage(apiClient, remotePeerEndpoints, (message).getBytes());
+            }
+        } else {
+            if (remoteHostEndpoint != null) {
+                Nearby.Connections.sendReliableMessage(apiClient, remoteHostEndpoint, (message).getBytes());
+            }
+        }
+    }
+
+    /**
+     * this sends a byte-array message
+     * @param mess
+     */
+    private void sendMessage(byte[] mess) {
+        Log.d("--DEBUG--","sendMessage" + isHost + "..." + remotePeerEndpoints.toString() + "..." + remoteHostEndpoint);
+        if (!remotePeerEndpoints.isEmpty()) {
+            if (isHost) {
+                Log.d("--DEBUG--",arrToString(mess));
+                Nearby.Connections.sendReliableMessage(apiClient, remotePeerEndpoints, mess);
+            }
+        } else {
+            if (remoteHostEndpoint != null) {
+                Log.d("--DEBUG--",arrToString(mess));
+                Nearby.Connections.sendReliableMessage(apiClient, remoteHostEndpoint, mess);
+            }
+        }
+    }
+
+    /**
+     * is it my turn? i don't know
+     * @param sending
+     * @param payload
+     */
+    private void isItMyTurn(boolean sending, byte[] payload) {
+        if (sending) {
+            sendMessage(payload);
+        }
+
+        int help = player.getScore();
+
+        if (idNameMap.size() == 2) {
+            actTurn++;
+            if (actTurn == 3) actTurn = 1;
+        } else if (idNameMap.size() == 3) {
+            actTurn++;
+            if (actTurn == 4) actTurn = 1;
+        } else {
+            actTurn++;
+            if (actTurn == 5) actTurn = 1;
+        }
+
+        if (actTurn == myturn) {
+            if (help > 0) {
+                player.setHasTurns(areTurnsLeft());
+            }
+            updatePoints();
+            if (player.getHasTurns()) { // Wenn ich noch Spielzüge habe, kann ich weiterspielen..
+                enableScreenInteraction();
+                Toast.makeText(getApplicationContext(), "There are turns left, you go", Toast.LENGTH_SHORT).show();
+            } else { // TODO ... wenn nicht, was muss dann aufgerufen werden, dass der nächste Spieler dran kommt!? So geht's nicht ;)
+                Toast.makeText(getApplicationContext(), "You lost buddy", Toast.LENGTH_SHORT).show();
+                disableScreenInteraction();
+                notifyFinished();
+
+                if (sending) {
+                    isItMyTurn(true, payload);
+                }
+            }
+        } else {
+            disableScreenInteraction();
+            new Handler().postDelayed(new Runnable() {
+
+                @Override
+                public void run() {
+                    if (player.getScore() > 0) {
+                        player.setHasTurns(areTurnsLeft());
+                    }
+                }
+            }, 200);
+
+        }
+        
+        /*if (idNameMap.size() == 2) {
+            Log.d("--DEBUG--","small");
+            actTurn++;
+            if (actTurn == 3) {
+                actTurn = 1;
+            }
+        } else {
+            Log.d("--DEBUG--","big");
+            actTurn++;
+            if (actTurn == 5) {
+                actTurn = 1;
+            }
+        }
+        Log.d("--DEBUG--","actturn" + actTurn + ", " + myturn);
+        if (actTurn == myturn) {
+            enableScreenInteraction();
+        } else {
+            disableScreenInteraction();
+        }*/
+
+    }
+
+    /**
+     * this disables the screen interaction
+     */
+    public void disableScreenInteraction() {
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+
+        imgView.setVisibility(View.VISIBLE);
+        imgView.setImageResource(R.drawable.wait);
+        imgView.setAlpha(0.4f);
+        Log.d("--DEBUG--","should disable and display pic");
+    }
+
+    /**
+     * this enables the screen interaction
+     */
+    public void enableScreenInteraction() {
+        Log.d("--DEBUG--","should enable");
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        imgView.setVisibility(View.GONE);
+    }
+
+    private void notifyFinished() {
+        countFinished++;
+        goOn();
+        sendMessage("FINISHED-"+playerID);
+    }
+
+    private void goOn() {
+        if (countFinished == idNameMap.size()) {
+            final Intent intent = new Intent("at.aau.se2.test.ENDSCREEN");
+            intent.putExtra("isHost", isHost);
+            intent.putExtra("hostEnd", remoteHostEndpoint);
+            startActivity(intent);
+        }
+    }
+
+    /**
+     * this hides the statusbar
+     */
+    private void hideStatusBar() {
+        View decorView = getWindow().getDecorView();
+        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+        decorView.setSystemUiVisibility(uiOptions);
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void onDisconnected(String s) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Called when a view has been clicked.
+     *
+     * @param v The view that was clicked.
+     */
+    @Override
+    public void onClick(View v) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Log.d("--DEBUG--","onConnected");
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Log.d("--DEBUG--","connSuspended");
+    }
+
+    @Override
+    public void onConnectionRequest(String s, String s1, String s2, byte[] bytes) {
+        Log.d("--DEBUG--","request");
+    }
+
+    @Override
+    public void onEndpointFound(String s, String s1, String s2, String s3) {
+        Log.d("--DEBUG--","endpoind found");
+    }
+
+    @Override
+    public void onEndpointLost(String s) {
+        Log.d("--DEBUG--","endpoint lost");
+    }
+
+    @Override
+    public void onMessageReceived(String endpointId, byte[] payload, boolean isReliable) {
+
+        Log.d("--DEBUG--","action received");
+
+        ByteArrayHelper b = new ByteArrayHelper();
+        b.fetchInformationFromByteArray(payload);
+
+        int color = b.getColor();
+        int idx = b.getIdx();
+        int idy = b.getIdy();
+        byte[][] stone = b.getByteStone();
+
+
+        if (color != playerID) {
+            Log.d("--DEBUG--","" + Integer.toString(color) + "_" + Integer.toString(playerID));
+            placeStoneOfOtherPlayer(stone, idy, idx);
+            isItMyTurn(false, null);
+
+        }
+
+        if (isHost) {
+            sendMessage(payload);
+            Log.d("--DEBUG--","send new action");
+        }
+
     }
 
     @Override
@@ -762,13 +1219,6 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         hideStatusBar();
-    }
-
-    private void hideStatusBar() {
-        View decorView = getWindow().getDecorView();
-        // Hide the status bar.
-        int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
-        decorView.setSystemUiVisibility(uiOptions);
     }
 
     @Override
@@ -796,406 +1246,4 @@ public class FullscreenActivity extends Activity implements GoogleApiClient.Conn
             }
         }, 2000);
     }
-
-
-    /**
-     * Not excessively tested, but worked where I wanted it to work :)
-     *
-     * @return true, as soon as it sees another possible turn
-     * false, else
-     */
-    public boolean areTurnsLeft(final boolean fullTest) {
-        final int selectionRemember = selectedBlockID; // To restore, if there is another possible move
-        final int transposeRemember = transposeCount; // ---------||---------
-        byte[] remainingStones = player.getRemainingStones(); // What stones do you still have (Saved as tags)
-        final byte[][] gameboard = gl.getGameBoard();
-        final boolean[] instaBreak = {false};
-        final boolean[] breakable = {false};
-        final boolean[] oneMoreTurn = {false};
-
-
-        ArrayList<IndexTuple> savedTuples = player.getSaveIndices(); // Tuples with the Indices of your placed stones
-        if (player.getScore() < player.MAX_STONES) { // Probably useless, because you should not be able to lay more than MAX_STONES
-            for (final IndexTuple tuple : savedTuples) { // Look at every IndexTuple (where your stones lay)
-//                Log.d("Tuple Info Vorm Testen", tuple.toString());
-                if (tuple.getHasTurns()) {
-                    for (final byte stone : remainingStones) { // Look at every stone you still have
-
-                        //
-                        Thread t = new Thread() {
-                            @Override
-                            public void run() {
-                                try {
-
-                                    breakable[0] = false;
-                                    if (stone != -1) { // Already placed stone
-                                        final int i = tuple.getIndex_j(); // Index_i, bit confusing with row and col..
-                                        final int j = tuple.getIndex_i(); // Index_j
-                                        selectedBlockID = stone + 1; // isYourPlacementValid needs selectedBlockID
-                                        byte[][] actualStone = player.getStone(selectedBlockID - 1);
-                                        int help = actualStone.length;
-                                        //Log.d("DebugInfo", "i = " + i + ", j = " + j + ", selected = " + selectedBlockID + ", transpose = " + transposeCount);
-                                        final int[] lu = {0};
-                                        final int[] ll = {0};
-                                        final int[] ru = {0};
-                                        final int[] rl = {0};
-                                        for (int h1 = help; h1 > 0; h1--) {
-                                            for (int h2 = help; h2 > 0; h2--) {
-                                                final int finalH2 = h2;
-                                                final int finalH1 = h1;
-
-                                                if ((i - finalH1) >= 0 - finalH1 && (j - finalH2) >= 0 - finalH2 && lu[0] == 0) { //Left upper corner
-                                                    if (i - 1 >= 0 && j - 1 >= 0) {
-                                                        if (gameboard[i - 1][j - 1] == 0) { // If that corner is not free, you can stop...
-                                                            for (int tr = 0; tr < 4; tr++) { // Test all four transpositions
-                                                                transposeCount = tr;
-                                                                if (cornerTesting(j - finalH2, i - finalH1, selectionRemember, transposeRemember)) {
-                                                                    if (fullTest) {
-                                                                        breakable[0] = true;
-                                                                        oneMoreTurn[0] = true;
-                                                                        break;
-                                                                    } else {
-                                                                        instaBreak[0] = true;
-                                                                        Thread.currentThread().isInterrupted();
-                                                                    }
-                                                                }
-                                                            }
-                                                        } else {
-                                                            lu[0]++; // ...and set 1/4 int (needed later)
-                                                        }
-                                                    }
-                                                }
-                                                if (breakable[0]) break;
-
-                                                if ((i - finalH1) >= 0 - finalH1 && (j + finalH2) < SIZE && ll[0] == 0) { //Right upper corner
-                                                    if (i - 1 >= 0) {
-                                                        if (gameboard[i - 1][j + 1] == 0) {
-                                                            for (int tr = 0; tr < 4; tr++) {
-                                                                transposeCount = tr;
-                                                                if (cornerTesting(j + finalH2, i - finalH1, selectionRemember, transposeRemember)) {
-                                                                    if (fullTest) {
-                                                                        breakable[0] = true;
-                                                                        oneMoreTurn[0] = true;
-                                                                        break;
-                                                                    } else {
-                                                                        instaBreak[0] = true;
-                                                                        Thread.currentThread().isInterrupted();
-                                                                    }
-                                                                }
-                                                                ;
-                                                            }
-                                                        } else {
-                                                            ll[0]++;
-                                                        }
-                                                    }
-                                                }
-                                                if (breakable[0]) break;
-
-                                                if ((i + finalH1) < SIZE && (j - finalH2) >= 0 - finalH2 && ru[0] == 0) { //Left lower corner
-                                                    if (j - 1 >= 0) {
-                                                        if (gameboard[i + 1][j - 1] == 0) {
-                                                            for (int tr = 0; tr < 4; tr++) {
-                                                                transposeCount = tr;
-                                                                if (cornerTesting(j - finalH2, i + finalH1, selectionRemember, transposeRemember)) {
-                                                                    if (fullTest) {
-                                                                        breakable[0] = true;
-                                                                        oneMoreTurn[0] = true;
-                                                                        break;
-                                                                    } else {
-                                                                        instaBreak[0] = true;
-                                                                        Thread.currentThread().isInterrupted();
-                                                                    }
-                                                                }
-                                                            }
-                                                        } else {
-                                                            ru[0]++;
-                                                        }
-                                                    }
-                                                }
-                                                if (breakable[0]) break;
-
-                                                if ((i + finalH1) < SIZE && (j + finalH2) < SIZE && rl[0] == 0) { //Right lower corner
-                                                    if (gameboard[i + 1][j + 1] == 0) {
-                                                        for (int tr = 0; tr < 4; tr++) {
-                                                            transposeCount = tr;
-                                                            if (cornerTesting(j + finalH2, i + finalH1, selectionRemember, transposeRemember)) {
-                                                                if (fullTest) {
-                                                                    breakable[0] = true;
-                                                                    oneMoreTurn[0] = true;
-                                                                    break;
-                                                                } else {
-                                                                    instaBreak[0] = true;
-                                                                    Thread.currentThread().isInterrupted();
-                                                                }
-                                                            }
-                                                        }
-                                                    } else {
-                                                        rl[0]++;
-                                                    }
-                                                }
-                                                if (breakable[0]) break;
-
-                                                // If there is no free corner for this IndexTuple, it has no turns
-                                                // May be boosting performance if breaking far enough
-                                                if (lu[0] != 0 && ll[0] != 0 && ru[0] != 0 && rl[0] != 0) {
-
-                                                    tuple.setHasTurns(false);
-                                                    break;
-                                                }
-                                            }
-                                            if (breakable[0]) {
-                                                break;
-                                            }
-                                        }
-                                    }
-                                } catch (Exception e) {
-                                    Log.e("Error", e.getMessage());
-                                    throw new IllegalStateException();
-                                } finally {
-
-                                }
-                            }
-                        };
-                        if (instaBreak[0]) return true;
-                        if (!breakable[0]) {
-                            tuple.setHasTurns(false);
-                        }
-//                    Log.d("Nach allen Steinen", tuple.toString());
-                    }
-                }
-            }
-        }
-        return oneMoreTurn[0];
-    }
-
-
-    /**
-     * Watch one corner around your stone, to see if there is at least one more turn
-     *
-     * @param i                 - the col to check the placement
-     * @param j                 - the row to check the placement
-     * @param selectionRemember - if one placement is valid, reset selectedBlockID
-     * @param transposeRemember - if one placement is valid, reset transposeCount
-     * @return true, if there is one more turn
-     * false, else
-     */
-
-    public boolean cornerTesting(int i, int j, int selectionRemember, int transposeRemember) {
-        if (drawStone(i, j)) { // Is needed, to make isYourPlacementValid work
-            if (isYourPlacementValid(i, j)) {
-                selectedBlockID = selectionRemember;
-                transposeCount = transposeRemember;
-                restore(i, j);
-                return true;
-            } else {
-                restore(i, j);
-            }
-            restore(i, j);
-        }
-        return false;
-    }
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        debugging("onConnected");
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        debugging("connSuspended");
-    }
-
-    @Override
-    public void onConnectionRequest(String s, String s1, String s2, byte[] bytes) {
-        debugging("request");
-    }
-
-    @Override
-    public void onEndpointFound(String s, String s1, String s2, String s3) {
-        debugging("endpoind found");
-    }
-
-    @Override
-    public void onEndpointLost(String s) {
-        debugging("endpoint lost");
-    }
-
-    @Override
-    public void onMessageReceived(String endpointId, byte[] payload, boolean isReliable) {
-
-        debugging("action received");
-
-        ByteArrayHelper b = new ByteArrayHelper();
-        b.fetchInformationFromByteArray(payload);
-
-        int color = b.getColor();
-        int idx = b.getIdx();
-        int idy = b.getIdy();
-        byte[][] stone = b.getByteStone();
-
-
-        if (color != playerID) {
-            debugging("" + Integer.toString(color) + "_" + Integer.toString(playerID));
-            placeStoneOfOtherPlayer(stone, idy, idx);
-            isItMyTurn(false, null);
-
-        }
-
-        if (isHost) {
-            sendMessage(payload);
-            debugging("send new action");
-        }
-
-    }
-
-    public String arrToString(byte[] arr) {
-        String s = "";
-        for (int i = 0; i < arr.length; i++) {
-            s += arr[i] + ", ";
-        }
-
-        return s;
-    }
-
-    private void sendMessage(byte[] mess) {
-        debugging("sendMessage" + isHost + "..." + remotePeerEndpoints.toString() + "..." + remoteHostEndpoint);
-        if (!remotePeerEndpoints.isEmpty()) {
-            if (isHost) {
-                debugging(arrToString(mess));
-                Nearby.Connections.sendReliableMessage(apiClient, remotePeerEndpoints, mess);
-            }
-        } else {
-            if (remoteHostEndpoint != null) {
-                debugging(arrToString(mess));
-                Nearby.Connections.sendReliableMessage(apiClient, remoteHostEndpoint, mess);
-            }
-        }
-    }
-
-    @Override
-    public void onDisconnected(String s) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Called when a view has been clicked.
-     *
-     * @param v The view that was clicked.
-     */
-    @Override
-    public void onClick(View v) {
-        throw new UnsupportedOperationException();
-    }
-
-    private void isItMyTurn(boolean sending, byte[] payload) {
-        if (sending) {
-            sendMessage(payload);
-        }
-
-        int help = player.getScore();
-
-        if (idNameMap.size() == 2) {
-            actTurn++;
-            if (actTurn == 3) actTurn = 1;
-        } else if (idNameMap.size() == 3) {
-            actTurn++;
-            if (actTurn == 4) actTurn = 1;
-        } else {
-            actTurn++;
-            if (actTurn == 5) actTurn = 1;
-        }
-
-        if (actTurn == myturn) {
-            if (help > 0) {
-                player.setHasTurns(areTurnsLeft(false));
-            }
-            updatePoints();
-            if (player.getHasTurns()) { // Wenn ich noch Spielzüge habe, kann ich weiterspielen..
-                enableScreenInteraction();
-                Toast.makeText(getApplicationContext(), "There are turns left, you go", Toast.LENGTH_SHORT).show();
-            } else { // TODO ... wenn nicht, was muss dann aufgerufen werden, dass der nächste Spieler dran kommt!? So geht's nicht ;)
-                Toast.makeText(getApplicationContext(), "You lost buddy", Toast.LENGTH_SHORT).show();
-                disableScreenInteraction();
-                if (sending) {
-                    isItMyTurn(true, payload);
-                }
-            }
-        } else {
-            disableScreenInteraction();
-            new Handler().postDelayed(new Runnable() {
-
-                @Override
-                public void run() {
-                    if (player.getScore() > 0) {
-                        player.setHasTurns(areTurnsLeft(true));
-                    }
-                }
-            }, 200);
-
-        }
-        
-        /*if (idNameMap.size() == 2) {
-            debugging("small");
-            actTurn++;
-            if (actTurn == 3) {
-                actTurn = 1;
-            }
-        } else {
-            debugging("big");
-            actTurn++;
-            if (actTurn == 5) {
-                actTurn = 1;
-            }
-        }
-        debugging("actturn" + actTurn + ", " + myturn);
-        if (actTurn == myturn) {
-            enableScreenInteraction();
-        } else {
-            disableScreenInteraction();
-        }*/
-
-    }
-
-
-    public void disableScreenInteraction() {
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-
-        imgView.setVisibility(View.VISIBLE);
-        imgView.setImageResource(R.drawable.wait);
-        imgView.setAlpha(0.4f);
-        debugging("should disable and display pic");
-    }
-
-    public void enableScreenInteraction() {
-        debugging("should enable");
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-        imgView.setVisibility(View.GONE);
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        throw new UnsupportedOperationException();
-    }
-
-
-    /* ---DEBUGGING--- */
-
-    private void debugging(String debMessage) {
-        Log.d("tobiasho", debMessage);
-    }
-
-    public void boardToLog() {
-        byte[][] b = gl.getGameBoard();
-        String s = "";
-        for (int i = 0; i < b.length; i++) {
-            for (int j = 0; j < b[i].length; j++) {
-                s += b[i][j] + ", ";
-            }
-            s += Character.toString('\n');
-        }
-        s += Character.toString('\n');
-        Log.d("Board", s);
-    }
-
 }
